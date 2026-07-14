@@ -89,47 +89,53 @@ export function Header() {
 	return (
 		<div
 			data-tauri-drag-region
-			class="flex relative flex-row items-center w-full h-14"
+			class="flex relative flex-row items-center w-full h-12 border-b border-gray-3 bg-gray-1/90 dark:bg-gray-2/90 backdrop-blur-sm"
 		>
 			<div
 				data-tauri-drag-region
-				class={cx("flex flex-row flex-1 gap-2 items-center px-4 h-full")}
+				class={cx("flex flex-row flex-1 gap-1.5 items-center px-3 h-full")}
 			>
 				{ostype() === "macos" && <div class="h-full w-16" />}
 				{ostype() === "linux" && <CaptionControlsMacOS class="mr-1" />}
-				<EditorButton
-					onClick={async () => {
-						clearTimelineSelection();
+				<div class="flex items-center gap-1 rounded-[var(--radius-md,10px)] border border-gray-3 bg-gray-2/80 p-0.5">
+					<EditorButton
+						onClick={async () => {
+							clearTimelineSelection();
 
-						if (!(await ask("Are you sure you want to delete this recording?")))
-							return;
+							if (
+								!(await ask("Are you sure you want to delete this recording?"))
+							)
+								return;
 
-						await commands.editorDeleteProject();
-					}}
-					tooltipText="Delete recording"
-					leftIcon={<IconCapTrash class="w-5" />}
-				/>
-				<EditorButton
-					onClick={() => {
-						clearTimelineSelection();
+							await commands.editorDeleteProject();
+						}}
+						tooltipText="Delete recording"
+						leftIcon={<IconCapTrash class="w-4" />}
+					/>
+					<EditorButton
+						onClick={() => {
+							clearTimelineSelection();
+							revealItemInDir(`${editorInstance.path}/`);
+						}}
+						tooltipText="Open project folder"
+						leftIcon={<IconLucideFolder class="w-4" />}
+					/>
+				</div>
 
-						console.log({ path: `${editorInstance.path}/` });
-						revealItemInDir(`${editorInstance.path}/`);
-					}}
-					tooltipText="Open recording bundle"
-					leftIcon={<IconLucideFolder class="w-5" />}
-				/>
-
-				<div class="flex flex-row items-center">
-					<NameEditor name={meta().prettyName} />
-					<span class="text-sm text-gray-11">.cap</span>
+				<div class="flex flex-col justify-center min-w-0 ml-2">
+					<div class="flex flex-row items-center gap-1.5 min-w-0">
+						<NameEditor name={meta().prettyName} />
+					</div>
+					<span class="text-[10px] text-gray-10 leading-none mt-0.5">
+						Studio project · local
+					</span>
 				</div>
 				<div data-tauri-drag-region class="flex-1 h-full" />
 			</div>
 
 			<div
 				data-tauri-drag-region
-				class="flex flex-row items-center justify-center gap-2 px-4 border-x border-black-transparent-10"
+				class="flex flex-row items-center justify-center gap-2 px-3 h-full border-x border-gray-3"
 			>
 				<PresetsDropdown />
 				<OrganizationDropdown />
@@ -138,41 +144,43 @@ export function Header() {
 			<div
 				data-tauri-drag-region
 				class={cx(
-					"flex-1 h-full flex flex-row items-center gap-2 pl-2",
+					"flex-1 h-full flex flex-row items-center gap-1.5 pl-2",
 					ostype() !== "windows" && "pr-2",
 				)}
 			>
-				<EditorButton
-					onClick={() => {
-						clearTimelineSelection();
-						if (!projectHistory.canUndo()) return;
-						projectHistory.undo();
-					}}
-					disabled={
-						!projectHistory.canUndo() && !editorState.timeline.selection
-					}
-					tooltipText="Undo"
-					leftIcon={<IconCapUndo class="w-5" />}
-				/>
-				<EditorButton
-					onClick={() => {
-						clearTimelineSelection();
-						if (!projectHistory.canRedo()) return;
-						projectHistory.redo();
-					}}
-					disabled={
-						!projectHistory.canRedo() && !editorState.timeline.selection
-					}
-					tooltipText="Redo"
-					leftIcon={<IconCapRedo class="w-5" />}
-				/>
+				<div class="flex items-center gap-0.5 rounded-[var(--radius-md,10px)] border border-gray-3 bg-gray-2/80 p-0.5">
+					<EditorButton
+						onClick={() => {
+							clearTimelineSelection();
+							if (!projectHistory.canUndo()) return;
+							projectHistory.undo();
+						}}
+						disabled={
+							!projectHistory.canUndo() && !editorState.timeline.selection
+						}
+						tooltipText="Undo"
+						leftIcon={<IconCapUndo class="w-4" />}
+					/>
+					<EditorButton
+						onClick={() => {
+							clearTimelineSelection();
+							if (!projectHistory.canRedo()) return;
+							projectHistory.redo();
+						}}
+						disabled={
+							!projectHistory.canRedo() && !editorState.timeline.selection
+						}
+						tooltipText="Redo"
+						leftIcon={<IconCapRedo class="w-4" />}
+					/>
+				</div>
 				<div data-tauri-drag-region class="flex-1 h-full" />
 				<Show when={customDomain.data}>
 					<ShareButton />
 				</Show>
 				<Button
 					variant={isClipsOpen() ? "white" : "gray"}
-					class="flex gap-1.5 justify-center h-[40px]"
+					class="flex gap-1.5 justify-center h-9 px-3 rounded-[var(--radius-md,10px)]"
 					onClick={() => {
 						clearTimelineSelection();
 						if (isClipsOpen()) {
@@ -188,7 +196,7 @@ export function Header() {
 				<Show when={hasTranscript()}>
 					<Button
 						variant={isTranscriptOpen() ? "white" : "gray"}
-						class="flex gap-1.5 justify-center h-[40px]"
+						class="flex gap-1.5 justify-center h-9 px-3 rounded-[var(--radius-md,10px)]"
 						onClick={() => {
 							clearTimelineSelection();
 							if (isTranscriptOpen()) {
@@ -210,12 +218,11 @@ export function Header() {
 				<button
 					type="button"
 					class={cx(
-						"flex gap-1.5 justify-center items-center px-4 w-full h-[40px] max-w-[100px] text-[0.8125rem] font-medium text-white rounded-xl outline-hidden",
-						"bg-linear-to-b from-[#3b82f6] to-[#2563eb]",
-						"shadow-[0_4px_14px_-6px_rgba(37,99,235,0.5),inset_0_1px_0_0_rgba(255,255,255,0.22)]",
-						"transition-[box-shadow,filter] duration-200 ease-out",
-						"hover:brightness-[1.08] hover:shadow-[0_8px_22px_-8px_rgba(37,99,235,0.6),inset_0_1px_0_0_rgba(255,255,255,0.28)]",
-						"active:brightness-95",
+						"flex gap-1.5 justify-center items-center px-4 h-9 min-w-[96px] text-[0.8125rem] font-medium text-white rounded-[var(--radius-md,10px)] outline-hidden",
+						"bg-[var(--flowreco-coral,#ff6243)] border border-[#e8563a]",
+						"shadow-[0_6px_18px_-8px_rgba(255,98,67,0.55),inset_0_1px_0_0_rgba(255,255,255,0.2)]",
+						"transition-[box-shadow,filter] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
+						"hover:brightness-110 active:brightness-95",
 					)}
 					onClick={() => {
 						clearTimelineSelection();

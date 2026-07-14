@@ -30,7 +30,7 @@ function HeaderSkeleton() {
 	return (
 		<div
 			data-tauri-drag-region
-			class="flex relative flex-row items-center w-full h-14"
+			class="flex relative flex-row items-center w-full h-12 border-b border-gray-3 bg-gray-1/90 dark:bg-gray-2/90"
 		>
 			<div
 				data-tauri-drag-region
@@ -197,7 +197,7 @@ function TimelineTrackSkeleton() {
 
 function TimelineSkeleton() {
 	return (
-		<div class="h-full rounded-xl border bg-gray-1 dark:bg-gray-2 border-gray-3 overflow-hidden">
+		<div class="h-full rounded-[var(--radius-lg,14px)] border bg-gray-1 dark:bg-gray-2 border-gray-3 overflow-hidden">
 			<div class="pt-8 relative flex flex-col gap-2 h-full px-4">
 				<div class="relative h-[32px] flex items-end">
 					<div class="flex items-center gap-8 w-full pl-16">

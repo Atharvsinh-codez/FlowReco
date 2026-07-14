@@ -207,7 +207,7 @@ export function Editor() {
 		<Switch
 			fallback={
 				<div class="flex items-center justify-center h-full w-full">
-					<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-500" />
+					<div class="animate-spin rounded-[var(--radius-md,10px)] h-8 w-8 border-2 border-gray-5 border-t-[var(--flowreco-coral,#ff6243)]" />
 				</div>
 			}
 		>
@@ -662,10 +662,10 @@ function Inner() {
 				</Suspense>
 			}
 		>
-			<div class="flex flex-col flex-1 min-h-0">
+			<div class="flex flex-col flex-1 min-h-0 bg-gray-2 dark:bg-[var(--flowreco-graphite,#111315)]">
 				<Header />
 				<div
-					class="flex overflow-y-hidden flex-col flex-1 gap-2 w-full min-h-0 leading-5"
+					class="flex overflow-y-hidden flex-col flex-1 gap-1.5 w-full min-h-0 leading-5 pt-1.5"
 					data-tauri-drag-region
 				>
 					<div
@@ -680,7 +680,7 @@ function Inner() {
 							}}
 						>
 							<div
-								class="flex flex-col rounded-xl border bg-gray-1 dark:bg-gray-2 border-gray-3 overflow-hidden"
+								class="flex flex-col rounded-[var(--radius-lg,14px)] border bg-gray-1 dark:bg-gray-2 border-gray-3 overflow-hidden shadow-[0_1px_0_rgba(255,255,255,0.03)_inset]"
 								style={{
 									flex: isTranscriptMode()
 										? `0 0 ${splitRatio() * 100}%`
@@ -692,13 +692,14 @@ function Inner() {
 								<div
 									role="separator"
 									aria-orientation="horizontal"
-									class="flex-none shrink-0 border-t border-gray-4 dark:border-gray-5 bg-gray-2/95 dark:bg-gray-3/55 transition-colors hover:bg-gray-3/70 dark:hover:bg-gray-4/55"
+									class="flex-none shrink-0 border-t border-gray-4 dark:border-gray-5 bg-gray-2/95 dark:bg-gray-3/55 transition-colors hover:bg-[var(--flowreco-coral-soft,rgba(255,98,67,0.14))]"
 									style={{ height: `${RESIZE_HANDLE_HEIGHT}px` }}
 								>
 									<div
 										class="flex flex-col gap-0.5 justify-center items-center h-full w-full cursor-row-resize select-none group"
 										classList={{
-											"bg-gray-3/55 dark:bg-gray-4/50": isResizingTimeline(),
+											"bg-[var(--flowreco-coral-soft,rgba(255,98,67,0.14))]":
+												isResizingTimeline(),
 										}}
 										onMouseDown={handleTimelineResizeStart}
 										aria-label="Resize timeline height"
@@ -706,9 +707,10 @@ function Inner() {
 										<For each={TIMELINE_RESIZE_GRIP_MARKS}>
 											{() => (
 												<div
-													class="h-0.5 w-20 max-w-[85%] rounded-full bg-gray-6 dark:bg-gray-7 shadow-[0_1px_0_rgb(0_0_0_/0.06)] transition-colors group-hover:bg-gray-9 dark:group-hover:bg-gray-11"
+													class="h-0.5 w-16 max-w-[85%] rounded-[var(--radius-xs,4px)] bg-gray-6 dark:bg-gray-7 transition-colors group-hover:bg-[var(--flowreco-coral,#ff6243)]"
 													classList={{
-														"bg-gray-9 dark:bg-gray-11": isResizingTimeline(),
+														"bg-[var(--flowreco-coral,#ff6243)]":
+															isResizingTimeline(),
 													}}
 												/>
 											)}
@@ -717,7 +719,7 @@ function Inner() {
 								</div>
 							</div>
 							<Show when={!isTranscriptMode()}>
-								<div class="ml-2 flex min-h-0 w-104 min-w-104 flex-none overflow-hidden">
+								<div class="ml-1.5 flex min-h-0 w-104 min-w-104 flex-none overflow-hidden">
 									<div
 										class="overflow-hidden min-h-0"
 										classList={{
@@ -748,14 +750,14 @@ function Inner() {
 									aria-orientation="vertical"
 								>
 									<div
-										class="w-1 h-10 rounded-full bg-gray-6 dark:bg-gray-7 transition-colors group-hover:bg-gray-9 dark:group-hover:bg-gray-11"
+										class="w-1 h-10 rounded-[var(--radius-xs,4px)] bg-gray-6 dark:bg-gray-7 transition-colors group-hover:bg-[var(--flowreco-coral,#ff6243)]"
 										classList={{
-											"bg-gray-9 dark:bg-gray-11": isResizingSplit(),
+											"bg-[var(--flowreco-coral,#ff6243)]": isResizingSplit(),
 										}}
 									/>
 								</div>
 								<div
-									class="flex flex-col min-h-0 overflow-hidden rounded-xl border bg-gray-1 dark:bg-gray-2 border-gray-3 animate-in fade-in duration-150"
+									class="flex flex-col min-h-0 overflow-hidden rounded-[var(--radius-lg,14px)] border bg-gray-1 dark:bg-gray-2 border-gray-3 animate-in fade-in duration-150"
 									style={{
 										flex: isResizingSplit()
 											? `0 0 calc(${(1 - splitRatio()) * 100}% - 12px)`
@@ -770,10 +772,10 @@ function Inner() {
 							</Show>
 						</div>
 						<div
-							class="flex-none min-h-0 px-2 overflow-hidden relative"
+							class="flex-none min-h-0 px-2 pb-2 overflow-hidden relative"
 							style={{ height: `${timelineHeight()}px` }}
 						>
-							<div class="h-full">
+							<div class="h-full rounded-[var(--radius-lg,14px)] border border-gray-3 bg-gray-1 dark:bg-gray-2 overflow-hidden">
 								<Timeline
 									onViewportOverflowChange={setTimelineViewportOverflow}
 								/>

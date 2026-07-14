@@ -23,4 +23,15 @@
 .cap-track-fill {
 	background: var(--seg-color);
 	border: 1px solid color-mix(in srgb, var(--seg-color) 58%, black);
+	border-radius: var(--radius-sm, 6px);
+}
+
+.timeline-playhead {
+	background: var(--flowreco-coral, #ff6243);
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--flowreco-coral, #ff6243) 35%, transparent);
+}
+
+.timeline-track-shell {
+	border-radius: var(--radius-md, 10px);
+	border: 1px solid color-mix(in srgb, var(--gray-5, #3a3a3a) 80%, transparent);
 }

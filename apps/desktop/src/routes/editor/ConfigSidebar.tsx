@@ -459,88 +459,90 @@ export function ConfigSidebar() {
 					? undefined
 					: state.selectedTab
 			}
-			class="flex flex-col min-h-0 shrink-0 flex-1 max-w-104 overflow-hidden rounded-xl z-10 bg-gray-1 dark:bg-gray-2 border border-gray-3"
+			class="flex flex-col min-h-0 shrink-0 flex-1 max-w-104 overflow-hidden rounded-[var(--radius-lg,14px)] z-10 bg-gray-1 dark:bg-gray-2 border border-gray-3 shadow-[0_1px_0_rgba(255,255,255,0.03)_inset]"
 		>
-			<KTabs.List class="flex overflow-hidden sticky top-0 z-60 flex-row items-center h-16 text-lg border-b border-gray-3 shrink-0 bg-gray-1 dark:bg-gray-2">
-				<For
-					each={[
-						{ id: TAB_IDS.background, icon: IconCapImage },
-						{
-							id: TAB_IDS.camera,
-							icon: IconCapCamera,
-							disabled: editorInstance.recordings.segments.every(
-								(s) => s.camera === null,
-							),
-						},
-						{ id: TAB_IDS.audio, icon: IconCapAudioOn },
-						{
-							id: TAB_IDS.cursor,
-							icon: IconCapCursor,
-							disabled: !meta().hasRecordedCursorData,
-						},
-						{
-							id: TAB_IDS.keyboard,
-							icon: IconLucideKeyboard,
-						},
-						{
-							id: TAB_IDS.captions,
-							icon: IconCapMessageBubble,
-						},
-						// { id: "hotkeys" as const, icon: IconCapHotkeys },
-					].filter(Boolean)}
-				>
-					{(item) => (
-						<KTabs.Trigger
-							value={item.id}
-							class={cx(
-								"flex relative z-10 flex-1 justify-center items-center px-4 py-2 transition-colors group disabled:opacity-50 focus:outline-hidden",
-								editorState.timeline.selection
-									? "text-gray-11"
-									: "text-gray-11 data-selected:text-gray-12",
-							)}
-							onClick={() => {
-								// Clear any active selection first
-								if (editorState.timeline.selection) {
-									setEditorState("timeline", "selection", null);
-								}
-								if (editorState.timeline.audioPicker !== null) {
-									setEditorState("timeline", "audioPicker", null);
-								}
-								if (editorState.timeline.audioReplace !== null) {
-									setEditorState("timeline", "audioReplace", null);
-								}
-								setState("selectedTab", item.id);
-								scrollRef.scrollTo({
-									top: 0,
-								});
-							}}
-							disabled={item.disabled}
-						>
-							<div
+			<div class="px-3 pt-2.5 pb-1 shrink-0 border-b border-gray-3 bg-gray-1 dark:bg-gray-2">
+				<p class="text-[10px] font-medium uppercase tracking-[0.08em] text-gray-10 mb-1.5">
+					Inspector
+				</p>
+				<KTabs.List class="relative flex overflow-hidden sticky top-0 z-60 flex-row items-center h-11 text-lg rounded-[var(--radius-md,10px)] bg-gray-2 dark:bg-gray-3/60 border border-gray-3">
+					<For
+						each={[
+							{ id: TAB_IDS.background, icon: IconCapImage },
+							{
+								id: TAB_IDS.camera,
+								icon: IconCapCamera,
+								disabled: editorInstance.recordings.segments.every(
+									(s) => s.camera === null,
+								),
+							},
+							{ id: TAB_IDS.audio, icon: IconCapAudioOn },
+							{
+								id: TAB_IDS.cursor,
+								icon: IconCapCursor,
+								disabled: !meta().hasRecordedCursorData,
+							},
+							{
+								id: TAB_IDS.keyboard,
+								icon: IconLucideKeyboard,
+							},
+							{
+								id: TAB_IDS.captions,
+								icon: IconCapMessageBubble,
+							},
+						].filter(Boolean)}
+					>
+						{(item) => (
+							<KTabs.Trigger
+								value={item.id}
 								class={cx(
-									"flex justify-center relative border-transparent border z-10 items-center rounded-md size-9 transition will-change-transform",
-									state.selectedTab !== item.id &&
-										"group-hover:border-gray-300 group-disabled:border-none",
+									"flex relative z-10 flex-1 justify-center items-center px-2 py-1.5 transition-colors group disabled:opacity-50 focus:outline-hidden",
+									editorState.timeline.selection
+										? "text-gray-11"
+										: "text-gray-11 data-selected:text-gray-12",
 								)}
+								onClick={() => {
+									if (editorState.timeline.selection) {
+										setEditorState("timeline", "selection", null);
+									}
+									if (editorState.timeline.audioPicker !== null) {
+										setEditorState("timeline", "audioPicker", null);
+									}
+									if (editorState.timeline.audioReplace !== null) {
+										setEditorState("timeline", "audioReplace", null);
+									}
+									setState("selectedTab", item.id);
+									scrollRef.scrollTo({
+										top: 0,
+									});
+								}}
+								disabled={item.disabled}
 							>
-								<Dynamic component={item.icon} />
-							</div>
-						</KTabs.Trigger>
-					)}
-				</For>
+								<div
+									class={cx(
+										"flex justify-center relative border-transparent border z-10 items-center rounded-[var(--radius-sm,6px)] size-8 transition will-change-transform",
+										state.selectedTab !== item.id &&
+											"group-hover:border-gray-300 group-disabled:border-none",
+									)}
+								>
+									<Dynamic component={item.icon} />
+								</div>
+							</KTabs.Trigger>
+						)}
+					</For>
 
-				{/** Center the indicator with the icon */}
-				<Show
-					when={
-						!editorState.timeline.selection &&
-						editorState.timeline.audioPicker === null
-					}
-				>
-					<KTabs.Indicator class="absolute top-0 left-0 w-full h-full transition-transform duration-200 ease-in-out pointer-events-none will-change-transform">
-						<div class="absolute top-1/2 left-1/2 rounded-lg transform -translate-x-1/2 -translate-y-1/2 bg-gray-3 will-change-transform size-9" />
-					</KTabs.Indicator>
-				</Show>
-			</KTabs.List>
+					<Show
+						when={
+							!editorState.timeline.selection &&
+							editorState.timeline.audioPicker === null
+						}
+					>
+						<KTabs.Indicator class="absolute top-0 left-0 w-full h-full transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] pointer-events-none will-change-transform">
+							<div class="absolute top-1/2 left-1/2 rounded-[var(--radius-sm,6px)] transform -translate-x-1/2 -translate-y-1/2 bg-gray-1 dark:bg-gray-4 ring-1 ring-[var(--flowreco-coral,#ff6243)]/35 will-change-transform size-8" />
+						</KTabs.Indicator>
+					</Show>
+				</KTabs.List>
+			</div>
 			<div
 				ref={scrollRef}
 				style={{

@@ -1081,7 +1081,7 @@ export function Timeline(props: {
 				</Show>
 				<div
 					class={cx(
-						"absolute bottom-0 rounded-full z-20 w-px pointer-events-none bg-linear-to-b to-120% from-[rgb(226,64,64)]",
+						"absolute bottom-0 rounded-[var(--radius-xs,4px)] z-20 w-px pointer-events-none bg-linear-to-b to-120% from-[var(--flowreco-coral,#ff6243)]",
 						split() && "opacity-50",
 					)}
 					style={{
@@ -1094,7 +1094,7 @@ export function Timeline(props: {
 						)}px)`,
 					}}
 				>
-					<div class="size-3 bg-[rgb(226,64,64)] rounded-full -mt-2 -ml-[calc(0.37rem-0.5px)]" />
+					<div class="size-3 bg-[var(--flowreco-coral,#ff6243)] rounded-[var(--radius-sm,6px)] -mt-2 -ml-[calc(0.37rem-0.5px)] shadow-[0_0_0_1px_rgba(255,98,67,0.35)]" />
 				</div>
 				<div
 					class="relative flex-1 min-h-0"

@@ -283,22 +283,31 @@ export function PlayerContent() {
 		},
 	]);
 
+	const playbackProgress = () => {
+		const total = totalDuration();
+		if (total <= 0) return 0;
+		const t = Math.max(editorState.previewTime ?? editorState.playbackTime, 0);
+		return Math.min(100, (t / total) * 100);
+	};
+
 	return (
 		<div class="flex flex-col flex-1 min-h-0">
-			<div class="flex items-center justify-between gap-3 p-3">
-				<div class="flex items-center gap-3">
+			<div class="flex items-center justify-between gap-3 px-3 py-2 border-b border-gray-3/80">
+				<div class="flex items-center gap-2">
 					<AspectRatioSelect />
 					<EditorButton
 						tooltipText="Crop Video"
 						onClick={cropDialogHandler}
-						leftIcon={<IconCapCrop class="w-5 text-gray-12" />}
+						leftIcon={<IconCapCrop class="w-4 text-gray-12" />}
 					>
 						Crop
 					</EditorButton>
 					<FrameButton />
 				</div>
 				<div class="flex items-center gap-2">
-					<span class="text-xs font-medium text-gray-11">Preview quality</span>
+					<span class="text-[11px] font-medium uppercase tracking-[0.06em] text-gray-10">
+						Preview
+					</span>
 					<KSelect<{ label: string; value: EditorPreviewQuality }>
 						options={previewOptions}
 						optionValue="value"
@@ -318,13 +327,13 @@ export function PlayerContent() {
 								<KSelect.ItemLabel class="flex-1">
 									{props.item.rawValue.label}
 								</KSelect.ItemLabel>
-								<KSelect.ItemIndicator class="ml-auto text-blue-9">
+								<KSelect.ItemIndicator class="ml-auto text-[var(--flowreco-coral,#ff6243)]">
 									<IconCapCircleCheck />
 								</KSelect.ItemIndicator>
 							</MenuItem>
 						)}
 					>
-						<KSelect.Trigger class="flex items-center gap-2 h-9 px-3 rounded-lg border border-gray-3 bg-gray-2 dark:bg-gray-3 text-sm text-gray-12">
+						<KSelect.Trigger class="flex items-center gap-2 h-8 px-2.5 rounded-[var(--radius-md,10px)] border border-gray-3 bg-gray-2 dark:bg-gray-3 text-sm text-gray-12 transition-colors hover:border-gray-5">
 							<KSelect.Value<{
 								label: string;
 								value: EditorPreviewQuality;
@@ -351,9 +360,101 @@ export function PlayerContent() {
 					</KSelect>
 				</div>
 			</div>
-			<PreviewCanvas />
-			<div class="relative flex overflow-hidden z-10 flex-row gap-3 justify-between items-center p-5">
-				<div class="flex-1">
+			<div class="relative flex flex-1 min-h-0 flex-col">
+				<PreviewCanvas />
+				<div class="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center px-3 pb-3">
+					<div class="pointer-events-auto flex max-w-full items-center gap-2 rounded-[var(--radius-lg,14px)] border border-white/10 bg-black/70 px-2 py-1.5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-md transition-colors duration-200 hover:border-white/20 hover:bg-black/80">
+						<button
+							type="button"
+							class="flex size-8 shrink-0 items-center justify-center rounded-[var(--radius-md,10px)] border border-white/10 bg-white/10 text-white transition-colors hover:bg-white/20"
+							onClick={handlePlayPauseClick}
+							aria-label={
+								!editorState.playing || isAtEnd() ? "Play" : "Pause"
+							}
+						>
+							{!editorState.playing || isAtEnd() ? (
+								<IconCapPlay class="size-3.5" />
+							) : (
+								<IconCapPause class="size-3.5" />
+							)}
+						</button>
+						<span class="w-10 shrink-0 text-right text-[10px] font-medium tabular-nums text-white/70">
+							{formatTime(
+								Math.max(
+									editorState.previewTime ?? editorState.playbackTime,
+									0,
+								),
+							)}
+						</span>
+						<div class="group relative mx-0.5 flex h-6 w-36 min-w-[6rem] flex-1 items-center sm:w-52">
+							<div class="absolute inset-x-0 h-0.5 overflow-hidden rounded-[var(--radius-xs,4px)] bg-white/15">
+								<div
+									class="h-full rounded-[var(--radius-xs,4px)] bg-[var(--flowreco-coral,#ff6243)]"
+									style={{ width: `${playbackProgress()}%` }}
+								/>
+							</div>
+							<input
+								type="range"
+								min={0}
+								max={Math.max(totalDuration(), 0.001)}
+								step={0.01}
+								value={Math.max(
+									editorState.previewTime ?? editorState.playbackTime,
+									0,
+								)}
+								class="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+								onInput={async (e) => {
+									const next = Number(e.currentTarget.value);
+									if (editorState.playing) {
+										await commands.stopPlayback();
+										setEditorState("playing", false);
+									}
+									setEditorState("playbackTime", next);
+									setEditorState("previewTime", null);
+									await commands.seekTo(Math.floor(next * FPS));
+								}}
+							/>
+							<div
+								class="pointer-events-none absolute size-2.5 rounded-[var(--radius-xs,4px)] bg-white shadow-sm transition-transform duration-100 group-hover:scale-125"
+								style={{
+									left: `${playbackProgress()}%`,
+									transform: "translateX(-50%)",
+								}}
+							/>
+						</div>
+						<span class="w-10 shrink-0 text-[10px] font-medium tabular-nums text-white/70">
+							{formatTime(totalDuration())}
+						</span>
+						<button
+							type="button"
+							class="flex size-7 shrink-0 items-center justify-center rounded-[var(--radius-sm,6px)] text-white/80 transition-opacity hover:opacity-100"
+							onClick={async () => {
+								await commands.stopPlayback();
+								setEditorState("playing", false);
+								setEditorState("playbackTime", 0);
+								editorState.timeline.transform.setPosition(0);
+							}}
+							aria-label="Go to start"
+						>
+							<IconCapPrev class="size-3" />
+						</button>
+						<button
+							type="button"
+							class="flex size-7 shrink-0 items-center justify-center rounded-[var(--radius-sm,6px)] text-white/80 transition-opacity hover:opacity-100"
+							onClick={async () => {
+								await commands.stopPlayback();
+								setEditorState("playing", false);
+								setEditorState("playbackTime", totalDuration());
+							}}
+							aria-label="Go to end"
+						>
+							<IconCapNext class="size-3" />
+						</button>
+					</div>
+				</div>
+			</div>
+			<div class="relative flex z-10 flex-row gap-3 justify-between items-center px-3 py-2.5 border-t border-gray-3">
+				<div class="flex items-center gap-2 text-[0.8125rem]">
 					<Time
 						class="text-gray-12"
 						seconds={Math.max(
@@ -361,51 +462,12 @@ export function PlayerContent() {
 							0,
 						)}
 					/>
-					<span class="text-gray-11 text-[0.875rem] tabular-nums"> / </span>
-					<Time seconds={totalDuration()} />
+					<span class="text-gray-10 tabular-nums">/</span>
+					<Time class="text-gray-11" seconds={totalDuration()} />
 				</div>
-				<div class="flex flex-row items-center justify-center text-gray-11 gap-8 text-[0.875rem]">
-					<button
-						type="button"
-						class="transition-opacity hover:opacity-70 will-change-[opacity]"
-						onClick={async () => {
-							await commands.stopPlayback();
-							setEditorState("playing", false);
-							setEditorState("playbackTime", 0);
-							editorState.timeline.transform.setPosition(0);
-						}}
-					>
-						<IconCapPrev class="text-gray-12 size-3" />
-					</button>
-					<Tooltip kbd={["Space"]} content="Play/Pause video">
-						<button
-							type="button"
-							onClick={handlePlayPauseClick}
-							class="flex justify-center items-center rounded-full border border-gray-300 transition-colors bg-gray-3 hover:bg-gray-4 hover:text-black size-9"
-						>
-							{!editorState.playing || isAtEnd() ? (
-								<IconCapPlay class="text-gray-12 size-3" />
-							) : (
-								<IconCapPause class="text-gray-12 size-3" />
-							)}
-						</button>
-					</Tooltip>
-					<button
-						type="button"
-						class="transition-opacity hover:opacity-70 will-change-[opacity]"
-						onClick={async () => {
-							await commands.stopPlayback();
-							setEditorState("playing", false);
-							setEditorState("playbackTime", totalDuration());
-						}}
-					>
-						<IconCapNext class="text-gray-12 size-3" />
-					</button>
-				</div>
-				<div class="flex flex-row flex-1 gap-4 justify-end items-center">
-					<div class="flex-1" />
+				<div class="flex flex-row flex-1 gap-3 justify-end items-center">
 					<EditorButton<typeof KToggleButton>
-						tooltipText="Toggle Split"
+						tooltipText="Split tool"
 						kbd={["S"]}
 						pressed={editorState.timeline.interactMode === "split"}
 						onChange={(v: boolean) =>
@@ -423,28 +485,34 @@ export function PlayerContent() {
 							/>
 						}
 					/>
-					<div class="w-px h-8 rounded-full bg-gray-4" />
-					<Tooltip kbd={["meta", "-"]} content="Zoom out">
-						<IconCapZoomOut
+					<div class="w-px h-6 rounded-[var(--radius-xs,4px)] bg-gray-4" />
+					<Tooltip kbd={["meta", "-"]} content="Zoom out timeline">
+						<button
+							type="button"
+							class="p-1 rounded-[var(--radius-sm,6px)] text-gray-12 transition-opacity hover:opacity-70"
 							onClick={() => {
 								editorState.timeline.transform.updateZoom(
 									editorState.timeline.transform.zoom * 1.1,
 									editorState.playbackTime,
 								);
 							}}
-							class="text-gray-12 size-5 will-change-[opacity] transition-opacity hover:opacity-70"
-						/>
+						>
+							<IconCapZoomOut class="size-4" />
+						</button>
 					</Tooltip>
-					<Tooltip kbd={["meta", "+"]} content="Zoom in">
-						<IconCapZoomIn
+					<Tooltip kbd={["meta", "+"]} content="Zoom in timeline">
+						<button
+							type="button"
+							class="p-1 rounded-[var(--radius-sm,6px)] text-gray-12 transition-opacity hover:opacity-70"
 							onClick={() => {
 								editorState.timeline.transform.updateZoom(
 									editorState.timeline.transform.zoom / 1.1,
 									editorState.playbackTime,
 								);
 							}}
-							class="text-gray-12 size-5 will-change-[opacity] transition-opacity hover:opacity-70"
-						/>
+						>
+							<IconCapZoomIn class="size-4" />
+						</button>
 					</Tooltip>
 					<Slider
 						class="w-24"
@@ -473,7 +541,7 @@ export function PlayerContent() {
 						}
 					/>
 				</div>
-				<div class="absolute right-2 bottom-1 text-[11px] leading-none text-right text-gray-9 pointer-events-none whitespace-nowrap">
+				<div class="absolute right-2 bottom-0.5 text-[10px] leading-none text-right text-gray-9 pointer-events-none whitespace-nowrap">
 					{zoomHint()}
 				</div>
 			</div>
