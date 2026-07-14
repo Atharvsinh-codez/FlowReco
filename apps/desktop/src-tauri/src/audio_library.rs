@@ -39,7 +39,7 @@ fn probe_duration(path: &std::path::Path) -> f64 {
 
 #[tauri::command]
 #[specta::specta]
-#[tracing::instrument(skip(app, editor_instance))]
+#[tracing::instrument(skip(_editor_instance))]
 pub async fn add_audio_library_track(
     _editor_instance: WindowEditorInstance,
     id: String,
