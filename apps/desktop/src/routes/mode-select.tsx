@@ -49,7 +49,7 @@ const ModeSelectWindow = () => {
 
 			<div class="flex flex-col items-center w-full px-7 py-6">
 				<div class="mb-6 text-center max-w-md">
-					<p class="text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--flowreco-coral,#ff6243)] mb-2">
+					<p class="text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--sleek-accent,#0284c7)] mb-2">
 						How do you want to capture
 					</p>
 					<h2 class="text-xl font-semibold tracking-tight text-gray-12 mb-1.5 text-balance">

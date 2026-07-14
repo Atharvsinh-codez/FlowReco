@@ -24,19 +24,27 @@ function TargetTypeButton(props: TargetTypeButtonProps) {
 			disabled={local.disabled}
 			aria-pressed={local.selected ? "true" : "false"}
 			class={cx(
-				"flex flex-1 flex-col items-center justify-end gap-1 rounded-lg border border-gray-5 bg-gray-3 py-2 text-center transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-9 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-1",
-				local.selected ? "text-gray-12" : "text-gray-12 hover:bg-gray-4",
+				"flex flex-1 flex-col items-center justify-center gap-1.5 rounded-[var(--radius-lg,12px)] border py-3 text-center transition-all duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--sleek-accent,#0284c7)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--recorder-bg,#121212)]",
+				local.selected
+					? "border-[var(--sleek-accent,#0284c7)] bg-[var(--sleek-accent-soft,rgba(2,132,199,0.12))] text-[var(--recorder-text,#eef3f8)] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
+					: "border-[var(--recorder-border,rgba(233,238,245,0.1))] bg-[var(--recorder-raised,#1b1d22)] text-[var(--recorder-text,#eef3f8)] hover:bg-[var(--recorder-hover,#22252b)] hover:border-[rgba(233,238,245,0.16)]",
 				local.disabled && "pointer-events-none opacity-60",
 				local.class,
 			)}
 		>
-			<local.Component
+			<div
 				class={cx(
-					"size-5 transition-colors",
-					local.selected ? "text-gray-12" : "text-gray-9",
+					"flex size-8 items-center justify-center rounded-[var(--radius-md,8px)] transition-colors",
+					local.selected
+						? "bg-[var(--sleek-accent,#0284c7)]/15 text-[var(--sleek-accent,#0284c7)]"
+						: "bg-white/[0.04] text-[var(--recorder-muted,#7a7d85)]",
 				)}
-			/>
-			<p class="text-xs">{local.name}</p>
+			>
+				<local.Component class="size-4" />
+			</div>
+			<p class="text-[12px] font-medium tracking-[-0.02em] leading-none">
+				{local.name}
+			</p>
 		</button>
 	);
 }

@@ -27,16 +27,16 @@ export default function TargetDropdownButton<
 			aria-expanded={local.expanded ? "true" : "false"}
 			data-expanded={local.expanded ? "true" : "false"}
 			class={cx(
-				"flex w-5 shrink-0 items-center justify-center rounded-lg bg-gray-4 text-gray-12 transition-colors duration-150 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-9 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-1 hover:bg-gray-5",
-				local.expanded && "bg-gray-5",
+				"flex w-6 shrink-0 items-center justify-center text-[var(--recorder-muted,#7a7d85)] transition-colors duration-150 focus-visible:outline-hidden hover:bg-white/[0.05] hover:text-[var(--recorder-text,#eef3f8)]",
+				local.expanded && "bg-white/[0.06] text-[var(--recorder-text,#eef3f8)]",
 				local.disabled && "pointer-events-none opacity-60",
 				local.class,
 			)}
 		>
 			<IconCapChevronDown
 				class={cx(
-					"size-4 text-gray-11 transition-transform duration-150",
-					local.expanded && "rotate-180 text-gray-12",
+					"size-3.5 transition-transform duration-150",
+					local.expanded && "rotate-180",
 				)}
 			/>
 		</Polymorphic>

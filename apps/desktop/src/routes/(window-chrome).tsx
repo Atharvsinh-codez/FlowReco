@@ -67,8 +67,8 @@ export default function (props: RouteSectionProps) {
 		<WindowChromeContext>
 			<div
 				class={cx(
-					"cap-window-shell flex overflow-hidden flex-col w-screen h-screen max-h-screen divide-y divide-gray-5 bg-gray-1",
-					isMacOS && "rounded-[16px]",
+					"cap-window-shell flex overflow-hidden flex-col w-screen h-screen max-h-screen divide-y divide-[var(--recorder-border,rgba(233,238,245,0.08))] bg-[var(--recorder-bg,#121212)]",
+					isMacOS && "rounded-[var(--radius-xl,16px)]",
 				)}
 			>
 				<Header />

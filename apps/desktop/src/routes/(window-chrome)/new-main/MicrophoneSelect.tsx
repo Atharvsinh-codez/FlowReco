@@ -86,11 +86,11 @@ export default function MicrophoneSelect(props: {
 			>
 				<Show when={showLevel()}>
 					<div
-						class="absolute inset-y-0 left-0 -z-10 transition-[right] duration-100 pointer-events-none bg-blue-9/10"
+						class="absolute inset-y-0 left-0 -z-10 transition-[right] duration-100 pointer-events-none bg-[var(--sleek-accent-soft,rgba(2,132,199,0.12))]"
 						style={{ right: `${audioLevel() * 100}%` }}
 					/>
 					<div
-						class="absolute bottom-0 left-0 h-[2px] -z-10 transition-[right] duration-100 pointer-events-none bg-blue-9"
+						class="absolute bottom-0 left-0 h-[2px] -z-10 transition-[right] duration-100 pointer-events-none bg-[var(--sleek-accent,#0284c7)]"
 						style={{ right: `${audioLevel() * 100}%` }}
 					/>
 				</Show>

@@ -1607,7 +1607,7 @@ function createUpdateReadyToast() {
 					<div class="flex gap-2 items-center">
 						<button
 							type="button"
-							class="px-2.5 py-1 text-xs font-medium rounded-lg transition-colors bg-blue-9 text-white hover:bg-blue-10"
+							class="px-2.5 py-1 text-xs font-medium rounded-[var(--radius-md,8px)] transition-colors bg-[var(--sleek-accent,#0284c7)] text-white hover:brightness-110"
 							onClick={() => {
 								toast.dismiss(t.id);
 								const install = update.installed
@@ -2527,7 +2527,7 @@ function Page() {
 	};
 
 	const BaseControls = () => (
-		<div class="space-y-2">
+		<div class="space-y-1.5">
 			<CameraSelect
 				disabled={enableDeviceQueries() && devices.isPending}
 				options={devices.cameras}
@@ -2583,14 +2583,14 @@ function Page() {
 			exitClass="scale-100"
 			exitToClass="scale-95"
 		>
-			<div class="flex flex-col gap-2 w-full">
-				<div class="flex flex-col gap-2 w-full text-xs text-gray-11">
+			<div class="flex flex-col gap-3 w-full">
+				<div class="flex flex-col gap-2 w-full">
 					<div class="flex flex-row gap-2 items-stretch w-full">
 						<div
 							class={cx(
-								"flex flex-1 overflow-hidden rounded-lg border border-gray-5 bg-gray-3 ring-1 ring-transparent ring-offset-2 ring-offset-gray-1 transition focus-within:ring-blue-9 focus-within:ring-offset-2 focus-within:ring-offset-gray-1",
+								"flex flex-1 overflow-hidden rounded-[var(--radius-lg,12px)] border border-[var(--recorder-border,rgba(233,238,245,0.1))] bg-[var(--recorder-raised,#1b1d22)] transition-[border-color,box-shadow] duration-150",
 								(rawOptions.targetMode === "display" || displayMenuOpen()) &&
-									"ring-blue-9",
+									"border-[var(--sleek-accent,#0284c7)] shadow-[0_0_0_1px_var(--sleek-accent-ring,rgba(2,132,199,0.35))]",
 							)}
 						>
 							<TargetTypeButton
@@ -2601,12 +2601,12 @@ function Page() {
 									toggleTargetMode("display");
 								}}
 								name="Display"
-								class="flex-1 rounded-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 pl-5"
+								class="flex-1 rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 pl-4"
 							/>
 							<TargetDropdownButton
 								class={cx(
-									"rounded-none border-l border-gray-6 focus-visible:ring-0 focus-visible:ring-offset-0",
-									displayMenuOpen() && "bg-gray-5",
+									"border-l border-[var(--recorder-border,rgba(233,238,245,0.1))]",
+									displayMenuOpen() && "bg-white/[0.06]",
 								)}
 								ref={displayTriggerRef}
 								disabled={isRecording()}
@@ -2626,9 +2626,9 @@ function Page() {
 						</div>
 						<div
 							class={cx(
-								"flex flex-1 overflow-hidden rounded-lg border border-gray-5 bg-gray-3 ring-1 ring-transparent ring-offset-2 ring-offset-gray-1 transition focus-within:ring-blue-9 focus-within:ring-offset-2 focus-within:ring-offset-gray-1",
+								"flex flex-1 overflow-hidden rounded-[var(--radius-lg,12px)] border border-[var(--recorder-border,rgba(233,238,245,0.1))] bg-[var(--recorder-raised,#1b1d22)] transition-[border-color,box-shadow] duration-150",
 								(rawOptions.targetMode === "window" || windowMenuOpen()) &&
-									"ring-blue-9",
+									"border-[var(--sleek-accent,#0284c7)] shadow-[0_0_0_1px_var(--sleek-accent-ring,rgba(2,132,199,0.35))]",
 							)}
 						>
 							<TargetTypeButton
@@ -2639,12 +2639,12 @@ function Page() {
 									toggleTargetMode("window");
 								}}
 								name="Window"
-								class="flex-1 rounded-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 pl-5"
+								class="flex-1 rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 pl-4"
 							/>
 							<TargetDropdownButton
 								class={cx(
-									"rounded-none border-l border-gray-6 focus-visible:ring-0 focus-visible:ring-offset-0",
-									windowMenuOpen() && "bg-gray-5",
+									"border-l border-[var(--recorder-border,rgba(233,238,245,0.1))]",
+									windowMenuOpen() && "bg-white/[0.06]",
 								)}
 								ref={windowTriggerRef}
 								disabled={isRecording()}
@@ -2686,6 +2686,7 @@ function Page() {
 						/>
 					</div>
 				</div>
+				<div class="h-px w-full bg-[var(--recorder-border,rgba(233,238,245,0.08))]" />
 				<BaseControls />
 			</div>
 		</Transition>
@@ -2714,7 +2715,7 @@ function Page() {
 	return (
 		<div
 			onMouseEnter={handleMouseEnter}
-			class="flex relative flex-col px-[13px] gap-2 pb-[8px] h-full min-h-0 text-(--text-primary)"
+			class="flex relative flex-col px-3.5 gap-2.5 pb-2.5 h-full min-h-0 text-[var(--recorder-text,#eef3f8)] bg-[var(--recorder-bg,#121212)]"
 		>
 			<WindowChromeHeader hideMaximize>
 				<div
@@ -2790,10 +2791,10 @@ function Page() {
 				</div>
 			</WindowChromeHeader>
 			<Show when={!activeMenu()}>
-				<div class="flex items-center justify-between mt-[16px] mb-[6px]">
-					<div class="flex items-center space-x-1">
+				<div class="flex items-center justify-between mt-3 mb-1">
+					<div class="flex items-center gap-2 min-w-0">
 						<a
-							class="*:w-[92px] *:h-auto text-(--text-primary)"
+							class="*:w-[92px] *:h-auto text-[var(--recorder-text,#eef3f8)] shrink-0"
 							target="_blank"
 							href={
 								auth.data
@@ -2806,10 +2807,10 @@ function Page() {
 						</a>
 						<span
 							class={cx(
-								"ml-2 rounded-lg border px-1.5 py-0.5 text-[0.6rem] font-medium",
+								"rounded-[var(--radius-pill,9999px)] border px-2 py-0.5 text-[10px] font-medium tracking-[-0.02em]",
 								auth.data
-									? "border-[#ff6243]/35 bg-[#ff6243]/10 text-[#d64a2f] dark:text-[#ff8a72]"
-									: "border-gray-5 bg-gray-3 text-gray-10",
+									? "border-[var(--sleek-accent,#0284c7)]/40 bg-[var(--sleek-accent-soft,rgba(2,132,199,0.12))] text-[var(--sleek-accent,#0284c7)]"
+									: "border-[var(--recorder-border,rgba(233,238,245,0.12))] bg-white/[0.04] text-[var(--recorder-muted,#7a7d85)]",
 							)}
 						>
 							{auth.data ? "Connected" : "Local"}

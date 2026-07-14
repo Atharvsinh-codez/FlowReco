@@ -93,22 +93,36 @@
 
 	--shadow-s: 0px 8px 16px 0px rgba(18, 22, 31, 0.04);
 
-	/* FlowReco surface system — graphite + coral, semi-rounded only */
-	--flowreco-graphite: #111315;
-	--flowreco-surface: #16191c;
-	--flowreco-raised: #1c2024;
-	--flowreco-border: rgba(255, 255, 255, 0.08);
-	--flowreco-coral: #ff6243;
-	--flowreco-coral-soft: rgba(255, 98, 67, 0.14);
-	--flowreco-coral-ring: rgba(255, 98, 67, 0.35);
+	/* make.design sleek tokens — only these accents (no purple) */
+	--sleek-surface-tint: #eef3f8;
+	--sleek-white: #ffffff;
+	--sleek-text: #121212;
+	--sleek-text-alt: #111111;
+	--sleek-foreground: #171717;
+	--sleek-muted: #7a7d85;
+	--sleek-accent: #0284c7;
+	--sleek-accent-soft: rgba(2, 132, 199, 0.12);
+	--sleek-accent-ring: rgba(2, 132, 199, 0.35);
+	--sleek-slate: #1b1d22;
+	--sleek-border: #e9eef5;
 	--radius-xs: 4px;
 	--radius-sm: 6px;
-	--radius-md: 10px;
-	--radius-lg: 14px;
-	--radius-xl: 18px;
+	--radius-md: 8px;
+	--radius-lg: 12px;
+	--radius-xl: 16px;
+	--radius-2xl: 20px;
+	--radius-pill: 9999px;
 	--ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 	--duration-fast: 150ms;
 	--duration-med: 220ms;
+
+	/* Recorder shell (dark, elevated) — derived only from sleek palette */
+	--recorder-bg: #121212;
+	--recorder-raised: #1b1d22;
+	--recorder-hover: #22252b;
+	--recorder-border: rgba(233, 238, 245, 0.1);
+	--recorder-text: #eef3f8;
+	--recorder-muted: #7a7d85;
 }
 
 /* Dark theme variables */

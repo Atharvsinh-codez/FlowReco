@@ -20,15 +20,15 @@ const ModeOption = (props: ModeOptionProps) => {
 			data-tauri-drag-region="false"
 			onClick={() => props.onSelect(props.mode)}
 			class={cx(
-				"group relative flex flex-col items-stretch text-left rounded-[var(--radius-lg,14px)] border transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] overflow-hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--flowreco-coral,#ff6243)]",
+				"group relative flex flex-col items-stretch text-left rounded-[var(--radius-xl,16px)] border transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] overflow-hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sleek-accent,#0284c7)]",
 				props.isSelected
-					? "border-[var(--flowreco-coral,#ff6243)] bg-[var(--flowreco-coral-soft,rgba(255,98,67,0.14))] shadow-[0_8px_24px_rgba(255,98,67,0.12)]"
+					? "border-[var(--sleek-accent,#0284c7)] bg-[var(--sleek-accent-soft,rgba(2,132,199,0.12))] shadow-[0_8px_24px_rgba(2,132,199,0.12)]"
 					: "border-gray-4 dark:border-gray-5 bg-gray-2 dark:bg-gray-3 hover:border-gray-6 hover:bg-gray-3 dark:hover:bg-gray-4 hover:-translate-y-0.5",
 			)}
 			aria-pressed={props.isSelected}
 		>
 			<Show when={props.isSelected}>
-				<div class="absolute top-2.5 right-2.5 flex items-center justify-center size-5 rounded-[var(--radius-sm,6px)] bg-[var(--flowreco-coral,#ff6243)]">
+				<div class="absolute top-2.5 right-2.5 flex items-center justify-center size-5 rounded-[var(--radius-md,8px)] bg-[var(--sleek-accent,#0284c7)]">
 					<IconLucideCheck class="size-3 text-white" />
 				</div>
 			</Show>
@@ -36,14 +36,16 @@ const ModeOption = (props: ModeOptionProps) => {
 			<div
 				class={cx(
 					"flex items-center justify-center w-full pt-5 pb-3 transition-colors duration-200",
-					props.isSelected ? "text-[var(--flowreco-coral,#ff6243)]" : "text-gray-12",
+					props.isSelected
+						? "text-[var(--sleek-accent,#0284c7)]"
+						: "text-gray-12",
 				)}
 			>
 				<div
 					class={cx(
-						"flex size-11 items-center justify-center rounded-[var(--radius-md,10px)] border transition-colors duration-200",
+						"flex size-11 items-center justify-center rounded-[var(--radius-lg,12px)] border transition-colors duration-200",
 						props.isSelected
-							? "border-[var(--flowreco-coral,#ff6243)]/40 bg-[var(--flowreco-coral,#ff6243)]/10"
+							? "border-[var(--sleek-accent,#0284c7)]/40 bg-[var(--sleek-accent-soft,rgba(2,132,199,0.12))]"
 							: "border-gray-5 bg-gray-1 dark:bg-gray-2 group-hover:border-gray-6",
 					)}
 				>
@@ -56,7 +58,7 @@ const ModeOption = (props: ModeOptionProps) => {
 					class={cx(
 						"text-[10px] font-medium uppercase tracking-[0.08em]",
 						props.isSelected
-							? "text-[var(--flowreco-coral,#ff6243)]"
+							? "text-[var(--sleek-accent,#0284c7)]"
 							: "text-gray-10",
 					)}
 				>

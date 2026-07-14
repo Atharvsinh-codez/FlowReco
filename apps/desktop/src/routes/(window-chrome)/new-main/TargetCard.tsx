@@ -207,7 +207,9 @@ export default function TargetCard(props: TargetCardProps) {
 		return parts.map((part) => {
 			if (part.toLowerCase() === lowercaseQuery) {
 				return (
-					<span class="rounded-sm bg-blue-9/20 px-px text-gray-12">{part}</span>
+					<span class="rounded-sm bg-[var(--sleek-accent-soft,rgba(2,132,199,0.12))] px-px text-gray-12">
+						{part}
+					</span>
 				);
 			}
 			return part;
