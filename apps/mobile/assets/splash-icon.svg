@@ -1,0 +1,6 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+	<title>FlowReco splash mark</title>
+	<rect x="56" y="56" width="400" height="400" rx="96" fill="#111315"/>
+	<path d="M208 152H176C162.745 152 152 162.745 152 176V208M304 152H336C349.255 152 360 162.745 360 176V208M360 304V336C360 349.255 349.255 360 336 360H304M208 360H176C162.745 360 152 349.255 152 336V304" stroke="#F4F5F6" stroke-width="25" stroke-linecap="round"/>
+	<path d="M213 320V192H269C302 192 321 209 321 238C321 268 300 282 269 282H213M268 282L322 320" stroke="#FF6243" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

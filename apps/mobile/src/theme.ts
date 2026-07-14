@@ -1,0 +1,95 @@
+import { Platform, StyleSheet } from "react-native";
+
+export const colors = {
+	white: "#ffffff",
+	black: "#000000",
+	gray1: "#fcfcfc",
+	gray2: "#f9f9f9",
+	gray3: "#f0f0f0",
+	gray4: "#e8e8e8",
+	gray5: "#e0e0e0",
+	gray6: "#d9d9d9",
+	gray7: "#cecece",
+	gray8: "#bbbbbb",
+	gray9: "#8d8d8d",
+	gray10: "#838383",
+	gray11: "#646464",
+	gray12: "#202020",
+	appBackground: "#f9f9f9",
+	blue1: "#fff9f7",
+	blue2: "#fff2ee",
+	blue3: "#ffe5de",
+	blue4: "#ffd6cc",
+	blue5: "#ffc5b8",
+	blue6: "#ffae9c",
+	blue7: "#fb927d",
+	blue8: "#f5765e",
+	blue9: "#ff6243",
+	blue10: "#ed5134",
+	blue11: "#c83c24",
+	blue12: "#5d2117",
+	red1: "#fffcfc",
+	red2: "#fff7f7",
+	red3: "#feebec",
+	red4: "#ffdbdc",
+	red5: "#ffcdce",
+	red6: "#fdbdbe",
+	red7: "#f4a9aa",
+	red8: "#eb8e90",
+	red9: "#e5484d",
+	red10: "#dc3e42",
+	red11: "#ce2c31",
+	red12: "#641723",
+	primary: "#c83c24",
+	primary2: "#a9321d",
+	secondary: "#ff6243",
+	tertiary: "#ffe5de",
+	buttonBlue: "#c83c24",
+	buttonBlueHover: "#a9321d",
+	buttonBlueBorder: "#7d2515",
+	glass: "rgba(252, 252, 252, 0.72)",
+	blackAlpha5: "rgba(18, 22, 31, 0.05)",
+	blackAlpha10: "rgba(18, 22, 31, 0.1)",
+	blackAlpha40: "rgba(18, 22, 31, 0.4)",
+	blackAlpha60: "rgba(18, 22, 31, 0.6)",
+	green9: "#30a46c",
+	yellow3: "#fffab8",
+	yellow5: "#ffe770",
+	yellow9: "#f5d90a",
+};
+
+export const fonts = {
+	regular: Platform.OS === "ios" ? "System" : "sans-serif",
+	medium: Platform.OS === "ios" ? "System" : "sans-serif-medium",
+	bold: Platform.OS === "ios" ? "System" : "sans-serif",
+};
+
+export const radius = {
+	xs: 6,
+	sm: 8,
+	md: 12,
+	lg: 16,
+	xl: 20,
+	full: 999,
+};
+
+export const squircle = {
+	borderCurve: "continuous" as const,
+};
+
+export const shadows = StyleSheet.create({
+	card: {
+		shadowColor: colors.black,
+		shadowOffset: { width: 0, height: 1 },
+		shadowOpacity: 0.04,
+		shadowRadius: 2,
+		elevation: 1,
+	},
+	popover: {
+		shadowColor: colors.black,
+		shadowOffset: { width: 0, height: 16 },
+		shadowOpacity: 0.12,
+		shadowRadius: 32,
+		elevation: 10,
+	},
+});

@@ -1,0 +1,132 @@
+name: Windows installer
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-installer-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-windows-installer:
+    name: Build unsigned Windows x64 installer
+    runs-on: windows-2022
+    timeout-minutes: 180
+    env:
+      RUST_TARGET_TRIPLE: x86_64-pc-windows-msvc
+
+    steps:
+      - name: Check out FlowReco
+        uses: actions/checkout@v4
+
+      - name: Configure Windows pagefile
+        uses: al-cheb/configure-pagefile-action@a3b6ebd6b634da88790d9c58d4b37a7fe93 # v1.4
+        with:
+          minimum-size: 16GB
+          maximum-size: 24GB
+          disk-root: "D:"
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@1.88.0
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Verify Rust toolchain
+        shell: bash
+        run: |
+          rustc -Vv
+          cargo -V
+          rustup show active-toolchain
+
+      - uses: ./.github/actions/setup-rust-cache
+        with:
+          target: x86_64-pc-windows-msvc
+
+      - uses: ./.github/actions/setup-js
+
+      - name: Configure unsigned production build
+        shell: bash
+        run: |
+          VERSION="$(sed -n 's/^version = "\([^"]*\)"$/\1/p' apps/desktop/src-tauri/Cargo.toml | head -n 1)"
+          if [[ -z "$VERSION" ]]; then
+            echo "Unable to read the FlowReco version from apps/desktop/src-tauri/Cargo.toml" >&2
+            exit 1
+          fi
+          {
+            echo "appVersion=$VERSION"
+            echo "VITE_ENVIRONMENT=production"
+            echo "NEXT_PUBLIC_WEB_URL=https://flowreco.local"
+            echo "NEXTAUTH_URL=https://flowreco.local"
+            echo "VITE_SERVER_URL=https://flowreco.local"
+            echo "VITE_POSTHOG_KEY="
+            echo "VITE_POSTHOG_HOST="
+            echo "CAP_DESKTOP_SENTRY_URL="
+            echo "RUST_TARGET_TRIPLE=x86_64-pc-windows-msvc"
+          } > .env
+
+      - name: Prepare Windows native dependencies
+        shell: bash
+        run: pnpm -w cap-setup
+
+      - name: Build FlowReco NSIS installer
+        working-directory: apps/desktop
+        shell: bash
+        env:
+          CI: "false"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUST_TARGET_TRIPLE: x86_64-pc-windows-msvc
+        run: >-
+          pnpm build:tauri
+          --target x86_64-pc-windows-msvc
+          --config src-tauri/tauri.windows-ci.conf.json
+          --bundles nsis
+
+      - name: Verify installer and write checksum
+        id: installer
+        shell: pwsh
+        run: |
+          $bundleDir = "target/x86_64-pc-windows-msvc/release/bundle/nsis"
+          $installers = @(Get-ChildItem -Path $bundleDir -Filter *.exe -File)
+          if ($installers.Count -ne 1) {
+            throw "Expected exactly one NSIS installer in '$bundleDir'; found $($installers.Count)."
+          }
+
+          $installer = $installers[0]
+          if ($installer.Length -lt 1MB) {
+            throw "Installer '$($installer.Name)' is unexpectedly small: $($installer.Length) bytes."
+          }
+
+          $hash = (Get-FileHash -Path $installer.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  $($installer.Name)" | Set-Content -Path (Join-Path $bundleDir "SHA256SUMS.txt") -Encoding ascii
+          "name=$($installer.Name)" >> $env:GITHUB_OUTPUT
+          "sha256=$hash" >> $env:GITHUB_OUTPUT
+          Write-Host "Verified installer: $($installer.Name) ($($installer.Length) bytes)"
+          Write-Host "SHA-256: $hash"
+
+      - name: Upload Windows installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: FlowReco-Windows-x64
+          path: |
+            target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe
+            target/x86_64-pc-windows-msvc/release/bundle/nsis/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Build summary
+        shell: bash
+        run: |
+          {
+            echo "## FlowReco Windows installer"
+            echo
+            echo "- Artifact: \`FlowReco-Windows-x64\`"
+            echo "- Installer: \`${{ steps.installer.outputs.name }}\`"
+            echo "- SHA-256: \`${{ steps.installer.outputs.sha256 }}\`"
+            echo "- Signing: unsigned development build"
+          } >> "$GITHUB_STEP_SUMMARY"

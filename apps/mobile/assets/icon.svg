@@ -1,0 +1,6 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+	<title>FlowReco app icon</title>
+	<rect width="1024" height="1024" fill="#111315"/>
+	<path d="M390 246H310C274.654 246 246 274.654 246 310V390M634 246H714C749.346 246 778 274.654 778 310V390M778 634V714C778 749.346 749.346 778 714 778H634M390 778H310C274.654 778 246 749.346 246 714V634" stroke="#F4F5F6" stroke-width="62" stroke-linecap="round"/>
+	<path d="M402 674V350H544C626 350 674 392 674 467C674 543 620 579 544 579H402M541 579L678 674" stroke="#FF6243" stroke-width="70" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

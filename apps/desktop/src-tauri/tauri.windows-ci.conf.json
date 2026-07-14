@@ -1,0 +1,19 @@
+{
+	"$schema": "https://schema.tauri.app/config/2",
+	"productName": "FlowReco",
+	"mainBinaryName": "FlowReco",
+	"identifier": "app.flowreco.desktop",
+	"build": {
+		"beforeBundleCommand": "node scripts/prodBeforeBundle.js"
+	},
+	"plugins": {
+		"updater": {
+			"active": false,
+			"pubkey": ""
+		}
+	},
+	"bundle": {
+		"targets": ["nsis"],
+		"createUpdaterArtifacts": false
+	}
+}
