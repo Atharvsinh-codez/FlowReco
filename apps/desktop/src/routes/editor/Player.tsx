@@ -327,7 +327,7 @@ export function PlayerContent() {
 								<KSelect.ItemLabel class="flex-1">
 									{props.item.rawValue.label}
 								</KSelect.ItemLabel>
-								<KSelect.ItemIndicator class="ml-auto text-[var(--flowreco-coral,#ff6243)]">
+								<KSelect.ItemIndicator class="ml-auto text-[var(--sleek-accent,#0284c7)]">
 									<IconCapCircleCheck />
 								</KSelect.ItemIndicator>
 							</MenuItem>
@@ -389,7 +389,7 @@ export function PlayerContent() {
 						<div class="group relative mx-0.5 flex h-6 w-36 min-w-[6rem] flex-1 items-center sm:w-52">
 							<div class="absolute inset-x-0 h-0.5 overflow-hidden rounded-[var(--radius-xs,4px)] bg-white/15">
 								<div
-									class="h-full rounded-[var(--radius-xs,4px)] bg-[var(--flowreco-coral,#ff6243)]"
+									class="h-full rounded-[var(--radius-xs,4px)] bg-[var(--sleek-accent,#0284c7)]"
 									style={{ width: `${playbackProgress()}%` }}
 								/>
 							</div>

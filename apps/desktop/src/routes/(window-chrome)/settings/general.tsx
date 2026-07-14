@@ -123,7 +123,6 @@ const MAX_FPS_OPTIONS = [
 
 const DEFAULT_PROJECT_NAME_TEMPLATE =
 	"{target_name} ({target_kind}) {date} {time}";
-const DEFAULT_INSTANT_MODE_MAX_RESOLUTION = 1920;
 
 export default function GeneralSettings() {
 	const [store] = createResource(() => generalSettingsStore.get());
@@ -213,11 +212,6 @@ function Inner(props: { initialStore: GeneralSettingsStore | null }) {
 	const [settings, setSettings] = createStore<ExtendedGeneralSettingsStore>(
 		deriveGeneralSettings(props.initialStore),
 	);
-	const instantModeMaxResolution = createMemo(
-		() =>
-			settings.instantModeMaxResolution ?? DEFAULT_INSTANT_MODE_MAX_RESOLUTION,
-	);
-
 	createEffect(() => {
 		setSettings(reconcile(deriveGeneralSettings(props.initialStore)));
 	});
@@ -508,23 +502,26 @@ function Inner(props: { initialStore: GeneralSettingsStore | null }) {
 					</Section>
 				)}
 
-				<PublishingSection
-					instantResolution={instantModeMaxResolution()}
-					onInstantResolutionChange={(value) =>
-						handleChange("instantModeMaxResolution", value)
-					}
-					autoOpenShareableLinks={!settings.disableAutoOpenLinks}
-					onAutoOpenShareableLinksChange={(v) =>
-						handleChange("disableAutoOpenLinks", !v)
-					}
-				/>
-
 				<QualitySection
 					studioQuality={settings.studioRecordingQuality ?? "balanced"}
 					onStudioQualityChange={(value) =>
 						handleChange("studioRecordingQuality", value)
 					}
 				/>
+
+				<Section
+					title="Publishing"
+					description="Link behaviour when you choose to publish a recording."
+				>
+					<SectionRows>
+						<ToggleSettingItem
+							label="Auto-open shareable links"
+							description="Open the share link in your browser as soon as an upload finishes."
+							value={!settings.disableAutoOpenLinks}
+							onChange={(v) => handleChange("disableAutoOpenLinks", !v)}
+						/>
+					</SectionRows>
+				</Section>
 
 				<Section
 					title="Recording"
@@ -579,14 +576,6 @@ function Inner(props: { initialStore: GeneralSettingsStore | null }) {
 									value: "reopenRecordingWindow",
 								},
 							]}
-						/>
-						<ToggleSettingItem
-							label="Delete Instant recordings after upload"
-							description="FlowReco removes the local file once it has uploaded successfully."
-							value={settings.deleteInstantRecordingsAfterUpload ?? false}
-							onChange={(v) =>
-								handleChange("deleteInstantRecordingsAfterUpload", v)
-							}
 						/>
 						<ToggleSettingItem
 							label="Crash-recoverable recording"
@@ -925,23 +914,6 @@ const STUDIO_QUALITY_TIERS: StudioQualityTier[] = [
 	},
 ];
 
-type InstantResolutionTier = {
-	value: number;
-	label: string;
-	summary: string;
-};
-
-const INSTANT_RESOLUTION_TIERS: InstantResolutionTier[] = [
-	{ value: 1280, label: "720p", summary: "Smallest size, low bandwidth." },
-	{
-		value: 1920,
-		label: "1080p",
-		summary: "Recommended. Sharp on most networks.",
-	},
-	{ value: 2560, label: "1440p", summary: "More detail for desktop content." },
-	{ value: 3840, label: "4K", summary: "Max clarity. Needs fast upload." },
-];
-
 function SegmentedControl<T extends string | number>(props: {
 	value: T;
 	onChange: (value: T) => void;
@@ -1010,79 +982,6 @@ function StudioQualitySubsection(props: {
 				</p>
 			</div>
 		</div>
-	);
-}
-
-function InstantQualitySetting(props: {
-	value: number;
-	onChange: (value: number) => void;
-}) {
-	const currentTier = createMemo(
-		() =>
-			INSTANT_RESOLUTION_TIERS.find((t) => t.value === props.value) ??
-			INSTANT_RESOLUTION_TIERS[0],
-	);
-
-	return (
-		<SettingItem
-			id="settings-section-instant-quality"
-			label="Instant Mode quality"
-			description="Choose the maximum upload resolution for Instant recordings."
-		>
-			<div class="flex flex-col items-end gap-1.5">
-				<div class="inline-flex p-0.5 rounded-lg border border-gray-3 bg-gray-3">
-					<For each={INSTANT_RESOLUTION_TIERS}>
-						{(tier) => {
-							const isSelected = () => props.value === tier.value;
-							return (
-								<button
-									type="button"
-									onClick={() => props.onChange(tier.value)}
-									class={cx(
-										"px-3 py-1 text-xs font-medium rounded-md transition-[background-color,color,box-shadow]",
-										isSelected()
-											? "bg-gray-1 text-gray-12 shadow-sm"
-											: "text-gray-10 hover:text-gray-12",
-									)}
-								>
-									{tier.label}
-								</button>
-							);
-						}}
-					</For>
-				</div>
-				<p class="text-[11px] leading-snug text-right text-gray-10">
-					{currentTier().summary}
-				</p>
-			</div>
-		</SettingItem>
-	);
-}
-
-function PublishingSection(props: {
-	instantResolution: number;
-	onInstantResolutionChange: (value: number) => void;
-	autoOpenShareableLinks: boolean;
-	onAutoOpenShareableLinksChange: (value: boolean) => void;
-}) {
-	return (
-		<Section
-			title="Publishing"
-			description="Quality and link behaviour for recordings you choose to publish."
-		>
-			<SectionRows>
-				<InstantQualitySetting
-					value={props.instantResolution}
-					onChange={props.onInstantResolutionChange}
-				/>
-				<ToggleSettingItem
-					label="Auto-open shareable links"
-					description="Open the share link in your browser as soon as the upload finishes."
-					value={props.autoOpenShareableLinks}
-					onChange={props.onAutoOpenShareableLinksChange}
-				/>
-			</SectionRows>
-		</Section>
 	);
 }
 
@@ -1312,7 +1211,7 @@ function DefaultProjectNameCard(props: {
 									"Instant", or "Screenshot"
 								</p>
 								<p>
-									<CodeView>{"{mode}"}</CodeView> → "studio", "instant", or
+									<CodeView>{"{mode}"}</CodeView> → "studio" or
 									"screenshot"
 								</p>
 							</div>

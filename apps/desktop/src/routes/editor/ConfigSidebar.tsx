@@ -538,7 +538,7 @@ export function ConfigSidebar() {
 						}
 					>
 						<KTabs.Indicator class="absolute top-0 left-0 w-full h-full transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] pointer-events-none will-change-transform">
-							<div class="absolute top-1/2 left-1/2 rounded-[var(--radius-sm,6px)] transform -translate-x-1/2 -translate-y-1/2 bg-gray-1 dark:bg-gray-4 ring-1 ring-[var(--flowreco-coral,#ff6243)]/35 will-change-transform size-8" />
+							<div class="absolute top-1/2 left-1/2 rounded-[var(--radius-sm,6px)] transform -translate-x-1/2 -translate-y-1/2 bg-gray-1 dark:bg-gray-4 ring-1 ring-[var(--sleek-accent,#0284c7)]/35 will-change-transform size-8" />
 						</KTabs.Indicator>
 					</Show>
 				</KTabs.List>

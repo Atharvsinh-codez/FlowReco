@@ -53,10 +53,10 @@ const ModeSelectWindow = () => {
 						How do you want to capture
 					</p>
 					<h2 class="text-xl font-semibold tracking-tight text-gray-12 mb-1.5 text-balance">
-						Pick a recording mode
+						Studio or screenshot
 					</h2>
 					<p class="text-sm text-gray-11 text-pretty leading-relaxed">
-						Share in seconds, edit in Studio, or grab a still. You can change
+						Record locally and open the editor, or grab a still. You can change
 						this anytime from the recorder.
 					</p>
 				</div>

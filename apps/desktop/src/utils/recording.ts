@@ -1,4 +1,3 @@
-import { emit } from "@tauri-apps/api/event";
 import * as dialog from "@tauri-apps/plugin-dialog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import type { createOptionsQuery } from "./queries";
@@ -12,36 +11,22 @@ export function handleRecordingResult(
 		.then(async (result) => {
 			if (result === "Started") return;
 			if (result === "InvalidAuthentication") {
-				const buttons = setOptions
-					? {
-							yes: "Login",
-							no: "Switch to Studio mode",
-							cancel: "Cancel",
-						}
-					: {
-							ok: "Login",
-							cancel: "Cancel",
-						};
-
-				const result = await dialog.message(
-					"You must be authenticated to start an instant mode recording. Login or switch to Studio mode.",
-					{
-						title: "Authentication required",
-						buttons,
-					},
-				);
-
-				if (result === buttons.yes || result === buttons.ok)
-					emit("start-sign-in");
-				else if (result === buttons.no && setOptions) {
+				if (setOptions) {
 					setOptions({ mode: "studio" });
 					commands.setRecordingMode("studio");
 				}
+				await dialog.message(
+					"Instant Mode is disabled in FlowReco. Studio Mode records locally without signing in.",
+					{
+						title: "Studio Mode only",
+						kind: "info",
+					},
+				);
 			} else {
 				await dialog.message(
-					"Your configured FlowReco server did not authorize Instant Mode. Verify your server access, or switch to Studio Mode to record locally.",
+					"Recording could not start with the current server settings. Use Studio Mode to record locally.",
 					{
-						title: "Instant Mode unavailable",
+						title: "Recording unavailable",
 						kind: "error",
 					},
 				);
@@ -53,6 +38,13 @@ export function handleRecordingResult(
 				kind: "error",
 			}),
 		);
+}
+
+export function ensureStudioOrScreenshotMode(
+	mode: RecordingMode | undefined | null,
+): RecordingMode {
+	if (mode === "screenshot") return "screenshot";
+	return "studio";
 }
 
 export async function openRecordingFolder(

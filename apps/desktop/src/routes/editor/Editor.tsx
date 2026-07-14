@@ -207,7 +207,7 @@ export function Editor() {
 		<Switch
 			fallback={
 				<div class="flex items-center justify-center h-full w-full">
-					<div class="animate-spin rounded-[var(--radius-md,10px)] h-8 w-8 border-2 border-gray-5 border-t-[var(--flowreco-coral,#ff6243)]" />
+					<div class="animate-spin rounded-[var(--radius-md,10px)] h-8 w-8 border-2 border-gray-5 border-t-[var(--sleek-accent,#0284c7)]" />
 				</div>
 			}
 		>
@@ -662,7 +662,7 @@ function Inner() {
 				</Suspense>
 			}
 		>
-			<div class="flex flex-col flex-1 min-h-0 bg-gray-2 dark:bg-[var(--flowreco-graphite,#111315)]">
+			<div class="flex flex-col flex-1 min-h-0 bg-gray-2 dark:bg-[var(--recorder-bg,#121212)]">
 				<Header />
 				<div
 					class="flex overflow-y-hidden flex-col flex-1 gap-1.5 w-full min-h-0 leading-5 pt-1.5"
@@ -692,13 +692,13 @@ function Inner() {
 								<div
 									role="separator"
 									aria-orientation="horizontal"
-									class="flex-none shrink-0 border-t border-gray-4 dark:border-gray-5 bg-gray-2/95 dark:bg-gray-3/55 transition-colors hover:bg-[var(--flowreco-coral-soft,rgba(255,98,67,0.14))]"
+									class="flex-none shrink-0 border-t border-gray-4 dark:border-gray-5 bg-gray-2/95 dark:bg-gray-3/55 transition-colors hover:bg-[var(--sleek-accent-soft,rgba(2,132,199,0.12))]"
 									style={{ height: `${RESIZE_HANDLE_HEIGHT}px` }}
 								>
 									<div
 										class="flex flex-col gap-0.5 justify-center items-center h-full w-full cursor-row-resize select-none group"
 										classList={{
-											"bg-[var(--flowreco-coral-soft,rgba(255,98,67,0.14))]":
+											"bg-[var(--sleek-accent-soft,rgba(2,132,199,0.12))]":
 												isResizingTimeline(),
 										}}
 										onMouseDown={handleTimelineResizeStart}
@@ -707,9 +707,9 @@ function Inner() {
 										<For each={TIMELINE_RESIZE_GRIP_MARKS}>
 											{() => (
 												<div
-													class="h-0.5 w-16 max-w-[85%] rounded-[var(--radius-xs,4px)] bg-gray-6 dark:bg-gray-7 transition-colors group-hover:bg-[var(--flowreco-coral,#ff6243)]"
+													class="h-0.5 w-16 max-w-[85%] rounded-[var(--radius-xs,4px)] bg-gray-6 dark:bg-gray-7 transition-colors group-hover:bg-[var(--sleek-accent,#0284c7)]"
 													classList={{
-														"bg-[var(--flowreco-coral,#ff6243)]":
+														"bg-[var(--sleek-accent,#0284c7)]":
 															isResizingTimeline(),
 													}}
 												/>
@@ -750,9 +750,9 @@ function Inner() {
 									aria-orientation="vertical"
 								>
 									<div
-										class="w-1 h-10 rounded-[var(--radius-xs,4px)] bg-gray-6 dark:bg-gray-7 transition-colors group-hover:bg-[var(--flowreco-coral,#ff6243)]"
+										class="w-1 h-10 rounded-[var(--radius-xs,4px)] bg-gray-6 dark:bg-gray-7 transition-colors group-hover:bg-[var(--sleek-accent,#0284c7)]"
 										classList={{
-											"bg-[var(--flowreco-coral,#ff6243)]": isResizingSplit(),
+											"bg-[var(--sleek-accent,#0284c7)]": isResizingSplit(),
 										}}
 									/>
 								</div>

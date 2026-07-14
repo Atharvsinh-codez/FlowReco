@@ -85,7 +85,7 @@ export const recordingSettingsStore = declareStore<RecordingSettingsStore>(
 		target: null,
 		micName: null,
 		cameraId: null,
-		mode: "instant",
+		mode: "studio",
 		systemAudio: false,
 		organizationId: null,
 		cameraDeviceSettings: {},

@@ -13,21 +13,11 @@ type ModeButtonConfig = {
 	mode: RecordingMode;
 	label: string;
 	description: string;
-	settingsSection: "instant-quality" | "studio-quality" | null;
+	settingsSection: "studio-quality" | null;
 	icon: (props: { class?: string }) => JSX.Element;
-	iconClass: string;
 };
 
 const MODE_BUTTONS: ModeButtonConfig[] = [
-	{
-		mode: "instant",
-		label: "Instant",
-		description:
-			"Uploads while you record so the share link is ready when you stop.",
-		settingsSection: "instant-quality",
-		icon: (p) => <IconCapInstant {...p} />,
-		iconClass: "size-4 invert dark:invert-0",
-	},
 	{
 		mode: "studio",
 		label: "Studio",
@@ -35,7 +25,6 @@ const MODE_BUTTONS: ModeButtonConfig[] = [
 			"Full-quality local capture that opens in the FlowReco editor when you finish.",
 		settingsSection: "studio-quality",
 		icon: (p) => <IconCapFilmCut {...p} />,
-		iconClass: "size-[0.9rem] invert dark:invert-0",
 	},
 	{
 		mode: "screenshot",
@@ -43,7 +32,6 @@ const MODE_BUTTONS: ModeButtonConfig[] = [
 		description: "Capture and annotate a still frame.",
 		settingsSection: null,
 		icon: (p) => <IconCapScreenshot {...p} />,
-		iconClass: "size-[0.9rem] invert dark:invert-0",
 	},
 ];
 
@@ -58,14 +46,18 @@ const Mode = (props: ModeProps) => {
 		}
 	};
 
-	const openQualitySettings = async (
-		section: "instant-quality" | "studio-quality",
-	) => {
+	const openQualitySettings = async (section: "studio-quality") => {
 		try {
 			localStorage.setItem("cap.settings.scrollToSection", section);
 		} catch {}
 		await commands.showWindow({ Settings: { page: "general" } });
 		await events.requestScrollToSettingsSection.emit({ section });
+	};
+
+	const selectMode = (mode: RecordingMode) => {
+		if (mode === "instant") return;
+		setOptions({ mode });
+		commands.setRecordingMode(mode);
 	};
 
 	return (
@@ -80,7 +72,9 @@ const Mode = (props: ModeProps) => {
 			</button>
 
 			{MODE_BUTTONS.map((button) => {
-				const isSelected = () => rawOptions.mode === button.mode;
+				const isSelected = () =>
+					rawOptions.mode === button.mode ||
+					(rawOptions.mode === "instant" && button.mode === "studio");
 
 				return (
 					<HoverCard
@@ -92,10 +86,7 @@ const Mode = (props: ModeProps) => {
 						<HoverCard.Trigger
 							as="button"
 							type="button"
-							onClick={() => {
-								setOptions({ mode: button.mode });
-								commands.setRecordingMode(button.mode);
-							}}
+							onClick={() => selectMode(button.mode)}
 							class={cx(
 								"relative flex justify-center items-center rounded-[var(--radius-pill,9999px)] transition-all duration-150 size-7 focus:outline-none",
 								isSelected()

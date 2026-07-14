@@ -64,12 +64,7 @@ const ModeOption = (props: ModeOptionProps) => {
 				>
 					{props.eyebrow}
 				</span>
-				<h3
-					class={cx(
-						"text-[15px] font-semibold tracking-tight",
-						props.isSelected ? "text-gray-12" : "text-gray-12",
-					)}
-				>
+				<h3 class="text-[15px] font-semibold tracking-tight text-gray-12">
 					{props.title}
 				</h3>
 				<p class="text-xs leading-relaxed text-gray-11 line-clamp-3 text-pretty">
@@ -84,19 +79,15 @@ const ModeSelect = (props: { onClose?: () => void; standalone?: boolean }) => {
 	const { rawOptions, setOptions } = createOptionsQuery();
 
 	const handleModeChange = (mode: RecordingMode) => {
+		if (mode === "instant") return;
 		setOptions({ mode });
 		commands.setRecordingMode(mode);
 	};
 
+	const selectedMode = () =>
+		rawOptions.mode === "instant" ? "studio" : rawOptions.mode;
+
 	const modeOptions = [
-		{
-			mode: "instant" as const,
-			title: "Share fast",
-			eyebrow: "Instant",
-			description:
-				"Capture and get a link as soon as you stop. Best for quick updates and support replies.",
-			icon: IconCapInstant,
-		},
 		{
 			mode: "studio" as const,
 			title: "Edit in studio",
@@ -121,7 +112,7 @@ const ModeSelect = (props: { onClose?: () => void; standalone?: boolean }) => {
 			class={cx(
 				"relative",
 				props.standalone
-					? "absolute z-10 border border-gray-4 p-6 rounded-[var(--radius-xl,18px)] bg-gray-1 shadow-s"
+					? "absolute z-10 border border-gray-4 p-6 rounded-[var(--radius-xl,16px)] bg-gray-1 shadow-s"
 					: "",
 			)}
 			onClick={(e) => e.stopPropagation()}
@@ -137,7 +128,7 @@ const ModeSelect = (props: { onClose?: () => void; standalone?: boolean }) => {
 				</button>
 			</Show>
 
-			<div class="grid grid-cols-3 gap-3">
+			<div class="grid grid-cols-2 gap-3">
 				{modeOptions.map((option) => (
 					<ModeOption
 						mode={option.mode}
@@ -145,7 +136,7 @@ const ModeSelect = (props: { onClose?: () => void; standalone?: boolean }) => {
 						eyebrow={option.eyebrow}
 						description={option.description}
 						icon={option.icon}
-						isSelected={rawOptions.mode === option.mode}
+						isSelected={selectedMode() === option.mode}
 						onSelect={handleModeChange}
 					/>
 				))}

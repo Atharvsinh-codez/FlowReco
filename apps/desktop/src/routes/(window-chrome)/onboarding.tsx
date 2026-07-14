@@ -51,32 +51,18 @@ import cloud2 from "../../assets/illustrations/cloud-2.png";
 import cloud3 from "../../assets/illustrations/cloud-3.png";
 import { WindowChromeHeader } from "./Context";
 
-type ModeId = "instant" | "studio" | "screenshot";
+type ModeId = "studio" | "screenshot";
 
 interface ModeDetail {
 	id: ModeId;
 	title: string;
 	tagline: string;
 	description: string;
-	icon: typeof IconCapInstant;
+	icon: typeof IconCapFilmCut;
 	features: string[];
 }
 
 const modes: ModeDetail[] = [
-	{
-		id: "instant",
-		title: "Instant",
-		tagline: "Share the moment you stop",
-		description:
-			"Record once. FlowReco uploads in the background so a shareable link is ready as soon as you finish.",
-		icon: IconCapInstant,
-		features: [
-			"Link ready when you stop",
-			"Background upload queue",
-			"Optional AI summary",
-			"Watch in the browser",
-		],
-	},
 	{
 		id: "studio",
 		title: "Studio",
@@ -102,7 +88,7 @@ const modes: ModeDetail[] = [
 			"One-key capture",
 			"Annotate and call out",
 			"Clean backgrounds",
-			"Copy or save instantly",
+			"Copy or save quickly",
 		],
 	},
 ];
@@ -339,7 +325,7 @@ export default function OnboardingPage() {
 
 	const totalSteps = createMemo(() => {
 		if (permissionsOnly()) return 1;
-		return 8;
+		return 7;
 	});
 
 	createEffect(() => {
@@ -504,27 +490,22 @@ export default function OnboardingPage() {
 							</StepPanel>
 							<StepPanel active={step() === 2} index={2} currentStep={step()}>
 								<ModeDetailStep mode={modes[0]} active={step() === 2}>
-									<InstantMockup active={step() === 2} />
+									<StudioMockup active={step() === 2} />
 								</ModeDetailStep>
 							</StepPanel>
 							<StepPanel active={step() === 3} index={3} currentStep={step()}>
 								<ModeDetailStep mode={modes[1]} active={step() === 3}>
-									<StudioMockup active={step() === 3} />
+									<ScreenshotMockup active={step() === 3} />
 								</ModeDetailStep>
 							</StepPanel>
 							<StepPanel active={step() === 4} index={4} currentStep={step()}>
-								<ModeDetailStep mode={modes[2]} active={step() === 4}>
-									<ScreenshotMockup active={step() === 4} />
-								</ModeDetailStep>
+								<ToggleStep active={step() === 4} />
 							</StepPanel>
 							<StepPanel active={step() === 5} index={5} currentStep={step()}>
-								<ToggleStep active={step() === 5} />
+								<ShortcutsStep active={step() === 5} />
 							</StepPanel>
 							<StepPanel active={step() === 6} index={6} currentStep={step()}>
-								<ShortcutsStep active={step() === 6} />
-							</StepPanel>
-							<StepPanel active={step() === 7} index={7} currentStep={step()}>
-								<FaqStep active={step() === 7} />
+								<FaqStep active={step() === 6} />
 							</StepPanel>
 						</Show>
 					</div>
@@ -594,7 +575,7 @@ function StepNavigation(props: {
 								class={cx(
 									"rounded-[var(--radius-xs,4px)] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
 									props.current === index()
-										? "w-5 h-1.5 bg-[var(--flowreco-coral,#ff6243)]"
+										? "w-5 h-1.5 bg-[var(--sleek-accent,#0284c7)]"
 										: props.current > index()
 											? "w-1.5 h-1.5 bg-gray-8"
 											: "w-1.5 h-1.5 bg-gray-5",
@@ -690,15 +671,15 @@ function ModesOverviewStep(props: { active: boolean }) {
 					visible() ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4",
 				)}
 			>
-				<p class="text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--flowreco-coral,#ff6243)]">
-					Three ways to capture
+				<p class="text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--sleek-accent,#0284c7)]">
+					Two ways to capture
 				</p>
 				<h2 class="text-2xl font-bold text-gray-12 tracking-tight text-balance">
-					Local-first recording, your pace
+					Studio recording, local by default
 				</h2>
 				<p class="text-[14px] text-gray-10 leading-relaxed text-pretty">
-					Share fast, edit in Studio, or grab a still — calm controls, canvas
-					first, your files stay local until you publish.
+					Record full-quality video into the editor, or grab a still for bugs
+					and docs. Your files stay on this machine until you export.
 				</p>
 			</div>
 
@@ -768,7 +749,7 @@ function ModeDetailStep(props: {
 							<h3 class="text-lg font-bold text-gray-12 tracking-tight">
 								{props.mode.title}
 							</h3>
-							<p class="text-[11px] font-medium text-[var(--flowreco-coral,#ff6243)]">
+							<p class="text-[11px] font-medium text-[var(--sleek-accent,#0284c7)]">
 								{props.mode.tagline}
 							</p>
 						</div>
@@ -825,7 +806,7 @@ function ToggleStep(props: { active: boolean }) {
 			setUserClicked(false);
 			const t = setTimeout(() => setVisible(true), 100);
 			const interval = setInterval(() => {
-				if (!userClicked()) setActiveMode((prev) => (prev + 1) % 3);
+				if (!userClicked()) setActiveMode((prev) => (prev + 1) % modes.length);
 			}, 2500);
 			onCleanup(() => {
 				clearTimeout(t);
@@ -1077,18 +1058,17 @@ function FaqStep(props: { active: boolean }) {
 						you want sharing and collaboration.
 					</p>
 				</FaqItem>
-				<FaqItem question="What's the difference between Instant and Studio?">
+				<FaqItem question="What is Studio Mode?">
 					<p class="text-[13px] text-gray-10 leading-relaxed">
-						Instant uploads while you record so a share link is ready when you
-						stop. Studio keeps full-quality media local for the FlowReco editor —
-						zooms, cursor, captions, export when you decide.
+						Studio keeps full-quality media local for the FlowReco editor —
+						zooms, cursor, captions, and export when you decide. Instant Mode is
+						not offered in FlowReco.
 					</p>
 				</FaqItem>
 				<FaqItem question="Where are my recordings stored?">
 					<p class="text-[13px] text-gray-10 leading-relaxed">
-						All recordings are stored locally on your computer. In Instant mode,
-						they are uploaded only to the server you explicitly configure. You
-						can manage storage in Settings.
+						Recordings are stored locally on your computer. You can open project
+						folders from the editor or Settings.
 					</p>
 				</FaqItem>
 				<FaqItem question="Can I change my shortcuts later?">
@@ -1099,9 +1079,8 @@ function FaqStep(props: { active: boolean }) {
 				</FaqItem>
 				<FaqItem question="How does sharing work?">
 					<p class="text-[13px] text-gray-10 leading-relaxed">
-						In Instant mode, you get a shareable link automatically when you
-						stop recording. In Studio mode, export your edited video and share
-						via your configured FlowReco server or save locally.
+						Open the recording in Studio, export when you are happy with the
+						edit, then share the file or upload to a server you configure.
 					</p>
 				</FaqItem>
 			</div>
@@ -1796,7 +1775,7 @@ function StartupOverlay(props: {
 	return (
 		<div
 			class={cx(
-				"absolute inset-0 z-50 flex flex-col min-h-full h-full overflow-hidden transition-all duration-600 text-white bg-[var(--flowreco-graphite,#111315)]",
+				"absolute inset-0 z-50 flex flex-col min-h-full h-full overflow-hidden transition-all duration-600 text-white bg-[var(--recorder-bg,#121212)]",
 				props.isExiting && "opacity-0 scale-105 pointer-events-none",
 			)}
 		>
@@ -1868,7 +1847,7 @@ function StartupOverlay(props: {
 							)}
 						/>
 					</div>
-					<p class="mt-8 text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--flowreco-coral,#ff6243)]">
+					<p class="mt-8 text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--sleek-accent,#0284c7)]">
 						Local-first capture
 					</p>
 					<h1 class="text-4xl md:text-[2.75rem] font-bold mb-3 mt-3 tracking-tight text-balance">
@@ -1881,7 +1860,7 @@ function StartupOverlay(props: {
 				</div>
 
 				<Button
-					class="mt-12 px-12 py-3.5 min-h-14 min-w-52 text-base font-medium rounded-[var(--radius-md,10px)] shadow-[0_12px_32px_rgba(255,98,67,0.28)] bg-[var(--flowreco-coral,#ff6243)] border border-[#e8563a] text-white hover:brightness-110 flex-col gap-0.5"
+					class="mt-12 px-12 py-3.5 min-h-14 min-w-52 text-base font-medium rounded-[var(--radius-md,10px)] shadow-[0_12px_32px_rgba(2,132,199,0.28)] bg-[var(--sleek-accent,#0284c7)] border border-[#0270a8] text-white hover:brightness-110 flex-col gap-0.5"
 					variant="blue"
 					size="lg"
 					onClick={handleGetStarted}

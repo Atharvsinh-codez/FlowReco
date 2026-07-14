@@ -325,7 +325,7 @@ function Inner() {
 	const dismissPickerForRecordingStart = () => {
 		if (options.mode === "screenshot") return;
 		const targetModeDismissal =
-			options.mode === "instant" ? "recordingInstant" : "recordingStudio";
+			options.mode === "screenshot" ? "recordingStudio" : "recordingStudio";
 		if (options.targetModeSource === "editor") {
 			setOptions({
 				targetMode: null,
@@ -1664,15 +1664,8 @@ function RecordingControls(props: {
 						setOptions("mode", "studio");
 						commands.setRecordingMode("studio");
 					},
-					checked: rawOptions.mode === "studio",
-				}),
-				await CheckMenuItem.new({
-					text: "Instant Mode",
-					action: () => {
-						setOptions("mode", "instant");
-						commands.setRecordingMode("instant");
-					},
-					checked: rawOptions.mode === "instant",
+					checked:
+						rawOptions.mode === "studio" || rawOptions.mode === "instant",
 				}),
 				await CheckMenuItem.new({
 					text: "Screenshot Mode",
@@ -1753,14 +1746,9 @@ function RecordingControls(props: {
 							<IconCapX class="invert will-change-transform size-3 dark:invert-0" />
 						</div>
 						<div
-							data-inactive={rawOptions.mode === "instant" && !auth.data}
 							data-disabled={startDisabled()}
-							class="flex flex-1 min-w-0 max-w-[18rem] overflow-hidden flex-row h-11 rounded-full text-white bg-linear-to-r from-blue-10 via-blue-10 to-blue-11 dark:from-blue-9 dark:via-blue-9 dark:to-blue-10 group"
+							class="flex flex-1 min-w-0 max-w-[18rem] overflow-hidden flex-row h-11 rounded-[var(--radius-pill,9999px)] text-white bg-[var(--sleek-accent,#0284c7)] group shadow-[0_8px_20px_-10px_rgba(2,132,199,0.55)]"
 							onClick={async () => {
-								if (rawOptions.mode === "instant" && !auth.data) {
-									emit("start-sign-in");
-									return;
-								}
 								if (startDisabled()) return;
 
 								// Snapshot before onRecordingStart: dismissing the picker
@@ -1867,28 +1855,23 @@ function RecordingControls(props: {
 								}}
 							>
 								<Switch>
-									<Match when={rawOptions.mode === "studio"}>
-										<IconCapFilmCut class="size-4 shrink-0" />
-									</Match>
-									<Match when={rawOptions.mode === "instant"}>
-										<IconCapInstant class="size-4 shrink-0" />
-									</Match>
-									<Match when={(rawOptions.mode as string) === "screenshot"}>
+									<Match when={rawOptions.mode === "screenshot"}>
 										<IconCapCamera class="size-4 shrink-0" />
+									</Match>
+									<Match when={true}>
+										<IconCapFilmCut class="size-4 shrink-0" />
 									</Match>
 								</Switch>
 								<div class="flex flex-col mr-2 ml-3 min-w-0">
 									<span class="text-[0.95rem] font-medium text-white text-nowrap">
-										{(() => {
-											if (rawOptions.mode === "instant" && !auth.data)
-												return "Sign In To Use";
-											if (rawOptions.mode === "screenshot")
-												return "Take Screenshot";
-											return "Start Recording";
-										})()}
+										{rawOptions.mode === "screenshot"
+											? "Take Screenshot"
+											: "Start Recording"}
 									</span>
 									<span class="text-[11px] flex items-center text-nowrap gap-1 transition-opacity duration-200 text-white/90 font-light -mt-0.5">
-										{`${capitalize(rawOptions.mode)} Mode`}
+										{rawOptions.mode === "screenshot"
+											? "Screenshot Mode"
+											: "Studio Mode"}
 									</span>
 								</div>
 							</div>

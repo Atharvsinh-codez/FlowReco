@@ -126,8 +126,8 @@ export function Header() {
 					<div class="flex flex-row items-center gap-1.5 min-w-0">
 						<NameEditor name={meta().prettyName} />
 					</div>
-					<span class="text-[10px] text-gray-10 leading-none mt-0.5">
-						Studio project · local
+					<span class="text-[10px] text-[var(--recorder-muted,#7a7d85)] leading-none mt-0.5">
+						Studio · local project
 					</span>
 				</div>
 				<div data-tauri-drag-region class="flex-1 h-full" />
@@ -218,9 +218,9 @@ export function Header() {
 				<button
 					type="button"
 					class={cx(
-						"flex gap-1.5 justify-center items-center px-4 h-9 min-w-[96px] text-[0.8125rem] font-medium text-white rounded-[var(--radius-md,10px)] outline-hidden",
-						"bg-[var(--flowreco-coral,#ff6243)] border border-[#e8563a]",
-						"shadow-[0_6px_18px_-8px_rgba(255,98,67,0.55),inset_0_1px_0_0_rgba(255,255,255,0.2)]",
+						"flex gap-1.5 justify-center items-center px-4 h-9 min-w-[96px] text-[0.8125rem] font-medium text-white rounded-[var(--radius-md,8px)] outline-hidden",
+						"bg-[var(--sleek-accent,#0284c7)] border border-[#0270a8]",
+						"shadow-[0_6px_18px_-8px_rgba(2,132,199,0.45),inset_0_1px_0_0_rgba(255,255,255,0.2)]",
 						"transition-[box-shadow,filter] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
 						"hover:brightness-110 active:brightness-95",
 					)}

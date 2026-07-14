@@ -115,7 +115,7 @@ export function Slider(
 					});
 				}}
 			>
-				<KSlider.Fill class="absolute -ml-2 h-full rounded-[var(--radius-xs,4px)] bg-[var(--flowreco-coral,#ff6243)] data-disabled:bg-gray-8" />
+				<KSlider.Fill class="absolute -ml-2 h-full rounded-[var(--radius-xs,4px)] bg-[var(--sleek-accent,#0284c7)] data-disabled:bg-gray-8" />
 				<Tooltip
 					open={dragging() ? true : undefined}
 					getAnchorRect={() => {
@@ -324,7 +324,7 @@ const editorButtonStyles = cva(
 		variants: {
 			variant: {
 				primary:
-					"text-gray-12 enabled:hover:not-data-pressed:bg-gray-3 data-expanded:bg-gray-3 outline-[var(--flowreco-coral,#ff6243)] focus:bg-transparent",
+					"text-gray-12 enabled:hover:not-data-pressed:bg-gray-3 data-expanded:bg-gray-3 outline-[var(--sleek-accent,#0284c7)] focus:bg-transparent",
 				danger:
 					"text-gray-12 enabled:hover:not-data-pressed:bg-gray-3 data-expanded:bg-red-300 data-pressed:bg-red-300 data-expanded:text-gray-1 data-pressed:text-gray-1 outline-red-300",
 			},

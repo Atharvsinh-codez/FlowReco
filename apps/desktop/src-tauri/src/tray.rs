@@ -356,6 +356,14 @@ fn create_previous_submenu(
 }
 
 fn get_current_mode(app: &AppHandle) -> RecordingMode {
+    let mode = get_current_mode_raw(app);
+    if matches!(mode, RecordingMode::Instant) {
+        return RecordingMode::Studio;
+    }
+    mode
+}
+
+fn get_current_mode_raw(app: &AppHandle) -> RecordingMode {
     RecordingSettingsStore::get(app)
         .ok()
         .flatten()
@@ -388,7 +396,6 @@ fn create_mode_submenu(app: &AppHandle) -> tauri::Result<Submenu<tauri::Wry>> {
 
     let modes = [
         (TrayItem::ModeStudio, RecordingMode::Studio, "Studio"),
-        (TrayItem::ModeInstant, RecordingMode::Instant, "Instant"),
         (
             TrayItem::ModeScreenshot,
             RecordingMode::Screenshot,
@@ -954,11 +961,8 @@ pub fn create_tray(app: &AppHandle) -> tauri::Result<()> {
                 Ok(TrayItem::PreviousItem(path)) => {
                     handle_previous_item_click(app, &path);
                 }
-                Ok(TrayItem::ModeStudio) => {
+                Ok(TrayItem::ModeStudio) | Ok(TrayItem::ModeInstant) => {
                     handle_mode_selection(app, RecordingMode::Studio, &cache);
-                }
-                Ok(TrayItem::ModeInstant) => {
-                    handle_mode_selection(app, RecordingMode::Instant, &cache);
                 }
                 Ok(TrayItem::ModeScreenshot) => {
                     handle_mode_selection(app, RecordingMode::Screenshot, &cache);
