@@ -6,6 +6,7 @@ import { commands, type RecordingMode } from "~/utils/tauri";
 interface ModeOptionProps {
 	mode: RecordingMode;
 	title: string;
+	eyebrow: string;
 	description: string;
 	icon: (props: { class: string; style?: JSX.CSSProperties }) => JSX.Element;
 	isSelected: boolean;
@@ -14,42 +15,66 @@ interface ModeOptionProps {
 
 const ModeOption = (props: ModeOptionProps) => {
 	return (
-		<div
+		<button
+			type="button"
 			data-tauri-drag-region="false"
 			onClick={() => props.onSelect(props.mode)}
 			class={cx(
-				"relative flex flex-col items-center rounded-xl border-2 transition-all duration-200 overflow-hidden group",
+				"group relative flex flex-col items-stretch text-left rounded-[var(--radius-lg,14px)] border transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] overflow-hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--flowreco-coral,#ff6243)]",
 				props.isSelected
-					? "border-blue-9 bg-blue-3 dark:bg-blue-3/30 shadow-lg shadow-blue-9/10"
-					: "border-gray-4 dark:border-gray-5 bg-gray-2 dark:bg-gray-3 hover:border-gray-6 dark:hover:border-gray-6 hover:bg-gray-3 dark:hover:bg-gray-4",
+					? "border-[var(--flowreco-coral,#ff6243)] bg-[var(--flowreco-coral-soft,rgba(255,98,67,0.14))] shadow-[0_8px_24px_rgba(255,98,67,0.12)]"
+					: "border-gray-4 dark:border-gray-5 bg-gray-2 dark:bg-gray-3 hover:border-gray-6 hover:bg-gray-3 dark:hover:bg-gray-4 hover:-translate-y-0.5",
 			)}
-			role="button"
 			aria-pressed={props.isSelected}
 		>
 			<Show when={props.isSelected}>
-				<div class="absolute top-2.5 right-2.5 flex items-center justify-center size-5 rounded-full bg-blue-9">
+				<div class="absolute top-2.5 right-2.5 flex items-center justify-center size-5 rounded-[var(--radius-sm,6px)] bg-[var(--flowreco-coral,#ff6243)]">
 					<IconLucideCheck class="size-3 text-white" />
 				</div>
 			</Show>
 
-			<div class="flex items-center justify-center w-full pt-5 pb-3">
-				<props.icon class="size-6 invert dark:invert-0" />
+			<div
+				class={cx(
+					"flex items-center justify-center w-full pt-5 pb-3 transition-colors duration-200",
+					props.isSelected ? "text-[var(--flowreco-coral,#ff6243)]" : "text-gray-12",
+				)}
+			>
+				<div
+					class={cx(
+						"flex size-11 items-center justify-center rounded-[var(--radius-md,10px)] border transition-colors duration-200",
+						props.isSelected
+							? "border-[var(--flowreco-coral,#ff6243)]/40 bg-[var(--flowreco-coral,#ff6243)]/10"
+							: "border-gray-5 bg-gray-1 dark:bg-gray-2 group-hover:border-gray-6",
+					)}
+				>
+					<props.icon class="size-5 invert dark:invert-0" />
+				</div>
 			</div>
 
-			<div class="flex flex-col items-center px-4 pb-4 text-center">
+			<div class="flex flex-col items-start px-4 pb-4 gap-1.5">
+				<span
+					class={cx(
+						"text-[10px] font-medium uppercase tracking-[0.08em]",
+						props.isSelected
+							? "text-[var(--flowreco-coral,#ff6243)]"
+							: "text-gray-10",
+					)}
+				>
+					{props.eyebrow}
+				</span>
 				<h3
 					class={cx(
-						"text-base font-semibold mb-1.5",
-						props.isSelected ? "text-blue-11" : "text-gray-12",
+						"text-[15px] font-semibold tracking-tight",
+						props.isSelected ? "text-gray-12" : "text-gray-12",
 					)}
 				>
 					{props.title}
 				</h3>
-				<p class="text-xs leading-relaxed text-gray-11 line-clamp-3">
+				<p class="text-xs leading-relaxed text-gray-11 line-clamp-3 text-pretty">
 					{props.description}
 				</p>
 			</div>
-		</div>
+		</button>
 	);
 };
 
@@ -64,20 +89,26 @@ const ModeSelect = (props: { onClose?: () => void; standalone?: boolean }) => {
 	const modeOptions = [
 		{
 			mode: "instant" as const,
-			title: "Instant",
-			description: "Share instantly with a link. Uploads as you record.",
+			title: "Share fast",
+			eyebrow: "Instant",
+			description:
+				"Capture and get a link as soon as you stop. Best for quick updates and support replies.",
 			icon: IconCapInstant,
 		},
 		{
 			mode: "studio" as const,
-			title: "Studio",
-			description: "Highest quality local recording for editing later.",
+			title: "Edit in studio",
+			eyebrow: "Studio",
+			description:
+				"Record locally at full quality, then polish zooms, cursor, captions, and export when ready.",
 			icon: IconCapFilmCut,
 		},
 		{
 			mode: "screenshot" as const,
-			title: "Screenshot",
-			description: "Capture and annotate screenshots instantly.",
+			title: "Still capture",
+			eyebrow: "Screenshot",
+			description:
+				"Grab a frame, annotate, and copy or save. Built for bugs, docs, and quick feedback.",
 			icon: IconCapScreenshot,
 		},
 	];
@@ -88,25 +119,28 @@ const ModeSelect = (props: { onClose?: () => void; standalone?: boolean }) => {
 			class={cx(
 				"relative",
 				props.standalone
-					? "absolute z-10 border border-gray-3 p-8 rounded-xl bg-gray-1"
+					? "absolute z-10 border border-gray-4 p-6 rounded-[var(--radius-xl,18px)] bg-gray-1 shadow-s"
 					: "",
 			)}
 			onClick={(e) => e.stopPropagation()}
 		>
 			<Show when={props.onClose}>
-				<div
+				<button
+					type="button"
 					onClick={() => props.onClose?.()}
-					class="absolute -top-2.5 -right-2.5 p-2 rounded-full border duration-200 bg-gray-2 border-gray-3 hover:bg-gray-3 transition-colors"
+					class="absolute -top-2 -right-2 p-2 rounded-[var(--radius-sm,6px)] border duration-200 bg-gray-2 border-gray-4 hover:bg-gray-3 transition-colors"
+					aria-label="Close mode picker"
 				>
 					<IconCapX class="invert-1 size-2 dark:invert" />
-				</div>
+				</button>
 			</Show>
 
-			<div class="grid grid-cols-3 gap-4">
+			<div class="grid grid-cols-3 gap-3">
 				{modeOptions.map((option) => (
 					<ModeOption
 						mode={option.mode}
 						title={option.title}
+						eyebrow={option.eyebrow}
 						description={option.description}
 						icon={option.icon}
 						isSelected={rawOptions.mode === option.mode}

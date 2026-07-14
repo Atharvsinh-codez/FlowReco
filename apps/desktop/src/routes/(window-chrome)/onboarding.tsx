@@ -45,6 +45,7 @@ import IconLucideCopy from "~icons/lucide/copy";
 import IconLucideExternalLink from "~icons/lucide/external-link";
 import IconLucideSave from "~icons/lucide/save";
 import IconLucideShield from "~icons/lucide/shield";
+import flowRecoMark from "../../assets/flowreco-mark.svg";
 import cloud1 from "../../assets/illustrations/cloud-1.png";
 import cloud2 from "../../assets/illustrations/cloud-2.png";
 import cloud3 from "../../assets/illustrations/cloud-3.png";
@@ -64,44 +65,44 @@ interface ModeDetail {
 const modes: ModeDetail[] = [
 	{
 		id: "instant",
-		title: "Instant Mode",
-		tagline: "Record & share in seconds",
+		title: "Instant",
+		tagline: "Share the moment you stop",
 		description:
-			"Your recording uploads as you capture. Stop recording and instantly get a shareable link — no waiting.",
+			"Record once. FlowReco uploads in the background so a shareable link is ready as soon as you finish.",
 		icon: IconCapInstant,
 		features: [
-			"Instant shareable link",
-			"Background uploading",
-			"AI transcription & summary",
-			"Browser-based playback",
+			"Link ready when you stop",
+			"Background upload queue",
+			"Optional AI summary",
+			"Watch in the browser",
 		],
 	},
 	{
 		id: "studio",
-		title: "Studio Mode",
-		tagline: "Professional editing tools",
+		title: "Studio",
+		tagline: "Local-first cinematic edits",
 		description:
-			"Record in full quality locally, then use the built-in editor to add backgrounds, padding, cursor effects, and more.",
+			"Keep full-quality media on your machine, then shape zooms, cursor, captions, and layout in the editor.",
 		icon: IconCapFilmCut,
 		features: [
-			"Full quality local recording",
-			"Built-in editor & effects",
-			"Custom backgrounds & padding",
-			"Export or share when ready",
+			"Full-quality local files",
+			"Non-destructive editor",
+			"Zooms, cursor, captions",
+			"Export when you decide",
 		],
 	},
 	{
 		id: "screenshot",
-		title: "Screenshot Mode",
-		tagline: "Capture & beautify instantly",
+		title: "Screenshot",
+		tagline: "Stills for bugs and docs",
 		description:
-			"Take screenshots with a single hotkey, add annotations and beautiful backgrounds, then share or copy instantly.",
+			"Capture a frame with a hotkey, annotate it, then copy or save — no video pipeline required.",
 		icon: IconCapScreenshot,
 		features: [
-			"Instant hotkey capture",
-			"Annotation & drawing tools",
-			"Beautiful backgrounds",
-			"Copy, save, or share",
+			"One-key capture",
+			"Annotate and call out",
+			"Clean backgrounds",
+			"Copy or save instantly",
 		],
 	},
 ];
@@ -132,15 +133,14 @@ const setupPermissions: readonly SetupPermission[] = [
 	{
 		name: "Microphone",
 		key: "microphone",
-		description: "This permission is required to record audio in your Caps.",
+		description: "Needed when you want microphone audio in recordings.",
 		requiresManualGrant: false,
 		optional: true,
 	},
 	{
 		name: "Camera",
 		key: "camera",
-		description:
-			"This permission is required to record your camera in your Caps.",
+		description: "Needed when you want a webcam track alongside the screen.",
 		requiresManualGrant: false,
 		optional: true,
 	},
@@ -587,14 +587,14 @@ function StepNavigation(props: {
 						</button>
 					</Show>
 				</div>
-				<div class="flex items-center gap-1">
+				<div class="flex items-center gap-1.5">
 					<For each={Array.from({ length: props.total })}>
 						{(_, index) => (
 							<div
 								class={cx(
-									"rounded-full transition-all duration-300",
+									"rounded-[var(--radius-xs,4px)] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
 									props.current === index()
-										? "w-5 h-1.5 bg-gray-12"
+										? "w-5 h-1.5 bg-[var(--flowreco-coral,#ff6243)]"
 										: props.current > index()
 											? "w-1.5 h-1.5 bg-gray-8"
 											: "w-1.5 h-1.5 bg-gray-5",
@@ -610,7 +610,7 @@ function StepNavigation(props: {
 							onClick={props.onNext}
 							variant="primary"
 							size="md"
-							class="gap-2 px-10 py-3 min-h-12 min-w-38 text-[15px] font-medium"
+							class="gap-2 px-10 py-3 min-h-12 min-w-38 text-[15px] font-medium rounded-[var(--radius-md,10px)]"
 							disabled={props.nextDisabled}
 						>
 							{props.nextLabel}
@@ -690,20 +690,23 @@ function ModesOverviewStep(props: { active: boolean }) {
 					visible() ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4",
 				)}
 			>
-				<h2 class="text-2xl font-bold text-gray-12 tracking-tight">
-					One app, every workflow
+				<p class="text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--flowreco-coral,#ff6243)]">
+					Three ways to capture
+				</p>
+				<h2 class="text-2xl font-bold text-gray-12 tracking-tight text-balance">
+					Local-first recording, your pace
 				</h2>
-				<p class="text-[14px] text-gray-10 leading-relaxed">
-					Whether you need speed, studio quality, or a quick screenshot —
-					FlowReco has a mode for it.
+				<p class="text-[14px] text-gray-10 leading-relaxed text-pretty">
+					Share fast, edit in Studio, or grab a still — calm controls, canvas
+					first, your files stay local until you publish.
 				</p>
 			</div>
 
-			<div class="flex gap-4 w-full max-w-[540px]">
+			<div class="flex gap-3 w-full max-w-[540px]">
 				<For each={modes}>
 					{(mode, index) => (
 						<div
-							class="flex-1 flex flex-col items-center gap-3 p-5 rounded-2xl border border-gray-4 bg-white dark:bg-gray-2 transition-all duration-500 ease-out shadow-xs"
+							class="flex-1 flex flex-col items-start gap-3 p-4 rounded-[var(--radius-lg,14px)] border border-gray-4 bg-gray-1 dark:bg-gray-2 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] shadow-xs"
 							style={{
 								"transition-delay": `${200 + index() * 100}ms`,
 								opacity: visible() ? 1 : 0,
@@ -712,14 +715,14 @@ function ModesOverviewStep(props: { active: boolean }) {
 									: "translateY(16px) scale(0.95)",
 							}}
 						>
-							<div class="flex items-center justify-center size-12 rounded-2xl border border-gray-5 bg-white dark:bg-gray-3">
+							<div class="flex items-center justify-center size-11 rounded-[var(--radius-md,10px)] border border-gray-5 bg-gray-2 dark:bg-gray-3">
 								<mode.icon class="size-5 invert dark:invert-0" />
 							</div>
-							<div class="text-center">
-								<div class="text-sm font-semibold text-gray-12">
+							<div class="text-left">
+								<div class="text-sm font-semibold text-gray-12 tracking-tight">
 									{mode.title}
 								</div>
-								<div class="text-[11px] text-gray-9 mt-1 leading-snug">
+								<div class="text-[11px] text-gray-10 mt-1 leading-snug text-pretty">
 									{mode.tagline}
 								</div>
 							</div>
@@ -758,12 +761,14 @@ function ModeDetailStep(props: {
 					)}
 				>
 					<div class="flex items-center gap-3">
-						<div class="flex items-center justify-center size-11 rounded-xl border border-gray-5 bg-white dark:bg-gray-3">
+						<div class="flex items-center justify-center size-11 rounded-[var(--radius-md,10px)] border border-gray-5 bg-gray-2 dark:bg-gray-3">
 							<props.mode.icon class="size-5 invert dark:invert-0" />
 						</div>
 						<div>
-							<h3 class="text-lg font-bold text-gray-12">{props.mode.title}</h3>
-							<p class="text-[11px] font-medium text-gray-9">
+							<h3 class="text-lg font-bold text-gray-12 tracking-tight">
+								{props.mode.title}
+							</h3>
+							<p class="text-[11px] font-medium text-[var(--flowreco-coral,#ff6243)]">
 								{props.mode.tagline}
 							</p>
 						</div>
@@ -1074,10 +1079,9 @@ function FaqStep(props: { active: boolean }) {
 				</FaqItem>
 				<FaqItem question="What's the difference between Instant and Studio?">
 					<p class="text-[13px] text-gray-10 leading-relaxed">
-						Instant mode uploads as you record — stop recording and you'll have
-						a shareable link immediately. Studio mode records locally in full
-						quality, letting you edit with backgrounds, effects, and more before
-						sharing.
+						Instant uploads while you record so a share link is ready when you
+						stop. Studio keeps full-quality media local for the FlowReco editor —
+						zooms, cursor, captions, export when you decide.
 					</p>
 				</FaqItem>
 				<FaqItem question="Where are my recordings stored?">
@@ -1792,16 +1796,23 @@ function StartupOverlay(props: {
 	return (
 		<div
 			class={cx(
-				"absolute inset-0 z-50 flex flex-col min-h-full h-full overflow-hidden custom-bg transition-all duration-600 text-solid-white bg-white",
+				"absolute inset-0 z-50 flex flex-col min-h-full h-full overflow-hidden transition-all duration-600 text-white bg-[var(--flowreco-graphite,#111315)]",
 				props.isExiting && "opacity-0 scale-105 pointer-events-none",
 			)}
 		>
-			<div class="startup-grain" />
+			<div class="startup-grain opacity-40" />
+			<div
+				class="pointer-events-none absolute inset-0 z-0"
+				style={{
+					background:
+						"radial-gradient(80% 60% at 50% 0%, rgba(255,98,67,0.18) 0%, transparent 55%), radial-gradient(50% 40% at 80% 100%, rgba(255,98,67,0.08) 0%, transparent 50%)",
+				}}
+			/>
 
 			<div
 				ref={bindCloud1}
 				class={cx(
-					"absolute top-0 right-0 opacity-70 pointer-events-none startup-cloud-1 z-1",
+					"absolute top-0 right-0 opacity-25 pointer-events-none startup-cloud-1 z-1",
 					props.isExiting && "startup-cloud-transition exiting",
 				)}
 			>
@@ -1814,7 +1825,7 @@ function StartupOverlay(props: {
 			<div
 				ref={bindCloud2}
 				class={cx(
-					"absolute top-0 left-0 opacity-70 pointer-events-none startup-cloud-2 z-1",
+					"absolute top-0 left-0 opacity-20 pointer-events-none startup-cloud-2 z-1",
 					props.isExiting && "startup-cloud-transition exiting",
 				)}
 			>
@@ -1826,7 +1837,7 @@ function StartupOverlay(props: {
 			</div>
 			<div
 				class={cx(
-					"absolute -bottom-[15%] left-1/2 -translate-x-1/2 opacity-70 pointer-events-none z-1",
+					"absolute -bottom-[15%] left-1/2 -translate-x-1/2 opacity-20 pointer-events-none z-1",
 					props.isExiting && "startup-cloud-transition startup-cloud-3 exiting",
 				)}
 			>
@@ -1841,38 +1852,44 @@ function StartupOverlay(props: {
 
 			<div
 				class={cx(
-					"flex flex-col items-center justify-center flex-1 relative px-4 z-5",
+					"flex flex-col items-center justify-center flex-1 relative px-6 z-5",
 					props.isExiting && "opacity-0 scale-[1.1]",
 				)}
-				style={{ transition: "all 600ms cubic-bezier(0.4, 0, 0.2, 1)" }}
+				style={{ transition: "all 600ms cubic-bezier(0.22, 1, 0.36, 1)" }}
 			>
-				<div class="text-center">
+				<div class="text-center max-w-lg">
 					<div onClick={handleLogoClick} class="inline-block">
-						<IconCapLogo
+						<img
+							src={flowRecoMark}
+							alt=""
 							class={cx(
-								"w-20 h-24 mx-auto drop-shadow-[0_0_100px_rgba(0,0,0,0.2)]",
+								"w-16 h-16 mx-auto drop-shadow-[0_0_48px_rgba(255,98,67,0.35)]",
 								isLogoAnimating() && "startup-logo-bounce",
 							)}
 						/>
 					</div>
-					<h1 class="text-5xl md:text-5xl font-bold mb-4 mt-8 drop-shadow-[0_0_20px_rgba(0,0,0,0.2)]">
+					<p class="mt-8 text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--flowreco-coral,#ff6243)]">
+						Local-first capture
+					</p>
+					<h1 class="text-4xl md:text-[2.75rem] font-bold mb-3 mt-3 tracking-tight text-balance">
 						Welcome to FlowReco
 					</h1>
-					<p class="text-xl md:text-2xl opacity-80 mx-auto drop-shadow-[0_0_20px_rgba(0,0,0,0.2)] whitespace-nowrap">
-						Beautiful screen recordings, owned by you.
+					<p class="text-base md:text-lg text-white/70 mx-auto text-pretty leading-relaxed">
+						Cinematic screen recording you own — edit locally, share only when
+						you choose.
 					</p>
 				</div>
 
 				<Button
-					class="mt-14 px-16 py-4 min-h-15 min-w-60 text-xl font-medium shadow-[0_0_30px_rgba(0,0,0,0.12)] bg-white border border-white/30 text-[#161b26] hover:bg-white/95 hover:border-white/40 flex-col gap-0.5"
-					variant="white"
+					class="mt-12 px-12 py-3.5 min-h-14 min-w-52 text-base font-medium rounded-[var(--radius-md,10px)] shadow-[0_12px_32px_rgba(255,98,67,0.28)] bg-[var(--flowreco-coral,#ff6243)] border border-[#e8563a] text-white hover:brightness-110 flex-col gap-0.5"
+					variant="blue"
 					size="lg"
 					onClick={handleGetStarted}
 				>
-					<span>Get Started</span>
-					<span class="text-[11px] font-normal text-[rgba(22,27,38,0.58)] leading-tight inline-flex items-center justify-center gap-1">
-						<span>Click here, or press</span>
-						<kbd class="rounded border border-gray-6 bg-white dark:bg-gray-3 px-1 py-px text-[10px] font-medium text-gray-11 shadow-[0_1px_0_rgba(0,0,0,0.04)]">
+					<span>Continue</span>
+					<span class="text-[11px] font-normal text-white/75 leading-tight inline-flex items-center justify-center gap-1">
+						<span>or press</span>
+						<kbd class="rounded-[var(--radius-xs,4px)] border border-white/25 bg-white/10 px-1.5 py-px text-[10px] font-medium text-white">
 							Space
 						</kbd>
 					</span>

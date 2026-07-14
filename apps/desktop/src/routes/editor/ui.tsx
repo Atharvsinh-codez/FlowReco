@@ -41,7 +41,7 @@ export function Field(
 				{props.icon}
 				{props.name}
 				{props.badge && (
-					<span class="text-[10px] px-1.5 py-0.5 bg-gray-3 rounded-full text-gray-11 font-medium">
+					<span class="text-[10px] px-1.5 py-0.5 bg-gray-3 rounded-[var(--radius-sm,6px)] text-gray-11 font-medium">
 						{props.badge}
 					</span>
 				)}
@@ -184,7 +184,7 @@ export const Dialog = {
 						<KDialog.Content
 							class={cx(
 								props.contentClass,
-								"z-50 text-sm rounded-[1.25rem] overflow-hidden border border-gray-3 bg-gray-1 min-w-88 data-expanded:animate-in data-expanded:fade-in data-expanded:zoom-in-95 origin-top data-closed:animate-out data-closed:fade-out data-closed:zoom-out-95",
+								"z-50 text-sm rounded-[var(--radius-xl,18px)] overflow-hidden border border-gray-3 bg-gray-1 min-w-88 data-expanded:animate-in data-expanded:fade-in data-expanded:zoom-in-95 origin-top data-closed:animate-out data-closed:fade-out data-closed:zoom-out-95",
 								(props.size ?? "sm") === "sm" ? "max-w-96" : "max-w-3xl",
 							)}
 						>
@@ -316,15 +316,15 @@ export function MenuItemList<T extends ValidComponent = "div">(
 
 const editorButtonStyles = cva(
 	[
-		"group flex flex-row items-center px-1.5 gap-1.5 h-8 rounded-lg text-[0.875rem]",
-		"focus:outline-solid focus:outline-2 focus:outline-offset-2 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors duration-100",
+		"group flex flex-row items-center px-1.5 gap-1.5 h-8 rounded-[var(--radius-md,10px)] text-[0.875rem]",
+		"focus:outline-solid focus:outline-2 focus:outline-offset-2 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors duration-150 ease-[cubic-bezier(0.22,1,0.36,1)]",
 		"disabled:opacity-50 disabled:text-gray-11",
 	],
 	{
 		variants: {
 			variant: {
 				primary:
-					"text-gray-12 enabled:hover:not-data-pressed:bg-gray-3 data-expanded:bg-gray-3 outline-blue-300 focus:bg-transparent",
+					"text-gray-12 enabled:hover:not-data-pressed:bg-gray-3 data-expanded:bg-gray-3 outline-[var(--flowreco-coral,#ff6243)] focus:bg-transparent",
 				danger:
 					"text-gray-12 enabled:hover:not-data-pressed:bg-gray-3 data-expanded:bg-red-300 data-pressed:bg-red-300 data-expanded:text-gray-1 data-pressed:text-gray-1 outline-red-300",
 			},

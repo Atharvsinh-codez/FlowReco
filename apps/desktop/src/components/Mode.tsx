@@ -21,26 +21,26 @@ type ModeButtonConfig = {
 const MODE_BUTTONS: ModeButtonConfig[] = [
 	{
 		mode: "instant",
-		label: "Instant mode",
+		label: "Instant",
 		description:
-			"No rendering required — uploads on the fly so you can share the link the moment you stop.",
+			"Uploads while you record so the share link is ready when you stop.",
 		settingsSection: "instant-quality",
 		icon: (p) => <IconCapInstant {...p} />,
 		iconClass: "size-4 invert dark:invert-0",
 	},
 	{
 		mode: "studio",
-		label: "Studio mode",
+		label: "Studio",
 		description:
-			"Records at the highest quality for local rendering later. Opens the FlowReco editor when you're done.",
+			"Full-quality local capture that opens in the FlowReco editor when you finish.",
 		settingsSection: "studio-quality",
 		icon: (p) => <IconCapFilmCut {...p} />,
 		iconClass: "size-[0.9rem] invert dark:invert-0",
 	},
 	{
 		mode: "screenshot",
-		label: "Screenshot mode",
-		description: "Capture and annotate stills.",
+		label: "Screenshot",
+		description: "Capture and annotate a still frame.",
 		settingsSection: null,
 		icon: (p) => <IconCapScreenshot {...p} />,
 		iconClass: "size-[0.9rem] invert dark:invert-0",
@@ -69,11 +69,11 @@ const Mode = (props: ModeProps) => {
 	};
 
 	return (
-		<div class="flex relative gap-2 items-center p-1.5 rounded-full border border-gray-5 bg-gray-3 w-fit">
+		<div class="flex relative gap-1.5 items-center p-1.5 rounded-[var(--radius-md,10px)] border border-gray-5 bg-gray-3 w-fit">
 			<button
 				type="button"
 				onClick={handleInfoClick}
-				class="absolute -left-1.5 -top-2 p-1 rounded-full w-fit bg-gray-5 group focus:outline-none"
+				class="absolute -left-1.5 -top-2 p-1 rounded-[var(--radius-sm,6px)] w-fit bg-gray-5 group focus:outline-none"
 				aria-label="Recording mode info"
 			>
 				<IconCapInfo class="invert transition-opacity duration-200 size-2.5 dark:invert-0 group-hover:opacity-50" />
@@ -97,9 +97,9 @@ const Mode = (props: ModeProps) => {
 								commands.setRecordingMode(button.mode);
 							}}
 							class={cx(
-								"relative flex justify-center items-center rounded-full transition-all duration-200 size-7 focus:outline-none",
+								"relative flex justify-center items-center rounded-[var(--radius-sm,6px)] transition-all duration-200 size-7 focus:outline-none",
 								isSelected()
-									? "ring-2 ring-offset-1 ring-offset-gray-1 bg-gray-7 hover:bg-gray-7 ring-blue-500"
+									? "ring-2 ring-offset-1 ring-offset-gray-1 bg-gray-7 hover:bg-gray-7 ring-[var(--flowreco-coral,#ff6243)]"
 									: "bg-gray-3 hover:bg-gray-7",
 							)}
 						>
@@ -107,7 +107,7 @@ const Mode = (props: ModeProps) => {
 						</HoverCard.Trigger>
 						<HoverCard.Portal>
 							<HoverCard.Content class="z-50 outline-none animate-in fade-in slide-in-from-top-1 duration-100">
-								<div class="flex flex-col gap-2 px-3 py-2.5 rounded-lg border shadow-lg bg-gray-12 text-gray-1 border-gray-3 min-w-[12rem] max-w-[15rem]">
+								<div class="flex flex-col gap-2 px-3 py-2.5 rounded-[var(--radius-md,10px)] border shadow-lg bg-gray-12 text-gray-1 border-gray-3 min-w-[12rem] max-w-[15rem]">
 									<div class="flex flex-col gap-0.5">
 										<span class="text-xs font-medium">{button.label}</span>
 										<span class="text-[10px] text-gray-4 leading-snug">
@@ -122,7 +122,7 @@ const Mode = (props: ModeProps) => {
 													e.stopPropagation();
 													void openQualitySettings(section());
 												}}
-												class="flex gap-1.5 items-center px-2 py-1 -mx-1 text-[11px] rounded-md transition-colors text-gray-4 hover:bg-gray-11 hover:text-gray-1"
+												class="flex gap-1.5 items-center px-2 py-1 -mx-1 text-[11px] rounded-[var(--radius-sm,6px)] transition-colors text-gray-4 hover:bg-gray-11 hover:text-gray-1"
 											>
 												<IconCapSettings class="size-3" />
 												<span>Quality settings</span>

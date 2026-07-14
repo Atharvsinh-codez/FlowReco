@@ -2,7 +2,7 @@ import { cva, type VariantProps } from "cva";
 import { type ComponentProps, splitProps } from "solid-js";
 
 const styles = cva(
-	"outline-offset-2 flex justify-center items-center focus-visible:outline-solid rounded-full transition-[background-color,border-color,color,box-shadow,filter,opacity,transform] active:scale-[0.98] will-change-transform duration-200",
+	"outline-offset-2 flex justify-center items-center focus-visible:outline-solid rounded-[var(--radius-md,10px)] transition-[background-color,border-color,color,box-shadow,filter,opacity,transform] active:scale-[0.98] will-change-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
 	{
 		defaultVariants: {
 			variant: "primary",
@@ -12,7 +12,7 @@ const styles = cva(
 			variant: {
 				primary:
 					"bg-gray-12 dark-button-shadow text-gray-1 disabled:bg-gray-6 disabled:text-gray-9",
-				blue: "bg-blue-600 text-white border border-blue-800 shadow-[0_1.50px_0_0_rgba(255,255,255,0.20)_inset] hover:bg-blue-700  disabled:bg-gray-6 disabled:text-gray-9",
+				blue: "bg-[var(--flowreco-coral,#ff6243)] text-white border border-[#e8563a] shadow-[0_1.5px_0_0_rgba(255,255,255,0.18)_inset] hover:brightness-110 disabled:bg-gray-6 disabled:text-gray-9",
 				destructive:
 					"bg-red-500 text-white hover:bg-red-600 disabled:bg-red-200",
 				outline:
@@ -25,7 +25,7 @@ const styles = cva(
 				darkgradient:
 					"bg-linear-to-t button-gradient-border from-[#0f0f0f] to-[#404040] shadow-[0_0_0_1px] hover:brightness-110 shadow-[#383838] text-gray-50 hover:bg-[#383838] disabled:bg-[#383838] border-transparent",
 				radialblue:
-					"text-gray-50 border button-gradient-border shadow-[0_0_0_1px] shadow-blue-400 disabled:bg-gray-1 border-0 [background:radial-gradient(90%_100%_at_15%_12%,#9BC4FF_0%,#3588FF_100%)] border-transparent hover:opacity-80",
+					"text-white border button-gradient-border shadow-[0_0_0_1px] shadow-[rgba(255,98,67,0.35)] disabled:bg-gray-1 border-0 [background:radial-gradient(90%_100%_at_15%_12%,#ff8a72_0%,#ff6243_100%)] border-transparent hover:opacity-90",
 			},
 			size: {
 				xs: "text-[0.75rem] px-2 h-5",

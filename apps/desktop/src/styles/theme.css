@@ -92,17 +92,34 @@
 	--red-transparent-20: rgba(255, 71, 102, 0.2);
 
 	--shadow-s: 0px 8px 16px 0px rgba(18, 22, 31, 0.04);
+
+	/* FlowReco surface system — graphite + coral, semi-rounded only */
+	--flowreco-graphite: #111315;
+	--flowreco-surface: #16191c;
+	--flowreco-raised: #1c2024;
+	--flowreco-border: rgba(255, 255, 255, 0.08);
+	--flowreco-coral: #ff6243;
+	--flowreco-coral-soft: rgba(255, 98, 67, 0.14);
+	--flowreco-coral-ring: rgba(255, 98, 67, 0.35);
+	--radius-xs: 4px;
+	--radius-sm: 6px;
+	--radius-md: 10px;
+	--radius-lg: 14px;
+	--radius-xl: 18px;
+	--ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+	--duration-fast: 150ms;
+	--duration-med: 220ms;
 }
 
 /* Dark theme variables */
 :root.dark {
 	color-scheme: dark;
-	--gray-50: #111111;
-	--gray-100: #1c1c1c;
-	--gray-200: #282828;
-	--gray-300: #323232;
-	--gray-400: #a1a1a1;
-	--gray-450: #eaeaea;
+	--gray-50: #111315;
+	--gray-100: #16191c;
+	--gray-200: #1c2024;
+	--gray-300: #262b31;
+	--gray-400: #9aa3ad;
+	--gray-450: #e8eaed;
 	--gray-500: #ffffff;
 
 	--gray-50-transparent-50: rgba(17, 17, 17, 0.5);

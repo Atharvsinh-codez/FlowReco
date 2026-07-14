@@ -24,8 +24,8 @@ const ModeSelectWindow = () => {
 		try {
 			const currentSize = await window.innerSize();
 
-			if (currentSize.width !== 580 || currentSize.height !== 340) {
-				await window.setSize(new LogicalSize(580, 340));
+			if (currentSize.width !== 640 || currentSize.height !== 380) {
+				await window.setSize(new LogicalSize(640, 380));
 			}
 		} catch (error) {
 			console.error("Failed to set window size:", error);
@@ -47,17 +47,21 @@ const ModeSelectWindow = () => {
 				</div>
 			)}
 
-			<div class="flex flex-col items-center w-full px-6 py-5">
-				<div class="mb-5 text-center">
-					<h2 class="text-xl font-semibold text-gray-12 mb-1">
-						Choose Recording Mode
+			<div class="flex flex-col items-center w-full px-7 py-6">
+				<div class="mb-6 text-center max-w-md">
+					<p class="text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--flowreco-coral,#ff6243)] mb-2">
+						How do you want to capture
+					</p>
+					<h2 class="text-xl font-semibold tracking-tight text-gray-12 mb-1.5 text-balance">
+						Pick a recording mode
 					</h2>
-					<p class="text-sm text-gray-11">
-						Select how you want to capture your screen
+					<p class="text-sm text-gray-11 text-pretty leading-relaxed">
+						Share in seconds, edit in Studio, or grab a still. You can change
+						this anytime from the recorder.
 					</p>
 				</div>
 
-				<div data-tauri-drag-region="false" class="w-full max-w-lg">
+				<div data-tauri-drag-region="false" class="w-full max-w-xl">
 					<ModeSelect />
 				</div>
 			</div>
