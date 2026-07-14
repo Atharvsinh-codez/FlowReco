@@ -1,0 +1,22 @@
+{
+	"$schema": "https://schema.tauri.app/config/2",
+	"productName": "FlowReco",
+	"mainBinaryName": "FlowReco",
+	"identifier": "app.flowreco.desktop",
+	"build": {
+		"beforeBundleCommand": "node scripts/prodBeforeBundle.js"
+	},
+	"plugins": {
+		"updater": { "active": false, "pubkey": "" }
+	},
+	"bundle": {
+		"macOS": {
+			"entitlements": "Entitlements.plist"
+		},
+		"windows": {
+			"wix": {
+				"upgradeCode": "c0a78662-3ce6-5da9-ae0d-f652f53bc0e7"
+			}
+		}
+	}
+}

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+	<title id="title">FlowReco app mark</title>
+	<desc id="desc">A coral recording signal centered inside four white focus corners on a graphite tile.</desc>
+	<rect x="32" y="32" width="960" height="960" rx="224" fill="#111315" />
+	<path d="M390 246H310c-35.346 0-64 28.654-64 64v80" fill="none" stroke="#F4F5F6" stroke-width="62" stroke-linecap="round" />
+	<path d="M634 246h80c35.346 0 64 28.654 64 64v80" fill="none" stroke="#F4F5F6" stroke-width="62" stroke-linecap="round" />
+	<path d="M778 634v80c0 35.346-28.654 64-64 64h-80" fill="none" stroke="#F4F5F6" stroke-width="62" stroke-linecap="round" />
+	<path d="M390 778h-80c-35.346 0-64-28.654-64-64v-80" fill="none" stroke="#F4F5F6" stroke-width="62" stroke-linecap="round" />
+	<path d="M402 674V350h142c82 0 130 42 130 117 0 76-54 112-130 112H402m139 0 137 95" fill="none" stroke="#FF6243" stroke-width="70" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

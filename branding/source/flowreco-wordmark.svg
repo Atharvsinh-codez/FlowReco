@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="144" viewBox="0 0 520 144" role="img" aria-labelledby="title desc">
+	<title id="title">FlowReco</title>
+	<desc id="desc">FlowReco app mark and wordmark.</desc>
+	<g transform="translate(8 8) scale(.125)">
+		<rect x="32" y="32" width="960" height="960" rx="224" fill="#111315" />
+		<path d="M390 246H310c-35.346 0-64 28.654-64 64v80M634 246h80c35.346 0 64 28.654 64 64v80M778 634v80c0 35.346-28.654 64-64 64h-80M390 778h-80c-35.346 0-64-28.654-64-64v-80" fill="none" stroke="#F4F5F6" stroke-width="62" stroke-linecap="round" />
+		<path d="M402 674V350h142c82 0 130 42 130 117 0 76-54 112-130 112H402m139 0 137 95" fill="none" stroke="#FF6243" stroke-width="70" stroke-linecap="round" stroke-linejoin="round" />
+	</g>
+	<text x="158" y="94" fill="#111315" font-family="Geist, Inter, Arial, sans-serif" font-size="68" font-weight="650" letter-spacing="-2">FlowReco</text>
+</svg>

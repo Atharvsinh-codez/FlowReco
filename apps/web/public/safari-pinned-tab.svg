@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+	<title id="title">FlowReco monochrome mark</title>
+	<desc id="desc">A recording signal inside four focus corners.</desc>
+	<path d="M390 246H310c-35.346 0-64 28.654-64 64v80M634 246h80c35.346 0 64 28.654 64 64v80M778 634v80c0 35.346-28.654 64-64 64h-80M390 778h-80c-35.346 0-64-28.654-64-64v-80" fill="none" stroke="#000000" stroke-width="62" stroke-linecap="round" />
+	<path d="M402 674V350h142c82 0 130 42 130 117 0 76-54 112-130 112H402m139 0 137 95" fill="none" stroke="#000000" stroke-width="70" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

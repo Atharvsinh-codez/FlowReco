@@ -1,0 +1,134 @@
+name: Build Windows EXE
+
+# Builds a Windows NSIS installer (FlowReco_*.exe) and uploads it as a
+# downloadable Actions artifact. No signing/CrabNebula secrets required.
+#
+# Run: Actions → "Build Windows EXE" → Run workflow (branch main2)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main2
+    paths:
+      - "apps/desktop/**"
+      - "crates/**"
+      - "packages/**"
+      - "scripts/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/build-windows-exe.yml"
+      - ".github/actions/**"
+
+permissions:
+  contents: read
+
+jobs:
+  windows-exe:
+    name: Windows NSIS installer
+    runs-on: windows-2022
+    timeout-minutes: 180
+    env:
+      RUST_TARGET_TRIPLE: x86_64-pc-windows-msvc
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Increase pagefile size
+        uses: al-cheb/configure-pagefile-action@a3b6ebd6b634da88790d9c58d4b37a7f4a7b8708 # v1.4
+        with:
+          minimum-size: 16GB
+          maximum-size: 24GB
+          disk-root: "D:"
+
+      - name: Rust setup
+        uses: dtolnay/rust-toolchain@1.88.0
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - uses: ./.github/actions/setup-rust-cache
+        with:
+          target: x86_64-pc-windows-msvc
+
+      - uses: ./.github/actions/setup-js
+
+      - name: Create .env file
+        shell: bash
+        run: |
+          {
+            echo "NODE_ENV=production"
+            echo "VITE_ENVIRONMENT=production"
+            echo "RUST_BACKTRACE=1"
+            echo "RUST_TARGET_TRIPLE=x86_64-pc-windows-msvc"
+            echo "VITE_SERVER_URL=http://localhost:3000"
+            echo "NEXT_PUBLIC_WEB_URL=http://localhost:3000"
+            echo "NEXTAUTH_URL=http://localhost:3000"
+          } > .env
+          cp .env apps/desktop/.env
+
+      - name: Run cap-setup
+        shell: bash
+        run: pnpm -w cap-setup
+        env:
+          RUST_TARGET_TRIPLE: x86_64-pc-windows-msvc
+
+      - name: Build desktop binaries
+        shell: bash
+        run: ./scripts/build-desktop-binaries.sh x86_64-pc-windows-msvc
+
+      - name: Build Windows NSIS installer
+        working-directory: apps/desktop
+        shell: bash
+        run: |
+          # Unsigned CI installer: skip updater signature artifacts that need secrets.
+          cat > src-tauri/tauri.ci-windows.conf.json <<'EOF'
+          {
+            "bundle": {
+              "createUpdaterArtifacts": false
+            },
+            "plugins": {
+              "updater": { "active": false, "pubkey": "" }
+            }
+          }
+          EOF
+          pnpm build:tauri \
+            --target x86_64-pc-windows-msvc \
+            --config src-tauri/tauri.prod.conf.json \
+            --config src-tauri/tauri.ci-windows.conf.json \
+            --bundles nsis
+        env:
+          CI: false
+          RUST_TARGET_TRIPLE: x86_64-pc-windows-msvc
+
+      - name: Locate installer artifacts
+        id: artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          BUNDLE_DIR="target/x86_64-pc-windows-msvc/release/bundle"
+          echo "Bundle tree:"
+          find "$BUNDLE_DIR" -type f 2>/dev/null | head -n 100 || true
+          NSIS_DIR="$BUNDLE_DIR/nsis"
+          if [[ ! -d "$NSIS_DIR" ]]; then
+            echo "::error::NSIS bundle directory missing at $NSIS_DIR"
+            exit 1
+          fi
+          mapfile -t EXES < <(find "$NSIS_DIR" -type f -name '*.exe' | sort)
+          if [[ "${#EXES[@]}" -eq 0 ]]; then
+            echo "::error::No .exe found under $NSIS_DIR"
+            exit 1
+          fi
+          for f in "${EXES[@]}"; do
+            echo "Found installer: $f ($(wc -c < "$f") bytes)"
+          done
+          echo "nsis_dir=$NSIS_DIR" >> "$GITHUB_OUTPUT"
+
+      - name: Upload Windows installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: FlowReco-Windows-x64
+          path: |
+            target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe
+          if-no-files-found: error
+          retention-days: 30
