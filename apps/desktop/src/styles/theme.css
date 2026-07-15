@@ -139,33 +139,31 @@
 	--recorder-selected-shadow: 0 0 0 1px rgba(0, 132, 209, 0.35);
 }
 
-/* Dark theme variables */
+/* Dark theme — premium graphite (Recordly-inspired density, FlowReco accent) */
 :root.dark {
 	color-scheme: dark;
-	--gray-50: #111315;
-	--gray-100: #16191c;
-	--gray-200: #1c2024;
-	--gray-300: #262b31;
+	--gray-50: #0f1012;
+	--gray-100: #141518;
+	--gray-200: #1a1c20;
+	--gray-300: #24272c;
 	--gray-400: #9aa3ad;
 	--gray-450: #e8eaed;
-	--gray-500: #ffffff;
+	--gray-500: #f5f7fa;
 
-	--gray-50-transparent-50: rgba(17, 17, 17, 0.5);
-	--gray-100-transparent-50: rgba(28, 28, 28, 0.5);
-	--gray-200-transparent-50: rgba(40, 40, 40, 0.5);
-	--gray-300-transparent-50: rgba(50, 50, 50, 0.5);
-	--gray-400-transparent-50: rgba(161, 161, 161, 0.5);
-	--gray-450-transparent-50: rgba(234, 234, 234, 0.5);
-	--gray-500-transparent-50: rgba(255, 255, 255, 0.5);
+	--gray-50-transparent-50: rgba(15, 16, 18, 0.5);
+	--gray-100-transparent-50: rgba(20, 21, 24, 0.5);
+	--gray-200-transparent-50: rgba(26, 28, 32, 0.5);
+	--gray-300-transparent-50: rgba(36, 39, 44, 0.5);
+	--gray-400-transparent-50: rgba(154, 163, 173, 0.5);
+	--gray-450-transparent-50: rgba(232, 234, 237, 0.5);
+	--gray-500-transparent-50: rgba(245, 247, 250, 0.5);
 
-	--transparent-window: rgba(28, 28, 28, 0.85);
+	--transparent-window: rgba(15, 16, 18, 0.88);
 
-	/* Add new variables for text hierarchy */
-	--text-primary: rgba(255, 255, 255, 0.95); /* Section titles, headings */
-	--text-secondary: rgba(255, 255, 255, 0.85); /* Important labels */
-	--text-tertiary: rgba(255, 255, 255, 0.65); /* Descriptions */
+	--text-primary: rgba(245, 247, 250, 0.96);
+	--text-secondary: rgba(245, 247, 250, 0.86);
+	--text-tertiary: rgba(245, 247, 250, 0.62);
 
-	/* Transparent overlays - adjusted for better contrast */
 	--black-transparent-5: rgba(255, 255, 255, 0.05);
 	--black-transparent-10: rgba(255, 255, 255, 0.1);
 	--black-transparent-20: rgba(255, 255, 255, 0.2);
@@ -173,26 +171,24 @@
 	--black-transparent-60: rgba(255, 255, 255, 0.6);
 	--black-transparent-80: rgba(255, 255, 255, 0.8);
 
-	/* White transparencies */
-	--white-transparent-5: rgba(18, 22, 31, 0.05);
-	--white-transparent-10: rgba(18, 22, 31, 0.1);
-	--white-transparent-20: rgba(18, 22, 31, 0.2);
-	--white-transparent-40: rgba(18, 22, 31, 0.4);
-	--white-transparent-60: rgba(18, 22, 31, 0.6);
-	--white-transparent-80: rgba(18, 22, 31, 0.8);
+	--white-transparent-5: rgba(0, 0, 0, 0.12);
+	--white-transparent-10: rgba(0, 0, 0, 0.18);
+	--white-transparent-20: rgba(0, 0, 0, 0.28);
+	--white-transparent-40: rgba(0, 0, 0, 0.4);
+	--white-transparent-60: rgba(0, 0, 0, 0.55);
+	--white-transparent-80: rgba(0, 0, 0, 0.72);
 
 	--solid-white: #ffffff;
 
-	/* Accent colors remain mostly the same but adjusted for dark theme */
-	--blue-50: #1a2438;
-	--blue-100: #243352;
-	--blue-200: #2e426b;
-	--blue-300: #4785ff;
-	--blue-400: #5c8fff;
-	--blue-500: #0a84ff;
+	--blue-50: #102033;
+	--blue-100: #16304a;
+	--blue-200: #1e4570;
+	--blue-300: #3aa0e0;
+	--blue-400: #4db0ef;
+	--blue-500: #2f9fe0;
 
-	--blue-transparent-10: rgba(71, 133, 255, 0.1);
-	--blue-transparent-20: rgba(71, 133, 255, 0.2);
+	--blue-transparent-10: rgba(47, 159, 224, 0.12);
+	--blue-transparent-20: rgba(47, 159, 224, 0.22);
 
 	--red-50: #2c1a1e;
 	--red-100: #52232c;
@@ -202,38 +198,49 @@
 
 	--red-transparent-20: rgba(255, 71, 102, 0.2);
 
-	--shadow-s: 0px 8px 16px 0px rgba(0, 0, 0, 0.4);
+	--shadow-s: 0px 12px 28px 0px rgba(0, 0, 0, 0.45);
 
-	--gray-1: #111111;
-	--gray-2: #1c1c1c;
-	--gray-3: #282828;
-	--gray-4: #323232;
-	--gray-5: #3a3a3a;
-	--gray-6: #444444;
-	--gray-11: #a1a1a1;
+	--gray-1: #0f1012;
+	--gray-2: #15171a;
+	--gray-3: #1c1f24;
+	--gray-4: #262a30;
+	--gray-5: #323740;
+	--gray-6: #3e4450;
+	--gray-11: #a8b0ba;
 
-	--sleek-surface-tint: #1b1d22;
-	--sleek-white: #ffffff;
-	--sleek-text: #eef3f8;
-	--sleek-text-alt: #c8cdd4;
-	--sleek-foreground: #f5f5f5;
-	--sleek-muted: #9aa3ad;
-	--sleek-accent: #0084d1;
-	--sleek-accent-soft: rgba(0, 132, 209, 0.18);
-	--sleek-accent-ring: rgba(0, 132, 209, 0.4);
-	--sleek-slate: #1b1d22;
-	--sleek-border: rgba(233, 238, 245, 0.12);
+	--flow-border: rgba(255, 255, 255, 0.1);
+	--flow-surface-light: #15171a;
+	--flow-surface-white: #0f1012;
+	--flow-accent: #2f9fe0;
+	--flow-text-alt: #a8b0ba;
+	--flow-foreground: #f5f7fa;
+	--flow-muted: #8b939e;
+	--flow-subtle: #1c1f24;
 
-	--recorder-bg: #121212;
-	--recorder-raised: #1b1d22;
-	--recorder-hover: #22252b;
-	--recorder-border: rgba(233, 238, 245, 0.1);
-	--recorder-text: #eef3f8;
-	--recorder-muted: #9aa3ad;
+	--sleek-surface-tint: #1c1f24;
+	--sleek-white: #f5f7fa;
+	--sleek-text: #f5f7fa;
+	--sleek-text-alt: #c5ccd6;
+	--sleek-foreground: #f5f7fa;
+	--sleek-muted: #8b939e;
+	--sleek-accent: #2f9fe0;
+	--sleek-accent-soft: rgba(47, 159, 224, 0.16);
+	--sleek-accent-ring: rgba(47, 159, 224, 0.42);
+	--sleek-slate: #15171a;
+	--sleek-border: rgba(255, 255, 255, 0.1);
+
+	--recorder-bg: #0f1012;
+	--recorder-raised: #15171a;
+	--recorder-hover: #1c1f24;
+	--recorder-border: rgba(255, 255, 255, 0.1);
+	--recorder-text: #f5f7fa;
+	--recorder-muted: #8b939e;
 	--recorder-overlay: rgba(255, 255, 255, 0.06);
 	--recorder-overlay-strong: rgba(255, 255, 255, 0.1);
-	--recorder-inset-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-	--recorder-selected-shadow: 0 0 0 1px rgba(0, 132, 209, 0.4);
+	--recorder-inset-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+	--recorder-selected-shadow: 0 0 0 1px rgba(47, 159, 224, 0.45);
+
+	--track-zoom: #8b5cf6;
 }
 
 .dark .dark-button-shadow {

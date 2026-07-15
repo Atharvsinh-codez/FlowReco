@@ -291,8 +291,8 @@ export function PlayerContent() {
 	};
 
 	return (
-		<div class="flex flex-col flex-1 min-h-0 bg-white dark:bg-gray-2">
-			<div class="flex items-center justify-between gap-3 px-3.5 py-2 border-b border-[var(--recorder-border,#e6e6e6)] bg-white/90 dark:bg-gray-2">
+		<div class="flex flex-col flex-1 min-h-0 bg-[var(--recorder-bg,#ffffff)]">
+			<div class="flex items-center justify-between gap-3 px-3.5 py-2 border-b border-[var(--recorder-border,#e6e6e6)] bg-[color-mix(in_srgb,var(--recorder-bg,#ffffff)_92%,transparent)]">
 				<div class="flex items-center gap-2">
 					<AspectRatioSelect />
 					<EditorButton
@@ -363,7 +363,7 @@ export function PlayerContent() {
 			<div class="relative flex flex-1 min-h-0 flex-col bg-[var(--flow-subtle,#eceef1)] dark:bg-gray-3">
 				<PreviewCanvas />
 			</div>
-			<div class="relative flex z-10 flex-row gap-3 justify-between items-center px-3.5 py-2.5 border-t border-[var(--recorder-border,#e6e6e6)] bg-white dark:bg-gray-2">
+			<div class="relative flex z-10 flex-row gap-3 justify-between items-center px-3.5 py-2.5 border-t border-[var(--recorder-border,#e6e6e6)] bg-[var(--recorder-bg,#ffffff)]">
 				<div class="flex items-center gap-2">
 					<button
 						type="button"

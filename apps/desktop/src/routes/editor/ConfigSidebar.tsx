@@ -489,7 +489,7 @@ export function ConfigSidebar() {
 					? undefined
 					: state.selectedTab
 			}
-			class="flex flex-row min-h-0 shrink-0 flex-1 max-w-104 overflow-hidden rounded-[var(--radius-xl,16px)] z-10 bg-white dark:bg-gray-2 border border-[var(--recorder-border,#e6e6e6)] dark:border-gray-3 shadow-[0_1px_0_rgba(255,255,255,0.8)_inset]"
+			class="flex flex-row min-h-0 shrink-0 flex-1 max-w-104 overflow-hidden rounded-[var(--radius-xl,16px)] z-10 bg-[var(--recorder-bg,#ffffff)] border border-[var(--recorder-border,#e6e6e6)] shadow-[var(--recorder-inset-highlight,inset_0_1px_0_rgba(255,255,255,0.8))]"
 		>
 			<div class="flex flex-col items-center shrink-0 w-12 py-2.5 gap-0.5 border-r border-[var(--recorder-border,#e6e6e6)] dark:border-gray-3 bg-[var(--flow-surface-light,#f5f5f5)] dark:bg-gray-3/40">
 				<KTabs.List class="relative flex flex-col items-center gap-0.5 w-full px-1.5">
@@ -814,7 +814,7 @@ export function ConfigSidebar() {
 												"rounded-[12px] border px-3 py-2.5 text-left transition-all",
 												project.cursor.animationStyle === option.value
 													? "border-[var(--sleek-accent,#0084d1)] bg-[var(--sleek-accent-soft,rgba(0,132,209,0.12))] shadow-[0_0_0_1px_rgba(0,132,209,0.12)]"
-													: "border-[var(--recorder-border,#e6e6e6)] bg-white hover:bg-[var(--flow-surface-light,#f5f5f5)]",
+													: "border-[var(--recorder-border,#e6e6e6)] bg-[var(--recorder-raised,#f5f5f5)] hover:bg-[var(--recorder-hover,#eceef1)]",
 											)}
 											onClick={() =>
 												applyCursorStylePreset(

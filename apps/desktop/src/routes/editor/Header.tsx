@@ -88,7 +88,7 @@ export function Header() {
 	return (
 		<div
 			data-tauri-drag-region
-			class="flex relative flex-row items-center w-full h-12 border-b border-[var(--recorder-border,#e6e6e6)] bg-white/95 dark:bg-gray-2/95 backdrop-blur-md"
+			class="flex relative flex-row items-center w-full h-12 border-b border-[var(--recorder-border,#e6e6e6)] bg-[color-mix(in_srgb,var(--recorder-bg,#ffffff)_95%,transparent)] backdrop-blur-md"
 		>
 			<div
 				data-tauri-drag-region

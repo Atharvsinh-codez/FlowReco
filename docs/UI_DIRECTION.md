@@ -32,7 +32,9 @@ Light-first product chrome (see D021). Marketing may use Instrument Serif for ed
 | Elevation | Flat by default; thin borders over heavy shadow stacks |
 | Motion | Short, interruptible, transform/opacity first; honor reduced motion |
 
-Avoid decorative gradients, oversized marketing typography inside dense editor chrome, unrelated illustrations, dense shadow stacks, and generic dashboard card grids. Dark theme remaps the same roles; it is optional, not the default product look.
+Avoid decorative gradients, oversized marketing typography inside dense editor chrome, unrelated illustrations, dense shadow stacks, and generic dashboard card grids.
+
+**Dark theme** is a first-class peer of light (not an afterthought): graphite surfaces (`#0f1012` / `#15171a`), soft white borders at ~10% opacity, and accent `#2f9fe0`. Product chrome must use `--recorder-*` / `--flow-*` / `--sleek-*` tokens so light and dark stay in sync without hard-coded pure white panels.
 
 ## Application layout
 

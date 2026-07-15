@@ -702,7 +702,7 @@ function Inner() {
 								</div>
 							</Show>
 							<div
-								class="flex flex-col rounded-[var(--radius-xl,16px)] border bg-white dark:bg-gray-2 border-[var(--recorder-border,#e6e6e6)] dark:border-gray-3 overflow-hidden shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]"
+								class="flex flex-col rounded-[var(--radius-xl,16px)] border bg-[var(--recorder-bg,#ffffff)] border-[var(--recorder-border,#e6e6e6)] overflow-hidden shadow-[var(--recorder-inset-highlight,inset_0_1px_0_rgba(255,255,255,0.9))]"
 								style={{
 									flex: isTranscriptMode()
 										? `0 0 ${splitRatio() * 100}%`
@@ -775,7 +775,7 @@ function Inner() {
 							class="flex-none min-h-0 px-2.5 pb-2.5 overflow-hidden relative"
 							style={{ height: `${timelineHeight()}px` }}
 						>
-							<div class="h-full rounded-[var(--radius-xl,16px)] border border-[var(--recorder-border,#e6e6e6)] bg-white dark:bg-gray-2 overflow-hidden shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]">
+							<div class="h-full rounded-[var(--radius-xl,16px)] border border-[var(--recorder-border,#e6e6e6)] bg-[var(--recorder-bg,#ffffff)] overflow-hidden shadow-[var(--recorder-inset-highlight,inset_0_1px_0_rgba(255,255,255,0.9))]">
 								<Timeline
 									onViewportOverflowChange={setTimelineViewportOverflow}
 								/>

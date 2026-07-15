@@ -31,9 +31,13 @@ import IconLucideArrowRight from "~icons/lucide/arrow-right";
 import IconLucideCheck from "~icons/lucide/check";
 import IconLucideClapperboard from "~icons/lucide/clapperboard";
 import IconLucideDownload from "~icons/lucide/download";
+import IconLucideGauge from "~icons/lucide/gauge";
+import IconLucideLayers from "~icons/lucide/layers";
 import IconLucideMonitor from "~icons/lucide/monitor";
+import IconLucideMousePointer2 from "~icons/lucide/mouse-pointer-2";
 import IconLucideShield from "~icons/lucide/shield";
 import IconLucideSparkles from "~icons/lucide/sparkles";
+import IconLucideZap from "~icons/lucide/zap";
 import flowRecoMark from "../../assets/flowreco-mark.svg";
 import { WindowChromeHeader } from "./Context";
 
@@ -49,44 +53,45 @@ const setupPermissions: readonly SetupPermission[] = [
 	{
 		name: "Screen Recording",
 		key: "screenRecording",
-		description: "Needed to capture your display, windows, or a selected area.",
+		description:
+			"Required before you capture display, window, or a selected area.",
 		requiresManualGrant: false,
 	},
 	{
 		name: "Accessibility",
 		key: "accessibility",
 		description:
-			"Used locally for pointer activity so Studio can suggest automatic zooms.",
+			"Powers automatic zoom suggestions from pointer activity — stored locally only.",
 		requiresManualGrant: false,
 	},
 	{
 		name: "Microphone",
 		key: "microphone",
-		description: "Optional — enable when you want voiceover on recordings.",
+		description: "Optional voiceover track when you want narration.",
 		requiresManualGrant: false,
 		optional: true,
 	},
 	{
 		name: "Camera",
 		key: "camera",
-		description: "Optional — enable when you want a webcam track.",
+		description: "Optional webcam track beside your screen.",
 		requiresManualGrant: false,
 		optional: true,
 	},
 ];
 
-const modes = [
+const captureModes = [
 	{
 		id: "studio" as const,
 		title: "Studio",
 		tagline: "Full-quality local video",
 		description:
-			"Record display, window, or area into the FlowReco editor. Add zooms, captions, and export when you are ready.",
+			"Record display, window, area, or camera into a project you own. Edit zooms, cursor, captions, then export.",
 		icon: IconCapFilmCut,
 		bullets: [
-			"Local project files",
-			"Non-destructive edits",
-			"MP4 / GIF export",
+			"Unlimited local length",
+			"Non-destructive timeline",
+			"MP4 / GIF export free",
 		],
 	},
 	{
@@ -94,26 +99,62 @@ const modes = [
 		title: "Screenshot",
 		tagline: "Stills for bugs and docs",
 		description:
-			"Grab a frame, annotate it, then copy or save — no video pipeline required.",
+			"Capture a frame, annotate, copy or save — no account and no video pipeline.",
 		icon: IconCapScreenshot,
 		bullets: ["One-shot capture", "Quick annotate", "Copy or save"],
+	},
+];
+
+const advantages = [
+	{
+		title: "Beyond Cap",
+		body: "Local-first by default with no commercial gate on Studio quality. Open source you can own end-to-end.",
+		icon: IconLucideZap,
+	},
+	{
+		title: "Beyond Recordly",
+		body: "Native Tauri + Rust media pipeline instead of Electron/Pixi — leaner runtime, shared preview/export graph.",
+		icon: IconLucideGauge,
+	},
+	{
+		title: "Built for FlowReco",
+		body: "Light and dark product chrome, free local unlock, and Studio inspector density made for creators.",
+		icon: IconLucideSparkles,
+	},
+];
+
+const studioPowers = [
+	{
+		title: "Automatic zooms",
+		body: "Deterministic suggestions from pointer intent — edit, accept, or rebuild anytime.",
+		icon: IconLucideMousePointer2,
+	},
+	{
+		title: "Cursor polish",
+		body: "Spring physics, motion blur, tilt, and smooth follow that stay in the shared renderer.",
+		icon: IconLucideLayers,
+	},
+	{
+		title: "Captions & export",
+		body: "Transcript-friendly captions and free high-quality export without a plan paywall.",
+		icon: IconLucideClapperboard,
 	},
 ];
 
 const workflow = [
 	{
 		title: "Capture",
-		body: "Pick display, window, area, or camera. FlowReco records full quality on this machine.",
+		body: "Pick display, window, area, or camera. Media lands on this machine first.",
 		icon: IconLucideMonitor,
 	},
 	{
 		title: "Polish",
-		body: "Open Studio to trim, zoom, style the cursor, add captions, and frame the scene.",
+		body: "Open Studio — left inspector, big canvas, timeline zooms, free tools.",
 		icon: IconLucideClapperboard,
 	},
 	{
 		title: "Export",
-		body: "Export a local file anytime. Sharing to a server is optional — never required.",
+		body: "Ship MP4 or GIF locally. Connect a server only when you want share links.",
 		icon: IconLucideDownload,
 	},
 ];
@@ -133,13 +174,19 @@ export default function OnboardingPage() {
 
 	const stepIds = createMemo(() => {
 		const ids: Array<
-			"welcome" | "permissions" | "modes" | "workflow" | "ready"
-		> = ["welcome"];
+			| "welcome"
+			| "edge"
+			| "permissions"
+			| "modes"
+			| "studio"
+			| "workflow"
+			| "ready"
+		> = ["welcome", "edge"];
 		if (isMacOS() && (!isRevisit() || permissionsNeeded())) {
 			ids.push("permissions");
 		}
 		if (!(isMacOS() && isRevisit() && permissionsNeeded())) {
-			ids.push("modes", "workflow", "ready");
+			ids.push("modes", "studio", "workflow", "ready");
 		}
 		return ids;
 	});
@@ -207,8 +254,8 @@ export default function OnboardingPage() {
 	};
 
 	const nextLabel = () => {
-		if (step() === totalSteps() - 1) return "Open FlowReco";
-		if (currentId() === "welcome") return "Get started";
+		if (step() === totalSteps() - 1) return "Launch FlowReco";
+		if (currentId() === "welcome") return "See why FlowReco";
 		return "Continue";
 	};
 
@@ -244,13 +291,13 @@ export default function OnboardingPage() {
 			<Show when={ready()}>
 				<div
 					data-tauri-drag-region="false"
-					class="flex flex-col flex-1 min-h-0 overflow-hidden relative bg-[var(--recorder-bg,#ffffff)] text-[var(--recorder-text,#252b31)]"
+					class="flex flex-col flex-1 min-h-0 overflow-hidden relative bg-[var(--recorder-bg)] text-[var(--recorder-text)]"
 				>
 					<div
 						class="pointer-events-none absolute inset-0"
 						style={{
 							background:
-								"radial-gradient(70% 50% at 50% 0%, rgba(0,132,209,0.08) 0%, transparent 60%)",
+								"radial-gradient(75% 55% at 50% -5%, color-mix(in srgb, var(--sleek-accent) 18%, transparent) 0%, transparent 58%), radial-gradient(50% 40% at 100% 100%, color-mix(in srgb, var(--sleek-accent) 8%, transparent) 0%, transparent 50%)",
 						}}
 					/>
 					<div class="relative flex-1 min-h-0 z-10">
@@ -264,6 +311,9 @@ export default function OnboardingPage() {
 									<Show when={id === "welcome"}>
 										<WelcomeStep />
 									</Show>
+									<Show when={id === "edge"}>
+										<EdgeStep />
+									</Show>
 									<Show when={id === "permissions"}>
 										<PermissionsStep
 											active={step() === index()}
@@ -273,6 +323,9 @@ export default function OnboardingPage() {
 									</Show>
 									<Show when={id === "modes"}>
 										<ModesStep />
+									</Show>
+									<Show when={id === "studio"}>
+										<StudioStep />
 									</Show>
 									<Show when={id === "workflow"}>
 										<WorkflowStep />
@@ -315,16 +368,16 @@ function StepNavigation(props: {
 	return (
 		<div
 			data-tauri-drag-region="false"
-			class="relative z-40 flex flex-col items-center gap-2 border-t border-[var(--recorder-border,#e6e6e6)] bg-[var(--recorder-bg,#ffffff)] px-6 pb-5 pt-3 shrink-0"
+			class="relative z-40 flex flex-col items-center gap-2 border-t border-[var(--recorder-border)] bg-[var(--recorder-bg)] px-6 pb-5 pt-3 shrink-0"
 		>
-			<div class="flex items-center justify-between w-full max-w-[640px]">
+			<div class="flex items-center justify-between w-full max-w-[680px]">
 				<div class="flex-1">
 					<Show when={props.showBack}>
 						<button
 							data-tauri-drag-region="false"
 							type="button"
 							onClick={props.onBack}
-							class="flex items-center gap-1.5 text-[13px] text-[var(--recorder-muted,#879192)] hover:text-[var(--recorder-text,#252b31)] transition-colors"
+							class="flex items-center gap-1.5 text-[13px] text-[var(--recorder-muted)] hover:text-[var(--recorder-text)] transition-colors"
 						>
 							<IconLucideArrowLeft class="size-3.5" />
 							Back
@@ -338,10 +391,10 @@ function StepNavigation(props: {
 								class={cx(
 									"rounded-full transition-all duration-300",
 									props.current === index()
-										? "w-5 h-1.5 bg-[var(--sleek-accent,#0084d1)]"
+										? "w-5 h-1.5 bg-[var(--sleek-accent)]"
 										: props.current > index()
-											? "w-1.5 h-1.5 bg-[var(--sleek-accent,#0084d1)]/50"
-											: "w-1.5 h-1.5 bg-[var(--flow-subtle,#eceef1)]",
+											? "w-1.5 h-1.5 bg-[var(--sleek-accent)]/55"
+											: "w-1.5 h-1.5 bg-[var(--recorder-overlay-strong)]",
 								)}
 							/>
 						)}
@@ -354,7 +407,7 @@ function StepNavigation(props: {
 							onClick={props.onNext}
 							variant="blue"
 							size="md"
-							class="gap-2 min-w-36 rounded-[var(--radius-md,10px)]"
+							class="gap-2 min-w-40 rounded-[12px] shadow-[0_10px_28px_-12px_color-mix(in_srgb,var(--sleek-accent)_70%,transparent)]"
 							disabled={props.nextDisabled}
 						>
 							{props.nextLabel}
@@ -370,7 +423,7 @@ function StepNavigation(props: {
 								data-tauri-drag-region="false"
 								type="button"
 								onClick={() => props.onSkip?.()}
-								class="text-[11px] text-[var(--recorder-muted,#879192)] hover:text-[var(--recorder-text,#252b31)] transition-colors py-0.5"
+								class="text-[11px] text-[var(--recorder-muted)] hover:text-[var(--recorder-text)] transition-colors py-0.5"
 							>
 								Skip for now
 							</button>
@@ -378,7 +431,7 @@ function StepNavigation(props: {
 					</div>
 				</div>
 			</div>
-			<span class="text-[10px] text-[var(--recorder-muted,#879192)] tabular-nums">
+			<span class="text-[10px] text-[var(--recorder-muted)] tabular-nums">
 				Enter ↵ · ← → arrows
 			</span>
 		</div>
@@ -398,14 +451,14 @@ function StepPanel(props: {
 				transform: props.active
 					? "translateX(0)"
 					: props.index < props.currentStep
-						? "translateX(-24px)"
-						: "translateX(24px)",
+						? "translateX(-28px)"
+						: "translateX(28px)",
 				opacity: props.active ? 1 : 0,
 				visibility: props.active ? "visible" : "hidden",
 				"pointer-events": props.active ? "auto" : "none",
 				"z-index": props.active ? 1 : 0,
 				transition:
-					"transform 320ms cubic-bezier(0.22, 1, 0.36, 1), opacity 240ms ease",
+					"transform 340ms cubic-bezier(0.22, 1, 0.36, 1), opacity 260ms ease",
 			}}
 		>
 			{props.children}
@@ -416,33 +469,72 @@ function StepPanel(props: {
 function WelcomeStep() {
 	return (
 		<div class="flex flex-col items-center justify-center min-h-full px-10 py-8 text-center">
-			<div class="flex size-16 items-center justify-center rounded-[20px] border border-[var(--recorder-border,#e6e6e6)] bg-white shadow-[0_8px_30px_rgba(37,43,49,0.06)]">
-				<img src={flowRecoMark} alt="" class="size-9" />
+			<div class="flex size-[4.5rem] items-center justify-center rounded-[22px] border border-[var(--recorder-border)] bg-[var(--recorder-raised)] shadow-[var(--recorder-inset-highlight)]">
+				<img src={flowRecoMark} alt="" class="size-10" />
 			</div>
-			<p class="mt-6 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--sleek-accent,#0084d1)]">
-				Local-first capture
+			<p class="mt-6 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--sleek-accent)]">
+				Local-first · free Studio
 			</p>
-			<h1 class="mt-2 text-[28px] font-semibold tracking-tight text-[var(--recorder-text,#252b31)] text-balance">
+			<h1 class="mt-2 max-w-[520px] text-[30px] font-semibold tracking-tight text-[var(--recorder-text)] text-balance leading-[1.15]">
 				Welcome to FlowReco
 			</h1>
-			<p class="mt-3 max-w-[420px] text-[14px] leading-relaxed text-[var(--recorder-muted,#879192)] text-pretty">
-				Record your screen, polish in Studio, and export files you own. No
-				account required for local capture and editing.
+			<p class="mt-3 max-w-[460px] text-[14px] leading-relaxed text-[var(--recorder-muted)] text-pretty">
+				Cinematic screen recording you actually own. Built on a serious native
+				media stack — then tuned past the tools that inspired us.
 			</p>
-			<div class="mt-8 grid w-full max-w-[480px] grid-cols-3 gap-2">
+			<div class="mt-8 grid w-full max-w-[520px] grid-cols-3 gap-2">
 				<For
 					each={[
-						{ label: "Offline ready", icon: IconLucideMonitor },
-						{ label: "Studio editor", icon: IconLucideClapperboard },
-						{ label: "Clean exports", icon: IconLucideSparkles },
+						{ label: "No plan gate", icon: IconLucideZap },
+						{ label: "Studio chrome", icon: IconLucideClapperboard },
+						{ label: "Light + dark", icon: IconLucideSparkles },
 					]}
 				>
 					{(item) => (
-						<div class="flex flex-col items-center gap-2 rounded-[14px] border border-[var(--recorder-border,#e6e6e6)] bg-[var(--recorder-raised,#f5f5f5)] px-3 py-4">
-							<item.icon class="size-4 text-[var(--sleek-accent,#0084d1)]" />
-							<span class="text-[11px] font-medium text-[var(--recorder-text,#252b31)]">
+						<div class="flex flex-col items-center gap-2 rounded-[14px] border border-[var(--recorder-border)] bg-[var(--recorder-raised)] px-3 py-4">
+							<item.icon class="size-4 text-[var(--sleek-accent)]" />
+							<span class="text-[11px] font-medium text-[var(--recorder-text)]">
 								{item.label}
 							</span>
+						</div>
+					)}
+				</For>
+			</div>
+		</div>
+	);
+}
+
+function EdgeStep() {
+	return (
+		<div class="flex flex-col items-center justify-center min-h-full px-8 py-6 gap-6">
+			<div class="text-center max-w-[520px]">
+				<p class="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--sleek-accent)]">
+					Why FlowReco
+				</p>
+				<h2 class="mt-2 text-[24px] font-semibold tracking-tight text-[var(--recorder-text)] text-balance">
+					Better than the two that inspired us
+				</h2>
+				<p class="mt-2 text-[14px] leading-relaxed text-[var(--recorder-muted)] text-pretty">
+					We studied Cap and Recordly carefully — then shipped a FlowReco that
+					keeps the best behaviors and drops the baggage: no Electron for
+					Studio, no paywall on local quality.
+				</p>
+			</div>
+			<div class="grid w-full max-w-[600px] gap-2.5">
+				<For each={advantages}>
+					{(item) => (
+						<div class="flex gap-3 rounded-[16px] border border-[var(--recorder-border)] bg-[var(--recorder-raised)] p-4">
+							<div class="flex size-10 shrink-0 items-center justify-center rounded-[12px] bg-[var(--sleek-accent-soft)] text-[var(--sleek-accent)]">
+								<item.icon class="size-4" />
+							</div>
+							<div class="min-w-0 text-left">
+								<div class="text-[14px] font-semibold text-[var(--recorder-text)]">
+									{item.title}
+								</div>
+								<p class="mt-1 text-[13px] leading-relaxed text-[var(--recorder-muted)]">
+									{item.body}
+								</p>
+							</div>
 						</div>
 					)}
 				</For>
@@ -454,43 +546,43 @@ function WelcomeStep() {
 function ModesStep() {
 	return (
 		<div class="flex flex-col items-center justify-center min-h-full px-8 py-6 gap-6">
-			<div class="text-center max-w-[460px]">
-				<p class="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--sleek-accent,#0084d1)]">
-					Capture modes
+			<div class="text-center max-w-[480px]">
+				<p class="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--sleek-accent)]">
+					Capture
 				</p>
-				<h2 class="mt-2 text-[24px] font-semibold tracking-tight text-[var(--recorder-text,#252b31)]">
+				<h2 class="mt-2 text-[24px] font-semibold tracking-tight text-[var(--recorder-text)]">
 					Studio and Screenshot
 				</h2>
-				<p class="mt-2 text-[14px] leading-relaxed text-[var(--recorder-muted,#879192)]">
-					Switch anytime from the main window. Everything stays on this device
-					until you export.
+				<p class="mt-2 text-[14px] leading-relaxed text-[var(--recorder-muted)]">
+					Switch anytime from the main window. Instant Mode is not part of
+					FlowReco — Studio stays local and free.
 				</p>
 			</div>
-			<div class="grid w-full max-w-[560px] gap-3 md:grid-cols-2">
-				<For each={modes}>
+			<div class="grid w-full max-w-[580px] gap-3 md:grid-cols-2">
+				<For each={captureModes}>
 					{(mode) => (
-						<div class="flex flex-col gap-3 rounded-[16px] border border-[var(--recorder-border,#e6e6e6)] bg-white p-4 shadow-[0_1px_0_rgba(255,255,255,0.8)_inset]">
+						<div class="flex flex-col gap-3 rounded-[16px] border border-[var(--recorder-border)] bg-[var(--recorder-raised)] p-4 shadow-[var(--recorder-inset-highlight)]">
 							<div class="flex items-center gap-3">
-								<div class="flex size-10 items-center justify-center rounded-[12px] bg-[var(--sleek-accent-soft,rgba(0,132,209,0.12))] text-[var(--sleek-accent,#0084d1)]">
+								<div class="flex size-10 items-center justify-center rounded-[12px] bg-[var(--sleek-accent-soft)] text-[var(--sleek-accent)]">
 									<mode.icon class="size-5 invert dark:invert-0 opacity-90" />
 								</div>
 								<div>
-									<div class="text-[15px] font-semibold text-[var(--recorder-text,#252b31)]">
+									<div class="text-[15px] font-semibold text-[var(--recorder-text)]">
 										{mode.title}
 									</div>
-									<div class="text-[12px] text-[var(--recorder-muted,#879192)]">
+									<div class="text-[12px] text-[var(--recorder-muted)]">
 										{mode.tagline}
 									</div>
 								</div>
 							</div>
-							<p class="text-[13px] leading-relaxed text-[var(--recorder-muted,#879192)]">
+							<p class="text-[13px] leading-relaxed text-[var(--recorder-muted)]">
 								{mode.description}
 							</p>
 							<ul class="flex flex-col gap-1.5">
 								<For each={mode.bullets}>
 									{(bullet) => (
-										<li class="flex items-center gap-2 text-[12px] text-[var(--recorder-text,#252b31)]">
-											<span class="flex size-4 items-center justify-center rounded-full bg-[var(--sleek-accent,#0084d1)]">
+										<li class="flex items-center gap-2 text-[12px] text-[var(--recorder-text)]">
+											<span class="flex size-4 items-center justify-center rounded-full bg-[var(--sleek-accent)]">
 												<IconLucideCheck class="size-2.5 text-white" />
 											</span>
 											{bullet}
@@ -506,34 +598,72 @@ function ModesStep() {
 	);
 }
 
+function StudioStep() {
+	return (
+		<div class="flex flex-col items-center justify-center min-h-full px-8 py-6 gap-6">
+			<div class="text-center max-w-[480px]">
+				<p class="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--sleek-accent)]">
+					Studio editor
+				</p>
+				<h2 class="mt-2 text-[24px] font-semibold tracking-tight text-[var(--recorder-text)]">
+					Polish that stays free
+				</h2>
+				<p class="mt-2 text-[14px] leading-relaxed text-[var(--recorder-muted)]">
+					Left inspector rail, big preview, cinematic cursor motion — without
+					the paid walls other apps use to upsell quality.
+				</p>
+			</div>
+			<div class="grid w-full max-w-[580px] gap-2.5">
+				<For each={studioPowers}>
+					{(item) => (
+						<div class="flex gap-3 rounded-[14px] border border-[var(--recorder-border)] bg-[var(--recorder-raised)] p-4">
+							<div class="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-[var(--sleek-accent-soft)] text-[var(--sleek-accent)]">
+								<item.icon class="size-4" />
+							</div>
+							<div>
+								<div class="text-[14px] font-semibold text-[var(--recorder-text)]">
+									{item.title}
+								</div>
+								<p class="mt-1 text-[13px] leading-relaxed text-[var(--recorder-muted)]">
+									{item.body}
+								</p>
+							</div>
+						</div>
+					)}
+				</For>
+			</div>
+		</div>
+	);
+}
+
 function WorkflowStep() {
 	return (
 		<div class="flex flex-col items-center justify-center min-h-full px-8 py-6 gap-6">
 			<div class="text-center max-w-[440px]">
-				<p class="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--sleek-accent,#0084d1)]">
+				<p class="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--sleek-accent)]">
 					How it works
 				</p>
-				<h2 class="mt-2 text-[24px] font-semibold tracking-tight text-[var(--recorder-text,#252b31)]">
-					Capture, polish, export
+				<h2 class="mt-2 text-[24px] font-semibold tracking-tight text-[var(--recorder-text)]">
+					Capture · polish · export
 				</h2>
 			</div>
-			<div class="flex w-full max-w-[520px] flex-col gap-3">
+			<div class="flex w-full max-w-[520px] flex-col gap-2.5">
 				<For each={workflow}>
 					{(item, index) => (
-						<div class="flex gap-3 rounded-[14px] border border-[var(--recorder-border,#e6e6e6)] bg-white p-4">
-							<div class="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-[var(--recorder-raised,#f5f5f5)] text-[var(--sleek-accent,#0084d1)]">
+						<div class="flex gap-3 rounded-[14px] border border-[var(--recorder-border)] bg-[var(--recorder-raised)] p-4">
+							<div class="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-[var(--recorder-hover)] text-[var(--sleek-accent)]">
 								<item.icon class="size-4" />
 							</div>
 							<div class="min-w-0">
 								<div class="flex items-center gap-2">
-									<span class="text-[11px] font-semibold tabular-nums text-[var(--sleek-accent,#0084d1)]">
+									<span class="text-[11px] font-semibold tabular-nums text-[var(--sleek-accent)]">
 										{index() + 1}
 									</span>
-									<span class="text-[14px] font-semibold text-[var(--recorder-text,#252b31)]">
+									<span class="text-[14px] font-semibold text-[var(--recorder-text)]">
 										{item.title}
 									</span>
 								</div>
-								<p class="mt-1 text-[13px] leading-relaxed text-[var(--recorder-muted,#879192)]">
+								<p class="mt-1 text-[13px] leading-relaxed text-[var(--recorder-muted)]">
 									{item.body}
 								</p>
 							</div>
@@ -548,19 +678,19 @@ function WorkflowStep() {
 function ReadyStep() {
 	return (
 		<div class="flex flex-col items-center justify-center min-h-full px-10 py-8 text-center">
-			<div class="flex size-14 items-center justify-center rounded-full bg-[var(--sleek-accent-soft,rgba(0,132,209,0.12))] text-[var(--sleek-accent,#0084d1)]">
+			<div class="flex size-14 items-center justify-center rounded-full bg-[var(--sleek-accent-soft)] text-[var(--sleek-accent)]">
 				<IconLucideCheck class="size-6" />
 			</div>
-			<h2 class="mt-5 text-[24px] font-semibold tracking-tight text-[var(--recorder-text,#252b31)]">
+			<h2 class="mt-5 text-[24px] font-semibold tracking-tight text-[var(--recorder-text)]">
 				You are ready
 			</h2>
-			<p class="mt-2 max-w-[400px] text-[14px] leading-relaxed text-[var(--recorder-muted,#879192)]">
-				Open the main window, choose a source, and start a Studio recording.
-				Shortcuts and preferences live in Settings anytime.
+			<p class="mt-2 max-w-[420px] text-[14px] leading-relaxed text-[var(--recorder-muted)]">
+				Open the main window, choose a source, and start Studio. Shortcuts and
+				theme live in Settings — pick light or dark anytime.
 			</p>
-			<div class="mt-6 rounded-[14px] border border-[var(--recorder-border,#e6e6e6)] bg-[var(--recorder-raised,#f5f5f5)] px-4 py-3 text-[12px] text-[var(--recorder-muted,#879192)]">
-				Tip: use Studio for editable video projects. Screenshots are perfect for
-				quick stills.
+			<div class="mt-6 max-w-[420px] rounded-[14px] border border-[var(--recorder-border)] bg-[var(--recorder-raised)] px-4 py-3 text-[12px] leading-relaxed text-[var(--recorder-muted)]">
+				Tip: FlowReco does not force Instant Mode or a subscription for local
+				recording. Export stays free. Share links only need a server you choose.
 			</div>
 		</div>
 	);
@@ -672,13 +802,13 @@ function PermissionsStep(props: {
 			class="flex flex-col items-center justify-center min-h-full px-8 py-6 gap-5"
 		>
 			<div class="flex flex-col items-center gap-2 text-center max-w-[440px]">
-				<div class="flex size-12 items-center justify-center rounded-[14px] border border-[var(--recorder-border,#e6e6e6)] bg-white">
-					<IconLucideShield class="size-5 text-[var(--sleek-accent,#0084d1)]" />
+				<div class="flex size-12 items-center justify-center rounded-[14px] border border-[var(--recorder-border)] bg-[var(--recorder-raised)]">
+					<IconLucideShield class="size-5 text-[var(--sleek-accent)]" />
 				</div>
-				<h2 class="text-[22px] font-semibold tracking-tight text-[var(--recorder-text,#252b31)]">
+				<h2 class="text-[22px] font-semibold tracking-tight text-[var(--recorder-text)]">
 					Permissions
 				</h2>
-				<p class="text-[13px] leading-relaxed text-[var(--recorder-muted,#879192)]">
+				<p class="text-[13px] leading-relaxed text-[var(--recorder-muted)]">
 					Grant access so FlowReco can record your screen. Optional devices can
 					wait until you need them.
 				</p>
@@ -690,19 +820,19 @@ function PermissionsStep(props: {
 							check()?.[permission.key] as OSPermissionStatus | undefined;
 						return (
 							<Show when={permStatus() !== "notNeeded"}>
-								<div class="flex items-center gap-3 rounded-[14px] border border-[var(--recorder-border,#e6e6e6)] bg-white px-4 py-3">
+								<div class="flex items-center gap-3 rounded-[14px] border border-[var(--recorder-border)] bg-[var(--recorder-raised)] px-4 py-3">
 									<div class="flex flex-col flex-1 min-w-0 gap-0.5">
 										<div class="flex items-center gap-2">
-											<span class="text-[13px] font-medium text-[var(--recorder-text,#252b31)]">
+											<span class="text-[13px] font-medium text-[var(--recorder-text)]">
 												{permission.name}
 											</span>
 											<Show when={permission.optional}>
-												<span class="text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--recorder-raised,#f5f5f5)] text-[var(--recorder-muted,#879192)]">
+												<span class="text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--recorder-hover)] text-[var(--recorder-muted)]">
 													Optional
 												</span>
 											</Show>
 										</div>
-										<span class="text-[11px] text-[var(--recorder-muted,#879192)] leading-snug">
+										<span class="text-[11px] text-[var(--recorder-muted)] leading-snug">
 											{permission.description}
 										</span>
 									</div>
