@@ -7,11 +7,8 @@ import {
 	useQueryClient,
 } from "@tanstack/solid-query";
 import { Channel } from "@tauri-apps/api/core";
-import { emit, listen } from "@tauri-apps/api/event";
-import {
-	getAllWebviewWindows,
-	WebviewWindow,
-} from "@tauri-apps/api/webviewWindow";
+import { emit } from "@tauri-apps/api/event";
+import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
 import * as dialog from "@tauri-apps/plugin-dialog";
 import { relaunch } from "@tauri-apps/plugin-process";
@@ -39,7 +36,6 @@ import {
 	generalSettingsStore,
 	recordingSettingsStore,
 } from "~/store";
-import { createSignInMutation } from "~/utils/auth";
 import { createTauriEventListener } from "~/utils/createEventListener";
 import {
 	type CameraWithDetails,
@@ -1607,7 +1603,7 @@ function createUpdateReadyToast() {
 					<div class="flex gap-2 items-center">
 						<button
 							type="button"
-							class="px-2.5 py-1 text-xs font-medium rounded-[var(--radius-md,8px)] transition-colors bg-[var(--sleek-accent,#0284c7)] text-white hover:brightness-110"
+							class="px-2.5 py-1 text-xs font-medium rounded-[var(--radius-md,8px)] transition-colors bg-[var(--sleek-accent,#0084d1)] text-white hover:brightness-110"
 							onClick={() => {
 								toast.dismiss(t.id);
 								const install = update.installed
@@ -2474,7 +2470,6 @@ function Page() {
 		}
 	});
 
-	const signIn = createSignInMutation();
 	const stopRecording = createMutation(() => ({
 		mutationFn: async () => {
 			try {
@@ -2588,9 +2583,9 @@ function Page() {
 					<div class="flex flex-row gap-2 items-stretch w-full">
 						<div
 							class={cx(
-								"flex flex-1 overflow-hidden rounded-[var(--radius-lg,12px)] border border-[var(--recorder-border,rgba(233,238,245,0.1))] bg-[var(--recorder-raised,#1b1d22)] transition-[border-color,box-shadow] duration-150",
+								"flex flex-1 overflow-hidden rounded-[var(--radius-lg,12px)] border border-[var(--recorder-border,#e6e6e6)] bg-[var(--recorder-raised,#f5f5f5)] transition-[border-color,box-shadow] duration-150",
 								(rawOptions.targetMode === "display" || displayMenuOpen()) &&
-									"border-[var(--sleek-accent,#0284c7)] shadow-[0_0_0_1px_var(--sleek-accent-ring,rgba(2,132,199,0.35))]",
+									"border-[var(--sleek-accent,#0084d1)] shadow-[var(--recorder-selected-shadow,0_0_0_1px_rgba(0,132,209,0.35))]",
 							)}
 						>
 							<TargetTypeButton
@@ -2605,8 +2600,9 @@ function Page() {
 							/>
 							<TargetDropdownButton
 								class={cx(
-									"border-l border-[var(--recorder-border,rgba(233,238,245,0.1))]",
-									displayMenuOpen() && "bg-white/[0.06]",
+									"border-l border-[var(--recorder-border,#e6e6e6)]",
+									displayMenuOpen() &&
+										"bg-[var(--recorder-overlay,rgba(37,43,49,0.05))]",
 								)}
 								ref={displayTriggerRef}
 								disabled={isRecording()}
@@ -2626,9 +2622,9 @@ function Page() {
 						</div>
 						<div
 							class={cx(
-								"flex flex-1 overflow-hidden rounded-[var(--radius-lg,12px)] border border-[var(--recorder-border,rgba(233,238,245,0.1))] bg-[var(--recorder-raised,#1b1d22)] transition-[border-color,box-shadow] duration-150",
+								"flex flex-1 overflow-hidden rounded-[var(--radius-lg,12px)] border border-[var(--recorder-border,#e6e6e6)] bg-[var(--recorder-raised,#f5f5f5)] transition-[border-color,box-shadow] duration-150",
 								(rawOptions.targetMode === "window" || windowMenuOpen()) &&
-									"border-[var(--sleek-accent,#0284c7)] shadow-[0_0_0_1px_var(--sleek-accent-ring,rgba(2,132,199,0.35))]",
+									"border-[var(--sleek-accent,#0084d1)] shadow-[var(--recorder-selected-shadow,0_0_0_1px_rgba(0,132,209,0.35))]",
 							)}
 						>
 							<TargetTypeButton
@@ -2643,8 +2639,9 @@ function Page() {
 							/>
 							<TargetDropdownButton
 								class={cx(
-									"border-l border-[var(--recorder-border,rgba(233,238,245,0.1))]",
-									windowMenuOpen() && "bg-white/[0.06]",
+									"border-l border-[var(--recorder-border,#e6e6e6)]",
+									windowMenuOpen() &&
+										"bg-[var(--recorder-overlay,rgba(37,43,49,0.05))]",
 								)}
 								ref={windowTriggerRef}
 								disabled={isRecording()}
@@ -2686,36 +2683,16 @@ function Page() {
 						/>
 					</div>
 				</div>
-				<div class="h-px w-full bg-[var(--recorder-border,rgba(233,238,245,0.08))]" />
+				<div class="h-px w-full bg-[var(--recorder-border,#e6e6e6)]" />
 				<BaseControls />
 			</div>
 		</Transition>
 	);
 
-	const startSignInCleanup = listen("start-sign-in", async () => {
-		const abort = new AbortController();
-		for (const win of await getAllWebviewWindows()) {
-			if (win.label.startsWith("target-select-overlay")) {
-				await win.setIgnoreCursorEvents(true);
-				await win.hide();
-			}
-		}
-
-		await signIn.mutateAsync(abort).catch(() => {});
-
-		for (const win of await getAllWebviewWindows()) {
-			if (win.label.startsWith("target-select-overlay")) {
-				await win.setIgnoreCursorEvents(false);
-				await win.show();
-			}
-		}
-	});
-	onCleanup(() => startSignInCleanup.then((cb) => cb()));
-
 	return (
 		<div
 			onMouseEnter={handleMouseEnter}
-			class="flex relative flex-col px-3.5 gap-2.5 pb-2.5 h-full min-h-0 text-[var(--recorder-text,#eef3f8)] bg-[var(--recorder-bg,#121212)]"
+			class="flex relative flex-col px-3.5 gap-2.5 pb-2.5 h-full min-h-0 text-[var(--recorder-text,#252b31)] bg-[var(--recorder-bg,#ffffff)]"
 		>
 			<WindowChromeHeader hideMaximize>
 				<div
@@ -2794,7 +2771,7 @@ function Page() {
 				<div class="flex items-center justify-between mt-3 mb-1">
 					<div class="flex items-center gap-2 min-w-0">
 						<a
-							class="*:w-[92px] *:h-auto text-[var(--recorder-text,#eef3f8)] shrink-0"
+							class="*:w-[92px] *:h-auto text-[var(--recorder-text,#252b31)] shrink-0"
 							target="_blank"
 							href={
 								auth.data
@@ -2809,8 +2786,8 @@ function Page() {
 							class={cx(
 								"rounded-[var(--radius-pill,9999px)] border px-2 py-0.5 text-[10px] font-medium tracking-[-0.02em]",
 								auth.data
-									? "border-[var(--sleek-accent,#0284c7)]/40 bg-[var(--sleek-accent-soft,rgba(2,132,199,0.12))] text-[var(--sleek-accent,#0284c7)]"
-									: "border-[var(--recorder-border,rgba(233,238,245,0.12))] bg-white/[0.04] text-[var(--recorder-muted,#7a7d85)]",
+									? "border-[var(--sleek-accent,#0084d1)]/40 bg-[var(--sleek-accent-soft,rgba(0,132,209,0.12))] text-[var(--sleek-accent,#0084d1)]"
+									: "border-[var(--recorder-border,#e6e6e6)] bg-[var(--recorder-overlay,rgba(37,43,49,0.05))] text-[var(--recorder-muted,#879192)]",
 							)}
 						>
 							{auth.data ? "Connected" : "Local"}
@@ -2830,46 +2807,27 @@ function Page() {
 				</div>
 			</Show>
 			<div class="flex-1 min-h-0 w-full flex flex-col">
-				<Show when={signIn.isPending}>
-					<div class="flex absolute inset-0 justify-center items-center bg-gray-1 animate-in fade-in">
-						<div class="flex flex-col gap-4 justify-center items-center">
-							<span>Signing In...</span>
-
-							<Button
-								onClick={() => {
-									signIn.variables?.abort();
-									signIn.reset();
+				<Show when={activeMenu()} keyed fallback={<TargetSelectionHome />}>
+					{(variant) =>
+						variant === "display" ? (
+							<TargetMenuPanel
+								variant="display"
+								targets={displayTargetsData()}
+								isLoading={displayMenuLoading()}
+								errorMessage={displayErrorMessage()}
+								onSelect={selectDisplayTarget}
+								disabled={isRecording()}
+								onBack={() => {
+									setDisplayMenuOpen(false);
+									displayTriggerRef?.focus();
 								}}
-								variant="gray"
-								class="w-full"
-							>
-								Cancel Sign In
-							</Button>
-						</div>
-					</div>
-				</Show>
-				<Show when={!signIn.isPending}>
-					<Show when={activeMenu()} keyed fallback={<TargetSelectionHome />}>
-						{(variant) =>
-							variant === "display" ? (
-								<TargetMenuPanel
-									variant="display"
-									targets={displayTargetsData()}
-									isLoading={displayMenuLoading()}
-									errorMessage={displayErrorMessage()}
-									onSelect={selectDisplayTarget}
-									disabled={isRecording()}
-									onBack={() => {
-										setDisplayMenuOpen(false);
-										displayTriggerRef?.focus();
-									}}
-								/>
-							) : variant === "window" ? (
-								<TargetMenuPanel
-									variant="window"
-									targets={windowTargetsData()}
-									isLoading={windowMenuLoading()}
-									errorMessage={windowErrorMessage()}
+							/>
+						) : variant === "window" ? (
+							<TargetMenuPanel
+								variant="window"
+								targets={windowTargetsData()}
+								isLoading={windowMenuLoading()}
+								errorMessage={windowErrorMessage()}
 									onSelect={selectWindowTarget}
 									disabled={isRecording()}
 									onBack={() => {
@@ -3018,7 +2976,6 @@ function Page() {
 								/>
 							)
 						}
-					</Show>
 				</Show>
 			</div>
 			<Show when={isActivelyRecording()}>

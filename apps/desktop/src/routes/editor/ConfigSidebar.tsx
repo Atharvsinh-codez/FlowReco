@@ -84,7 +84,7 @@ import IconLucideMonitor from "~icons/lucide/monitor";
 import IconLucideMoon from "~icons/lucide/moon";
 import IconLucideMusic from "~icons/lucide/music";
 import IconLucidePalette from "~icons/lucide/palette";
-import IconLucideRabbit from "~icons/lucide/rabbit";
+import IconLucideRotate3d from "~icons/lucide/rotate-3d";
 import IconLucideSparkles from "~icons/lucide/sparkles";
 import IconLucideTimer from "~icons/lucide/timer";
 import IconLucideType from "~icons/lucide/type";
@@ -122,7 +122,6 @@ import {
 	type TextSegment,
 } from "./text";
 import {
-	ComingSoonTooltip,
 	EditorButton,
 	Field,
 	Input,
@@ -451,55 +450,58 @@ export function ConfigSidebar() {
 
 	let scrollRef!: HTMLDivElement;
 
+	const inspectorTabs = () =>
+		[
+			{ id: TAB_IDS.background, icon: IconCapImage, label: "Scene" },
+			{
+				id: TAB_IDS.camera,
+				icon: IconCapCamera,
+				label: "Camera",
+				disabled: editorInstance.recordings.segments.every(
+					(s) => s.camera === null,
+				),
+			},
+			{
+				id: TAB_IDS.cursor,
+				icon: IconCapCursor,
+				label: "Cursor",
+				disabled: !meta().hasRecordedCursorData,
+			},
+			{
+				id: TAB_IDS.captions,
+				icon: IconCapMessageBubble,
+				label: "Captions",
+			},
+			{ id: TAB_IDS.audio, icon: IconCapAudioOn, label: "Audio" },
+			{
+				id: TAB_IDS.keyboard,
+				icon: IconLucideKeyboard,
+				label: "Keys",
+			},
+		] as const;
+
 	return (
 		<KTabs
+			orientation="vertical"
 			value={
 				editorState.timeline.selection ||
 				editorState.timeline.audioPicker !== null
 					? undefined
 					: state.selectedTab
 			}
-			class="flex flex-col min-h-0 shrink-0 flex-1 max-w-104 overflow-hidden rounded-[var(--radius-lg,14px)] z-10 bg-gray-1 dark:bg-gray-2 border border-gray-3 shadow-[0_1px_0_rgba(255,255,255,0.03)_inset]"
+			class="flex flex-row min-h-0 shrink-0 flex-1 max-w-104 overflow-hidden rounded-[var(--radius-xl,16px)] z-10 bg-white dark:bg-gray-2 border border-[var(--recorder-border,#e6e6e6)] dark:border-gray-3 shadow-[0_1px_0_rgba(255,255,255,0.8)_inset]"
 		>
-			<div class="px-3 pt-2.5 pb-1 shrink-0 border-b border-gray-3 bg-gray-1 dark:bg-gray-2">
-				<p class="text-[10px] font-medium uppercase tracking-[0.08em] text-gray-10 mb-1.5">
-					Inspector
-				</p>
-				<KTabs.List class="relative flex overflow-hidden sticky top-0 z-60 flex-row items-center h-11 text-lg rounded-[var(--radius-md,10px)] bg-gray-2 dark:bg-gray-3/60 border border-gray-3">
-					<For
-						each={[
-							{ id: TAB_IDS.background, icon: IconCapImage },
-							{
-								id: TAB_IDS.camera,
-								icon: IconCapCamera,
-								disabled: editorInstance.recordings.segments.every(
-									(s) => s.camera === null,
-								),
-							},
-							{ id: TAB_IDS.audio, icon: IconCapAudioOn },
-							{
-								id: TAB_IDS.cursor,
-								icon: IconCapCursor,
-								disabled: !meta().hasRecordedCursorData,
-							},
-							{
-								id: TAB_IDS.keyboard,
-								icon: IconLucideKeyboard,
-							},
-							{
-								id: TAB_IDS.captions,
-								icon: IconCapMessageBubble,
-							},
-						].filter(Boolean)}
-					>
+			<div class="flex flex-col items-center shrink-0 w-12 py-2.5 gap-0.5 border-r border-[var(--recorder-border,#e6e6e6)] dark:border-gray-3 bg-[var(--flow-surface-light,#f5f5f5)] dark:bg-gray-3/40">
+				<KTabs.List class="relative flex flex-col items-center gap-0.5 w-full px-1.5">
+					<For each={inspectorTabs()}>
 						{(item) => (
 							<KTabs.Trigger
 								value={item.id}
 								class={cx(
-									"flex relative z-10 flex-1 justify-center items-center px-2 py-1.5 transition-colors group disabled:opacity-50 focus:outline-hidden",
-									editorState.timeline.selection
-										? "text-gray-11"
-										: "text-gray-11 data-selected:text-gray-12",
+									"group relative flex size-9 items-center justify-center rounded-[10px] transition-all duration-150 disabled:opacity-40 focus:outline-hidden",
+									"text-[var(--recorder-muted,#879192)] data-selected:text-[var(--sleek-accent,#0084d1)]",
+									"hover:text-[var(--recorder-text,#252b31)] hover:bg-black/[0.04] dark:hover:bg-white/5",
+									"data-selected:bg-[var(--sleek-accent-soft,rgba(0,132,209,0.12))]",
 								)}
 								onClick={() => {
 									if (editorState.timeline.selection) {
@@ -516,360 +518,384 @@ export function ConfigSidebar() {
 										top: 0,
 									});
 								}}
-								disabled={item.disabled}
+								disabled={"disabled" in item ? item.disabled : false}
+								aria-label={item.label}
+								title={item.label}
 							>
-								<div
+								<span
 									class={cx(
-										"flex justify-center relative border-transparent border z-10 items-center rounded-[var(--radius-sm,6px)] size-8 transition will-change-transform",
-										state.selectedTab !== item.id &&
-											"group-hover:border-gray-300 group-disabled:border-none",
+										"absolute left-0 top-1/2 h-4 w-0.5 -translate-y-1/2 rounded-full bg-[var(--sleek-accent,#0084d1)] transition-opacity",
+										state.selectedTab === item.id &&
+											!editorState.timeline.selection
+											? "opacity-100"
+											: "opacity-0",
 									)}
-								>
-									<Dynamic component={item.icon} />
-								</div>
+								/>
+								<Dynamic component={item.icon} class="size-[18px]" />
 							</KTabs.Trigger>
 						)}
 					</For>
-
-					<Show
-						when={
-							!editorState.timeline.selection &&
-							editorState.timeline.audioPicker === null
-						}
-					>
-						<KTabs.Indicator class="absolute top-0 left-0 w-full h-full transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] pointer-events-none will-change-transform">
-							<div class="absolute top-1/2 left-1/2 rounded-[var(--radius-sm,6px)] transform -translate-x-1/2 -translate-y-1/2 bg-gray-1 dark:bg-gray-4 ring-1 ring-[var(--sleek-accent,#0284c7)]/35 will-change-transform size-8" />
-						</KTabs.Indicator>
-					</Show>
 				</KTabs.List>
 			</div>
-			<div
-				ref={scrollRef}
-				style={{
-					"--margin-top-scroll": "5px",
-				}}
-				class="custom-scroll overflow-x-hidden overflow-y-scroll text-[0.875rem] flex-1 min-h-0"
-				classList={{
-					hidden:
-						!!editorState.timeline.selection ||
-						editorState.timeline.audioPicker !== null ||
-						editorState.timeline.audioReplace !== null,
-				}}
-			>
-				<BackgroundConfig
-					scrollRef={scrollRef}
-					brandColorSwatches={brandColorSwatches()}
-				/>
-				<CameraConfig scrollRef={scrollRef} />
-				<KTabs.Content
-					value="audio"
-					class="flex flex-col flex-1 gap-6 p-4 min-h-0"
+			<div class="flex flex-col flex-1 min-w-0 min-h-0">
+				<div class="flex items-center justify-between px-3.5 h-10 shrink-0 border-b border-[var(--recorder-border,#e6e6e6)] dark:border-gray-3">
+					<p class="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--recorder-muted,#879192)]">
+						{inspectorTabs().find((t) => t.id === state.selectedTab)?.label ??
+							"Inspector"}
+					</p>
+				</div>
+				<div
+					ref={scrollRef}
+					style={{
+						"--margin-top-scroll": "5px",
+					}}
+					class="custom-scroll overflow-x-hidden overflow-y-scroll text-[0.875rem] flex-1 min-h-0"
+					classList={{
+						hidden:
+							!!editorState.timeline.selection ||
+							editorState.timeline.audioPicker !== null ||
+							editorState.timeline.audioReplace !== null,
+					}}
 				>
-					<Field
-						name="Audio Controls"
-						icon={<IconLucideVolume2 class="size-4" />}
+					<BackgroundConfig
+						scrollRef={scrollRef}
+						brandColorSwatches={brandColorSwatches()}
+					/>
+					<CameraConfig scrollRef={scrollRef} />
+					<KTabs.Content
+						value="audio"
+						class="flex flex-col flex-1 gap-6 p-4 min-h-0"
 					>
-						<Subfield name="Mute Audio">
-							<Toggle
-								checked={project.audio.mute}
-								onChange={(v) => setProject("audio", "mute", v)}
-							/>
-						</Subfield>
-						{editorInstance.recordings.segments[0].mic?.channels === 2 && (
-							<Subfield name="Microphone Stereo Mode">
-								<KSelect<{ name: string; value: StereoMode }>
-									options={STEREO_MODES}
-									optionValue="value"
-									optionTextValue="name"
-									value={STEREO_MODES.find(
-										(v) => v.value === project.audio.micStereoMode,
-									)}
-									onChange={(v) => {
-										if (v) setProject("audio", "micStereoMode", v.value);
-									}}
-									disallowEmptySelection
-									itemComponent={(props) => (
-										<MenuItem<typeof KSelect.Item>
-											as={KSelect.Item}
-											item={props.item}
-										>
-											<KSelect.ItemLabel class="flex-1">
-												{props.item.rawValue.name}
-											</KSelect.ItemLabel>
-										</MenuItem>
-									)}
-								>
-									<KSelect.Trigger class="flex flex-row gap-2 items-center px-2 w-full h-8 rounded-lg transition-colors bg-gray-3 disabled:text-gray-11">
-										<KSelect.Value<{
-											name: string;
-											value: StereoMode;
-										}> class="flex-1 text-sm text-left truncate text-(--gray-500) font-normal">
-											{(state) => <span>{state.selectedOption().name}</span>}
-										</KSelect.Value>
-										<KSelect.Icon<ValidComponent>
-											as={(props) => (
-												<IconCapChevronDown
-													{...props}
-													class="size-4 shrink-0 transform transition-transform data-expanded:rotate-180 text-(--gray-500)"
-												/>
-											)}
-										/>
-									</KSelect.Trigger>
-									<KSelect.Portal>
-										<PopperContent<typeof KSelect.Content>
-											as={KSelect.Content}
-											class={cx(topSlideAnimateClasses, "z-50")}
-										>
-											<MenuItemList<typeof KSelect.Listbox>
-												class="overflow-y-auto max-h-32"
-												as={KSelect.Listbox}
-											/>
-										</PopperContent>
-									</KSelect.Portal>
-								</KSelect>
+						<Field
+							name="Audio Controls"
+							icon={<IconLucideVolume2 class="size-4" />}
+						>
+							<Subfield name="Mute Audio">
+								<Toggle
+									checked={project.audio.mute}
+									onChange={(v) => setProject("audio", "mute", v)}
+								/>
 							</Subfield>
-						)}
+							{editorInstance.recordings.segments[0].mic?.channels === 2 && (
+								<Subfield name="Microphone Stereo Mode">
+									<KSelect<{ name: string; value: StereoMode }>
+										options={STEREO_MODES}
+										optionValue="value"
+										optionTextValue="name"
+										value={STEREO_MODES.find(
+											(v) => v.value === project.audio.micStereoMode,
+										)}
+										onChange={(v) => {
+											if (v) setProject("audio", "micStereoMode", v.value);
+										}}
+										disallowEmptySelection
+										itemComponent={(props) => (
+											<MenuItem<typeof KSelect.Item>
+												as={KSelect.Item}
+												item={props.item}
+											>
+												<KSelect.ItemLabel class="flex-1">
+													{props.item.rawValue.name}
+												</KSelect.ItemLabel>
+											</MenuItem>
+										)}
+									>
+										<KSelect.Trigger class="flex flex-row gap-2 items-center px-2 w-full h-8 rounded-lg transition-colors bg-gray-3 disabled:text-gray-11">
+											<KSelect.Value<{
+												name: string;
+												value: StereoMode;
+											}> class="flex-1 text-sm text-left truncate text-(--gray-500) font-normal">
+												{(state) => <span>{state.selectedOption().name}</span>}
+											</KSelect.Value>
+											<KSelect.Icon<ValidComponent>
+												as={(props) => (
+													<IconCapChevronDown
+														{...props}
+														class="size-4 shrink-0 transform transition-transform data-expanded:rotate-180 text-(--gray-500)"
+													/>
+												)}
+											/>
+										</KSelect.Trigger>
+										<KSelect.Portal>
+											<PopperContent<typeof KSelect.Content>
+												as={KSelect.Content}
+												class={cx(topSlideAnimateClasses, "z-50")}
+											>
+												<MenuItemList<typeof KSelect.Listbox>
+													class="overflow-y-auto max-h-32"
+													as={KSelect.Listbox}
+												/>
+											</PopperContent>
+										</KSelect.Portal>
+									</KSelect>
+								</Subfield>
+							)}
 
-						{/* <Subfield name="Mute Audio">
+							{/* <Subfield name="Mute Audio">
                 <Toggle
                   checked={project.audio.mute}
                   onChange={(v) => setProject("audio", "mute", v)}
                 />
               </Subfield> */}
 
-						{/* <ComingSoonTooltip>
+							{/* <ComingSoonTooltip>
                 <Subfield name="Improve Mic Quality">
                   <Toggle disabled />
                 </Subfield>
               </ComingSoonTooltip> */}
-					</Field>
-					{meta().hasMicrophone && (
-						<Field
-							name="Microphone Volume"
-							icon={<IconCapMicrophone class="size-4" />}
-						>
-							<Slider
-								disabled={project.audio.mute}
-								value={[project.audio.micVolumeDb ?? 0]}
-								onChange={(v) => setProject("audio", "micVolumeDb", v[0])}
-								minValue={-30}
-								maxValue={10}
-								step={0.1}
-								formatTooltip={(v) =>
-									v <= -30 ? "Muted" : `${v > 0 ? "+" : ""}${v.toFixed(1)} dB`
-								}
-							/>
 						</Field>
-					)}
-					{meta().hasSystemAudio && (
-						<Field
-							name="System Audio Volume"
-							icon={<IconLucideMonitor class="size-4" />}
-						>
-							<Slider
-								disabled={project.audio.mute}
-								value={[project.audio.systemVolumeDb ?? 0]}
-								onChange={(v) => setProject("audio", "systemVolumeDb", v[0])}
-								minValue={-30}
-								maxValue={10}
-								step={0.1}
-								formatTooltip={(v) =>
-									v <= -30 ? "Muted" : `${v > 0 ? "+" : ""}${v.toFixed(1)} dB`
-								}
-							/>
-						</Field>
-					)}
-				</KTabs.Content>
-				<KTabs.Content
-					value="cursor"
-					class="flex flex-col flex-1 gap-6 p-4 min-h-0"
-				>
-					<Field
-						name="Show cursor"
-						value={
+						{meta().hasMicrophone && (
+							<Field
+								name="Microphone Volume"
+								icon={<IconCapMicrophone class="size-4" />}
+							>
+								<Slider
+									disabled={project.audio.mute}
+									value={[project.audio.micVolumeDb ?? 0]}
+									onChange={(v) => setProject("audio", "micVolumeDb", v[0])}
+									minValue={-30}
+									maxValue={10}
+									step={0.1}
+									formatTooltip={(v) =>
+										v <= -30 ? "Muted" : `${v > 0 ? "+" : ""}${v.toFixed(1)} dB`
+									}
+								/>
+							</Field>
+						)}
+						{meta().hasSystemAudio && (
+							<Field
+								name="System Audio Volume"
+								icon={<IconLucideMonitor class="size-4" />}
+							>
+								<Slider
+									disabled={project.audio.mute}
+									value={[project.audio.systemVolumeDb ?? 0]}
+									onChange={(v) => setProject("audio", "systemVolumeDb", v[0])}
+									minValue={-30}
+									maxValue={10}
+									step={0.1}
+									formatTooltip={(v) =>
+										v <= -30 ? "Muted" : `${v > 0 ? "+" : ""}${v.toFixed(1)} dB`
+									}
+								/>
+							</Field>
+						)}
+					</KTabs.Content>
+					<KTabs.Content
+						value="cursor"
+						class="flex flex-col flex-1 gap-5 p-3.5 min-h-0"
+					>
+						<div class="flex items-center justify-between">
+							<span class="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--recorder-muted,#879192)]">
+								Cursor
+							</span>
 							<Toggle
 								checked={!project.cursor.hide}
 								onChange={(v) => {
 									setProject("cursor", "hide", !v);
 								}}
 							/>
-						}
-					/>
-					<Show when={!project.cursor.hide}>
-						<Field name="Cursor Type" icon={<IconCapCursor />}>
-							<RadioGroup
-								class="flex flex-col gap-2"
-								value={project.cursor.type}
-								onChange={(value) =>
-									setProject("cursor", "type", value as CursorType)
-								}
-							>
-								{CURSOR_TYPE_OPTIONS.map((option) => (
-									<RadioGroup.Item
-										value={option.value}
-										class="rounded-lg border border-gray-3 transition-colors data-checked:border-blue-8 data-checked:bg-blue-3/40"
-									>
-										<RadioGroup.ItemInput class="sr-only" />
-										<RadioGroup.ItemLabel class="flex items-start gap-3 p-3">
-											<RadioGroup.ItemControl class="mt-1 size-4 rounded-full border border-gray-7 data-checked:border-blue-9 data-checked:bg-blue-9" />
-											<div class="flex flex-col text-left">
-												<span class="text-sm font-medium text-gray-12">
+						</div>
+						<Show when={!project.cursor.hide}>
+							<Field name="Style" icon={<IconCapCursor />}>
+								<div class="grid grid-cols-2 gap-2">
+									<For each={CURSOR_TYPE_OPTIONS}>
+										{(option) => (
+											<button
+												type="button"
+												class={cx(
+													"rounded-[12px] border px-3 py-2.5 text-left transition-all",
+													project.cursor.type === option.value
+														? "border-[var(--sleek-accent,#0084d1)] bg-[var(--sleek-accent-soft,rgba(0,132,209,0.12))]"
+														: "border-[var(--recorder-border,#e6e6e6)] bg-[var(--flow-surface-light,#f5f5f5)] hover:border-gray-5",
+												)}
+												onClick={() =>
+													setProject(
+														"cursor",
+														"type",
+														option.value as CursorType,
+													)
+												}
+											>
+												<span class="block text-[13px] font-medium text-gray-12">
 													{option.label}
 												</span>
-												<span class="text-xs text-gray-11">
+												<span class="block mt-0.5 text-[11px] leading-snug text-gray-11">
 													{option.description}
 												</span>
-											</div>
-										</RadioGroup.ItemLabel>
-									</RadioGroup.Item>
-								))}
-							</RadioGroup>
-						</Field>
-						<Field name="Size" icon={<IconCapEnlarge />}>
-							<Slider
-								value={[project.cursor.size]}
-								onChange={(v) => setProject("cursor", "size", v[0])}
-								minValue={20}
-								maxValue={300}
-								step={1}
-							/>
-						</Field>
-						<Field name="Tilt" icon={<IconLucideRotate3d class="size-4" />}>
-							<Slider
-								value={[project.cursor.rotationAmount ?? 0.15]}
-								onChange={(v) => setProject("cursor", "rotationAmount", v[0])}
-								minValue={0}
-								maxValue={1}
-								step={0.01}
-								formatTooltip={(value) => `${Math.round(value * 100)}%`}
-							/>
-						</Field>
-						<Field
-							name="Hide When Idle"
-							icon={<IconLucideTimer class="size-4" />}
-							value={
-								<Toggle
-									checked={project.cursor.hideWhenIdle}
-									onChange={(value) =>
-										setProject("cursor", "hideWhenIdle", value)
-									}
-								/>
-							}
-						/>
-						<Show when={project.cursor.hideWhenIdle}>
-							<Subfield name="Inactivity Delay" class="gap-4 items-center">
-								<div class="flex flex-1 gap-3 items-center">
-									<Slider
-										class="flex-1"
-										value={[cursorIdleDelay()]}
-										onChange={(v) => {
-											const rounded = clampIdleDelay(v[0]);
-											setProject("cursor", "hideWhenIdleDelay", rounded);
-										}}
-										minValue={0.5}
-										maxValue={5}
-										step={0.1}
-										formatTooltip={(value) => `${value.toFixed(1)}s`}
-									/>
-									<span class="w-12 text-xs text-right text-gray-11">
-										{cursorIdleDelay().toFixed(1)}s
-									</span>
+											</button>
+										)}
+									</For>
 								</div>
-							</Subfield>
-						</Show>
-						<Field
-							name="Cursor Movement Style"
-							icon={<IconLucideRabbit class="size-4" />}
-						>
-							<RadioGroup
-								class="flex flex-col gap-2"
-								value={project.cursor.animationStyle}
-								onChange={(value) =>
-									applyCursorStylePreset(value as CursorAnimationStyle)
-								}
-							>
-								{CURSOR_ANIMATION_STYLE_OPTIONS.map((option) => (
-									<RadioGroup.Item
-										value={option.value}
-										class="rounded-lg border border-gray-3 transition-colors data-checked:border-blue-8 data-checked:bg-blue-3/40"
-									>
-										<RadioGroup.ItemInput class="sr-only" />
-										<RadioGroup.ItemLabel class="flex items-start gap-3 p-3">
-											<RadioGroup.ItemControl class="mt-1 size-4 rounded-full border border-gray-7 data-checked:border-blue-9 data-checked:bg-blue-9" />
-											<div class="flex flex-col text-left">
-												<span class="text-sm font-medium text-gray-12">
-													{option.label}
-												</span>
-												<span class="text-xs text-gray-11">
-													{option.description}
-												</span>
-											</div>
-										</RadioGroup.ItemLabel>
-									</RadioGroup.Item>
-								))}
-							</RadioGroup>
-						</Field>
-						<KCollapsible open={!project.cursor.raw}>
+							</Field>
+							<Field name="Size" icon={<IconCapEnlarge />}>
+								<Slider
+									value={[project.cursor.size]}
+									onChange={(v) => setProject("cursor", "size", v[0])}
+									minValue={20}
+									maxValue={300}
+									step={1}
+								/>
+							</Field>
+							<Field name="Tilt" icon={<IconLucideRotate3d class="size-4" />}>
+								<Slider
+									value={[project.cursor.rotationAmount ?? 0.15]}
+									onChange={(v) => setProject("cursor", "rotationAmount", v[0])}
+									minValue={0}
+									maxValue={1}
+									step={0.01}
+									formatTooltip={(value) => `${Math.round(value * 100)}%`}
+								/>
+							</Field>
 							<Field
-								name="Smooth Movement"
-								icon={<IconHugeiconsEaseCurveControlPoints />}
+								name="Motion Blur"
+								icon={<IconLucideWind class="size-4" />}
+							>
+								<Slider
+									value={[project.cursor.motionBlur ?? DEFAULT_MOTION_BLUR]}
+									onChange={(v) => {
+										const value = v[0];
+										setProject("cursor", "motionBlur", value);
+										setProject("screenMotionBlur", value);
+									}}
+									minValue={0}
+									maxValue={1}
+									step={0.01}
+									formatTooltip={(value) => `${Math.round(value * 100)}%`}
+								/>
+							</Field>
+							<Field
+								name="Hide When Idle"
+								icon={<IconLucideTimer class="size-4" />}
 								value={
 									<Toggle
-										checked={!project.cursor.raw}
+										checked={project.cursor.hideWhenIdle}
+										onChange={(value) =>
+											setProject("cursor", "hideWhenIdle", value)
+										}
+									/>
+								}
+							/>
+							<Show when={project.cursor.hideWhenIdle}>
+								<Subfield name="Inactivity Delay" class="gap-4 items-center">
+									<div class="flex flex-1 gap-3 items-center">
+										<Slider
+											class="flex-1"
+											value={[cursorIdleDelay()]}
+											onChange={(v) => {
+												const rounded = clampIdleDelay(v[0]);
+												setProject("cursor", "hideWhenIdleDelay", rounded);
+											}}
+											minValue={0.5}
+											maxValue={5}
+											step={0.1}
+											formatTooltip={(value) => `${value.toFixed(1)}s`}
+										/>
+										<span class="w-12 text-xs text-right text-gray-11">
+											{cursorIdleDelay().toFixed(1)}s
+										</span>
+									</div>
+								</Subfield>
+							</Show>
+							<div class="h-px w-full bg-[var(--recorder-border,#e6e6e6)]" />
+							<span class="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--recorder-muted,#879192)]">
+								Animation
+							</span>
+							<div class="grid grid-cols-2 gap-2">
+								<For
+									each={CURSOR_ANIMATION_STYLE_OPTIONS.filter(
+										(o) => o.value !== "custom",
+									)}
+								>
+									{(option) => (
+										<button
+											type="button"
+											class={cx(
+												"rounded-[12px] border px-3 py-2.5 text-left transition-all",
+												project.cursor.animationStyle === option.value
+													? "border-[var(--sleek-accent,#0084d1)] bg-[var(--sleek-accent-soft,rgba(0,132,209,0.12))] shadow-[0_0_0_1px_rgba(0,132,209,0.12)]"
+													: "border-[var(--recorder-border,#e6e6e6)] bg-white hover:bg-[var(--flow-surface-light,#f5f5f5)]",
+											)}
+											onClick={() =>
+												applyCursorStylePreset(
+													option.value as CursorAnimationStyle,
+												)
+											}
+										>
+											<span class="block text-[13px] font-semibold text-gray-12">
+												{option.label}
+											</span>
+											<span class="block mt-0.5 text-[11px] leading-snug text-gray-11">
+												{option.description}
+											</span>
+										</button>
+									)}
+								</For>
+							</div>
+							<KCollapsible open={!project.cursor.raw}>
+								<Field
+									name="Smooth Movement"
+									icon={<IconHugeiconsEaseCurveControlPoints />}
+									value={
+										<Toggle
+											checked={!project.cursor.raw}
+											onChange={(value) => {
+												setProject("cursor", "raw", !value);
+											}}
+										/>
+									}
+								/>
+								<KCollapsible.Content class="overflow-hidden opacity-0 transition-opacity animate-collapsible-up data-expanded:animate-collapsible-down data-expanded:opacity-100">
+									<div class="flex flex-col gap-4 pt-3 pb-2 rounded-[12px] border border-[var(--recorder-border,#e6e6e6)] bg-[var(--flow-surface-light,#f5f5f5)] px-3">
+										<p class="text-[11px] text-[var(--recorder-muted,#879192)]">
+											Spring physics — higher tension is snappier; higher mass
+											is heavier; friction damps overshoot.
+										</p>
+										<Field name="Spring Tension">
+											<Slider
+												value={[project.cursor.tension]}
+												onChange={(v) => setCursorPhysics("tension", v[0])}
+												minValue={1}
+												maxValue={600}
+												step={1}
+											/>
+										</Field>
+										<Field name="Damping (Friction)">
+											<Slider
+												value={[project.cursor.friction]}
+												onChange={(v) => setCursorPhysics("friction", v[0])}
+												minValue={0}
+												maxValue={200}
+												step={0.1}
+											/>
+										</Field>
+										<Field name="Mass">
+											<Slider
+												value={[project.cursor.mass]}
+												onChange={(v) => setCursorPhysics("mass", v[0])}
+												minValue={0.1}
+												maxValue={15}
+												step={0.01}
+											/>
+										</Field>
+									</div>
+								</KCollapsible.Content>
+							</KCollapsible>
+							<Field
+								name="High Quality SVG Cursors"
+								icon={<IconLucideSparkles />}
+								value={
+									<Toggle
+										checked={project.cursor.useSvg ?? true}
 										onChange={(value) => {
-											setProject("cursor", "raw", !value);
+											setProject("cursor", "useSvg", value);
 										}}
 									/>
 								}
 							/>
-							<KCollapsible.Content class="overflow-hidden border-b opacity-0 transition-opacity border-gray-3 animate-collapsible-up data-expanded:animate-collapsible-down data-expanded:opacity-100">
-								{/* if Content has padding or margin the animation doesn't look as good */}
-								<div class="flex flex-col gap-4 pt-4 pb-6">
-									<Field name="Tension">
-										<Slider
-											value={[project.cursor.tension]}
-											onChange={(v) => setCursorPhysics("tension", v[0])}
-											minValue={1}
-											maxValue={600}
-											step={1}
-										/>
-									</Field>
-									<Field name="Friction">
-										<Slider
-											value={[project.cursor.friction]}
-											onChange={(v) => setCursorPhysics("friction", v[0])}
-											minValue={0}
-											maxValue={200}
-											step={0.1}
-										/>
-									</Field>
-									<Field name="Mass">
-										<Slider
-											value={[project.cursor.mass]}
-											onChange={(v) => setCursorPhysics("mass", v[0])}
-											minValue={0.1}
-											maxValue={15}
-											step={0.01}
-										/>
-									</Field>
-								</div>
-							</KCollapsible.Content>
-						</KCollapsible>
-						<Field
-							name="High Quality SVG Cursors"
-							icon={<IconLucideSparkles />}
-							value={
-								<Toggle
-									checked={project.cursor.useSvg ?? true}
-									onChange={(value) => {
-										setProject("cursor", "useSvg", value);
-									}}
-								/>
-							}
-						/>
-					</Show>
+						</Show>
 
-					{/* <Field name="Animation Style" icon={<IconLucideRabbit />}>
+						{/* <Field name="Animation Style" icon={<IconLucideRabbit />}>
             <RadioGroup
               defaultValue="regular"
               value={project.cursor.animationStyle}
@@ -914,678 +940,695 @@ export function ConfigSidebar() {
               ))}
             </RadioGroup>
           </Field> */}
-				</KTabs.Content>
-				<KTabs.Content value="hotkeys" class="flex flex-1 p-4 min-h-0">
-					<Field name="Hotkeys" icon={<IconCapHotkeys />}>
-						<ComingSoonTooltip>
-							<Subfield name="Show hotkeys">
-								<Toggle disabled />
-							</Subfield>
-						</ComingSoonTooltip>
-					</Field>
-				</KTabs.Content>
-				<KTabs.Content
-					value={TAB_IDS.captions}
-					class="flex flex-col flex-1 gap-6 p-4 min-h-0"
-				>
-					<Suspense>
-						<CaptionsTab brandColorSwatches={brandColorSwatches()} />
-					</Suspense>
-				</KTabs.Content>
-				<KTabs.Content
-					value={TAB_IDS.keyboard}
-					class="flex flex-col flex-1 gap-6 p-4 min-h-0"
-				>
-					<KeyboardTab brandColorSwatches={brandColorSwatches()} />
-				</KTabs.Content>
-			</div>
-			<div
-				style={{
-					"--margin-top-scroll": "5px",
-				}}
-				class="custom-scroll p-4 top-16 left-0 right-0 bottom-0 text-[0.875rem] space-y-4 bg-gray-1 dark:bg-gray-2 z-50"
-				classList={{
-					hidden:
-						!editorState.timeline.selection &&
-						editorState.timeline.audioPicker === null &&
-						editorState.timeline.audioReplace === null,
-					"animate-in slide-in-from-bottom-2 fade-in":
-						!!editorState.timeline.selection ||
-						editorState.timeline.audioPicker !== null ||
-						editorState.timeline.audioReplace !== null,
-				}}
-			>
-				<Show
-					when={
-						editorState.timeline.audioPicker !== null &&
-						!editorState.timeline.selection &&
-						editorState.timeline.audioReplace === null
-					}
-				>
-					<AudioLibraryPanel
-						mode={{
-							type: "add",
-							lane: editorState.timeline.audioPicker ?? 0,
-						}}
-						onClose={() => setEditorState("timeline", "audioPicker", null)}
-					/>
-				</Show>
-				<Show
-					when={(() => {
-						const index = editorState.timeline.audioReplace;
-						if (index === null) return null;
-						const segment = project.timeline?.audioSegments?.[index];
-						if (!segment) {
-							setEditorState("timeline", "audioReplace", null);
-							return null;
-						}
-						return { index };
-					})()}
-				>
-					{(value) => (
-						<AudioLibraryPanel
-							mode={{ type: "replace", index: value().index }}
-							onClose={() => setEditorState("timeline", "audioReplace", null)}
-						/>
-					)}
-				</Show>
-				<Show
-					when={
-						editorState.timeline.audioReplace === null
-							? editorState.timeline.selection
-							: null
-					}
-				>
-					{(selection) => (
+					</KTabs.Content>
+					<KTabs.Content value="hotkeys" class="flex flex-1 p-4 min-h-0">
+						<Field name="Hotkeys" icon={<IconCapHotkeys />}>
+							<p class="text-[12px] leading-relaxed text-[var(--recorder-muted,#879192)]">
+								System-wide shortcuts are free to configure in Settings →
+								Shortcuts. All capture and edit tools are unlocked with no plan
+								gate.
+							</p>
+						</Field>
+					</KTabs.Content>
+					<KTabs.Content
+						value={TAB_IDS.captions}
+						class="flex flex-col flex-1 gap-6 p-4 min-h-0"
+					>
 						<Suspense>
-							<Show
-								when={(() => {
-									const captionSelection = selection();
-									if (captionSelection.type !== "caption") return;
+							<CaptionsTab brandColorSwatches={brandColorSwatches()} />
+						</Suspense>
+					</KTabs.Content>
+					<KTabs.Content
+						value={TAB_IDS.keyboard}
+						class="flex flex-col flex-1 gap-6 p-4 min-h-0"
+					>
+						<KeyboardTab brandColorSwatches={brandColorSwatches()} />
+					</KTabs.Content>
+				</div>
+				<div
+					style={{
+						"--margin-top-scroll": "5px",
+					}}
+					class="custom-scroll p-4 top-16 left-0 right-0 bottom-0 text-[0.875rem] space-y-4 bg-gray-1 dark:bg-gray-2 z-50"
+					classList={{
+						hidden:
+							!editorState.timeline.selection &&
+							editorState.timeline.audioPicker === null &&
+							editorState.timeline.audioReplace === null,
+						"animate-in slide-in-from-bottom-2 fade-in":
+							!!editorState.timeline.selection ||
+							editorState.timeline.audioPicker !== null ||
+							editorState.timeline.audioReplace !== null,
+					}}
+				>
+					<Show
+						when={
+							editorState.timeline.audioPicker !== null &&
+							!editorState.timeline.selection &&
+							editorState.timeline.audioReplace === null
+						}
+					>
+						<AudioLibraryPanel
+							mode={{
+								type: "add",
+								lane: editorState.timeline.audioPicker ?? 0,
+							}}
+							onClose={() => setEditorState("timeline", "audioPicker", null)}
+						/>
+					</Show>
+					<Show
+						when={(() => {
+							const index = editorState.timeline.audioReplace;
+							if (index === null) return null;
+							const segment = project.timeline?.audioSegments?.[index];
+							if (!segment) {
+								setEditorState("timeline", "audioReplace", null);
+								return null;
+							}
+							return { index };
+						})()}
+					>
+						{(value) => (
+							<AudioLibraryPanel
+								mode={{ type: "replace", index: value().index }}
+								onClose={() => setEditorState("timeline", "audioReplace", null)}
+							/>
+						)}
+					</Show>
+					<Show
+						when={
+							editorState.timeline.audioReplace === null
+								? editorState.timeline.selection
+								: null
+						}
+					>
+						{(selection) => (
+							<Suspense>
+								<Show
+									when={(() => {
+										const captionSelection = selection();
+										if (captionSelection.type !== "caption") return;
 
-									const segments = captionSelection.indices
-										.map((index) => ({
-											index,
-											segment: project.timeline?.captionSegments?.[index],
-										}))
-										.filter(
-											(
-												item,
-											): item is {
-												index: number;
-												segment: CaptionTrackSegment;
-											} => item.segment !== undefined,
-										);
+										const segments = captionSelection.indices
+											.map((index) => ({
+												index,
+												segment: project.timeline?.captionSegments?.[index],
+											}))
+											.filter(
+												(
+													item,
+												): item is {
+													index: number;
+													segment: CaptionTrackSegment;
+												} => item.segment !== undefined,
+											);
 
-									if (segments.length === 0) {
-										setEditorState("timeline", "selection", null);
-										return;
-									}
+										if (segments.length === 0) {
+											setEditorState("timeline", "selection", null);
+											return;
+										}
 
-									return { selection: captionSelection, segments };
-								})()}
-							>
-								{(value) => (
-									<div class="space-y-4">
-										<div class="flex flex-row justify-between items-center">
-											<div class="flex gap-2 items-center">
+										return { selection: captionSelection, segments };
+									})()}
+								>
+									{(value) => (
+										<div class="space-y-4">
+											<div class="flex flex-row justify-between items-center">
+												<div class="flex gap-2 items-center">
+													<EditorButton
+														onClick={() =>
+															setEditorState("timeline", "selection", null)
+														}
+														leftIcon={<IconLucideCheck />}
+													>
+														Done
+													</EditorButton>
+													<span class="text-sm text-gray-10">
+														{value().segments.length} caption{" "}
+														{value().segments.length === 1
+															? "segment"
+															: "segments"}{" "}
+														selected
+													</span>
+												</div>
 												<EditorButton
+													variant="danger"
 													onClick={() =>
-														setEditorState("timeline", "selection", null)
+														projectActions.deleteCaptionSegments(
+															value().segments.map((s) => s.index),
+														)
 													}
-													leftIcon={<IconLucideCheck />}
+													leftIcon={<IconCapTrash />}
 												>
-													Done
+													Delete
 												</EditorButton>
-												<span class="text-sm text-gray-10">
-													{value().segments.length} caption{" "}
-													{value().segments.length === 1
-														? "segment"
-														: "segments"}{" "}
-													selected
-												</span>
 											</div>
-											<EditorButton
-												variant="danger"
-												onClick={() =>
-													projectActions.deleteCaptionSegments(
-														value().segments.map((s) => s.index),
-													)
-												}
-												leftIcon={<IconCapTrash />}
-											>
-												Delete
-											</EditorButton>
-										</div>
-										<For each={value().segments}>
-											{(item) => (
-												<div class="p-4 rounded-lg border border-gray-200">
-													<CaptionSegmentConfig
-														segment={item.segment}
-														segmentIndex={item.index}
-													/>
-												</div>
-											)}
-										</For>
-									</div>
-								)}
-							</Show>
-							<Show
-								when={(() => {
-									const keyboardSelection = selection();
-									if (keyboardSelection.type !== "keyboard") return;
-
-									const segments = keyboardSelection.indices
-										.map((index) => ({
-											index,
-											segment: project.timeline?.keyboardSegments?.[index],
-										}))
-										.filter(
-											(
-												item,
-											): item is {
-												index: number;
-												segment: KeyboardTrackSegment;
-											} => item.segment !== undefined,
-										);
-
-									if (segments.length === 0) {
-										setEditorState("timeline", "selection", null);
-										return;
-									}
-
-									return { selection: keyboardSelection, segments };
-								})()}
-							>
-								{(value) => (
-									<div class="space-y-4">
-										<div class="flex flex-row justify-between items-center">
-											<div class="flex gap-2 items-center">
-												<EditorButton
-													onClick={() => {
-														setEditorState("timeline", "selection", null);
-														setState("selectedTab", TAB_IDS.keyboard);
-													}}
-													leftIcon={<IconLucideCheck />}
-												>
-													Done
-												</EditorButton>
-												<span class="text-sm text-gray-10">
-													{value().segments.length} keyboard{" "}
-													{value().segments.length === 1
-														? "segment"
-														: "segments"}{" "}
-													selected
-												</span>
-											</div>
-											<EditorButton
-												variant="danger"
-												onClick={() =>
-													projectActions.deleteKeyboardSegments(
-														value().segments.map((s) => s.index),
-													)
-												}
-												leftIcon={<IconCapTrash />}
-											>
-												Delete
-											</EditorButton>
-										</div>
-										<For each={value().segments}>
-											{(item) => (
-												<div class="p-4 rounded-lg border border-gray-200">
-													<KeyboardSegmentConfig
-														segment={item.segment}
-														segmentIndex={item.index}
-													/>
-												</div>
-											)}
-										</For>
-									</div>
-								)}
-							</Show>
-							<Show
-								when={(() => {
-									const textSelection = selection();
-									if (textSelection.type !== "text") return;
-
-									const segments = textSelection.indices
-										.map((index) => ({
-											index,
-											segment: project.timeline?.textSegments?.[index],
-										}))
-										.filter(
-											(item): item is { index: number; segment: TextSegment } =>
-												item.segment !== undefined,
-										);
-
-									if (segments.length === 0) {
-										setEditorState("timeline", "selection", null);
-										return;
-									}
-									return { selection: textSelection, segments };
-								})()}
-							>
-								{(value) => (
-									<div class="space-y-4">
-										<div class="flex flex-row justify-between items-center">
-											<div class="flex gap-2 items-center">
-												<EditorButton
-													onClick={() =>
-														setEditorState("timeline", "selection", null)
-													}
-													leftIcon={<IconLucideCheck />}
-												>
-													Done
-												</EditorButton>
-												<span class="text-sm text-gray-10">
-													{value().segments.length} text{" "}
-													{value().segments.length === 1
-														? "segment"
-														: "segments"}{" "}
-													selected
-												</span>
-											</div>
-											<EditorButton
-												variant="danger"
-												onClick={() =>
-													projectActions.deleteTextSegments(
-														value().segments.map((s) => s.index),
-													)
-												}
-												leftIcon={<IconCapTrash />}
-											>
-												Delete
-											</EditorButton>
-										</div>
-										<For each={value().segments}>
-											{(item) => (
-												<div class="p-4 rounded-lg border border-gray-200">
-													<TextSegmentConfig
-														segment={item.segment}
-														segmentIndex={item.index}
-														brandColorSwatches={brandColorSwatches()}
-													/>
-												</div>
-											)}
-										</For>
-									</div>
-								)}
-							</Show>
-							<Show
-								when={(() => {
-									const audioSelection = selection();
-									if (audioSelection.type !== "audio") return;
-
-									const segments = audioSelection.indices
-										.map((index) => ({
-											index,
-											segment: project.timeline?.audioSegments?.[index],
-										}))
-										.filter(
-											(
-												item,
-											): item is {
-												index: number;
-												segment: AudioTrackSegment;
-											} => item.segment !== undefined,
-										);
-
-									if (segments.length === 0) {
-										setEditorState("timeline", "selection", null);
-										return;
-									}
-									return { selection: audioSelection, segments };
-								})()}
-							>
-								{(value) => (
-									<div class="space-y-4">
-										<div class="flex flex-row justify-between items-center">
-											<div class="flex gap-2 items-center">
-												<EditorButton
-													onClick={() =>
-														setEditorState("timeline", "selection", null)
-													}
-													leftIcon={<IconLucideCheck />}
-												>
-													Done
-												</EditorButton>
-												<span class="text-sm text-gray-10">
-													{value().segments.length} audio{" "}
-													{value().segments.length === 1
-														? "segment"
-														: "segments"}{" "}
-													selected
-												</span>
-											</div>
-											<EditorButton
-												variant="danger"
-												onClick={() =>
-													projectActions.deleteAudioSegments(
-														value().segments.map((s) => s.index),
-													)
-												}
-												leftIcon={<IconCapTrash />}
-											>
-												Delete
-											</EditorButton>
-										</div>
-										<For each={value().segments}>
-											{(item) => (
-												<div class="p-4 rounded-lg border border-gray-200">
-													<AudioSegmentConfig
-														segment={item.segment}
-														segmentIndex={item.index}
-													/>
-												</div>
-											)}
-										</For>
-									</div>
-								)}
-							</Show>
-							<Show
-								when={(() => {
-									const maskSelection = selection();
-									if (maskSelection.type !== "mask") return;
-
-									const segments = maskSelection.indices
-										.map((index) => ({
-											index,
-											segment: project.timeline?.maskSegments?.[index],
-										}))
-										.filter(
-											(item): item is { index: number; segment: MaskSegment } =>
-												item.segment !== undefined,
-										);
-
-									if (segments.length === 0) {
-										setEditorState("timeline", "selection", null);
-										return;
-									}
-									return { selection: maskSelection, segments };
-								})()}
-							>
-								{(value) => (
-									<div class="space-y-4">
-										<div class="flex flex-row justify-between items-center">
-											<div class="flex gap-2 items-center">
-												<EditorButton
-													onClick={() =>
-														setEditorState("timeline", "selection", null)
-													}
-													leftIcon={<IconLucideCheck />}
-												>
-													Done
-												</EditorButton>
-												<span class="text-sm text-gray-10">
-													{value().segments.length} mask{" "}
-													{value().segments.length === 1
-														? "segment"
-														: "segments"}{" "}
-													selected
-												</span>
-											</div>
-											<EditorButton
-												variant="danger"
-												onClick={() =>
-													projectActions.deleteMaskSegments(
-														value().segments.map((s) => s.index),
-													)
-												}
-												leftIcon={<IconCapTrash />}
-											>
-												Delete
-											</EditorButton>
-										</div>
-										<For each={value().segments}>
-											{(item) => (
-												<div class="p-4 rounded-lg border border-gray-200">
-													<MaskSegmentConfig
-														segment={item.segment}
-														segmentIndex={item.index}
-													/>
-												</div>
-											)}
-										</For>
-									</div>
-								)}
-							</Show>
-							<Show
-								when={(() => {
-									const zoomSelection = selection();
-									if (zoomSelection.type !== "zoom") return;
-
-									const segments = zoomSelection.indices
-										.map((index) => ({
-											index,
-											segment: project.timeline?.zoomSegments?.[index],
-										}))
-										.filter(
-											(item): item is { index: number; segment: ZoomSegment } =>
-												item.segment !== undefined,
-										);
-
-									if (segments.length === 0) {
-										setEditorState("timeline", "selection", null);
-										return;
-									}
-									return { selection: zoomSelection, segments };
-								})()}
-							>
-								{(value) => (
-									<div class="space-y-4">
-										<div class="flex flex-row justify-between items-center">
-											<div class="flex gap-2 items-center">
-												<EditorButton
-													onClick={() =>
-														setEditorState("timeline", "selection", null)
-													}
-													leftIcon={<IconLucideCheck />}
-												>
-													Done
-												</EditorButton>
-												<span class="text-sm text-gray-10">
-													{value().segments.length} zoom{" "}
-													{value().segments.length === 1
-														? "segment"
-														: "segments"}{" "}
-													selected
-												</span>
-											</div>
-											<EditorButton
-												variant="danger"
-												onClick={() => {
-													projectActions.deleteZoomSegments(
-														value().segments.map((s) => s.index),
-													);
-												}}
-												leftIcon={<IconCapTrash />}
-											>
-												Delete
-											</EditorButton>
-										</div>
-										<Show
-											when={value().segments.length === 1}
-											fallback={
-												<div class="space-y-4">
-													<MultiZoomSegmentConfig segments={value().segments} />
-													<div class="grid grid-cols-3 gap-4">
-														<Index each={value().segments}>
-															{(item, index) => (
-																<div class="p-2.5 rounded-lg border border-gray-4 bg-gray-3">
-																	<ZoomSegmentPreview
-																		segment={item().segment}
-																		segmentIndex={index}
-																	/>
-																</div>
-															)}
-														</Index>
-													</div>
-												</div>
-											}
-										>
 											<For each={value().segments}>
 												{(item) => (
 													<div class="p-4 rounded-lg border border-gray-200">
-														<ZoomSegmentConfig
+														<CaptionSegmentConfig
 															segment={item.segment}
 															segmentIndex={item.index}
 														/>
 													</div>
 												)}
 											</For>
+										</div>
+									)}
+								</Show>
+								<Show
+									when={(() => {
+										const keyboardSelection = selection();
+										if (keyboardSelection.type !== "keyboard") return;
+
+										const segments = keyboardSelection.indices
+											.map((index) => ({
+												index,
+												segment: project.timeline?.keyboardSegments?.[index],
+											}))
+											.filter(
+												(
+													item,
+												): item is {
+													index: number;
+													segment: KeyboardTrackSegment;
+												} => item.segment !== undefined,
+											);
+
+										if (segments.length === 0) {
+											setEditorState("timeline", "selection", null);
+											return;
+										}
+
+										return { selection: keyboardSelection, segments };
+									})()}
+								>
+									{(value) => (
+										<div class="space-y-4">
+											<div class="flex flex-row justify-between items-center">
+												<div class="flex gap-2 items-center">
+													<EditorButton
+														onClick={() => {
+															setEditorState("timeline", "selection", null);
+															setState("selectedTab", TAB_IDS.keyboard);
+														}}
+														leftIcon={<IconLucideCheck />}
+													>
+														Done
+													</EditorButton>
+													<span class="text-sm text-gray-10">
+														{value().segments.length} keyboard{" "}
+														{value().segments.length === 1
+															? "segment"
+															: "segments"}{" "}
+														selected
+													</span>
+												</div>
+												<EditorButton
+													variant="danger"
+													onClick={() =>
+														projectActions.deleteKeyboardSegments(
+															value().segments.map((s) => s.index),
+														)
+													}
+													leftIcon={<IconCapTrash />}
+												>
+													Delete
+												</EditorButton>
+											</div>
+											<For each={value().segments}>
+												{(item) => (
+													<div class="p-4 rounded-lg border border-gray-200">
+														<KeyboardSegmentConfig
+															segment={item.segment}
+															segmentIndex={item.index}
+														/>
+													</div>
+												)}
+											</For>
+										</div>
+									)}
+								</Show>
+								<Show
+									when={(() => {
+										const textSelection = selection();
+										if (textSelection.type !== "text") return;
+
+										const segments = textSelection.indices
+											.map((index) => ({
+												index,
+												segment: project.timeline?.textSegments?.[index],
+											}))
+											.filter(
+												(
+													item,
+												): item is { index: number; segment: TextSegment } =>
+													item.segment !== undefined,
+											);
+
+										if (segments.length === 0) {
+											setEditorState("timeline", "selection", null);
+											return;
+										}
+										return { selection: textSelection, segments };
+									})()}
+								>
+									{(value) => (
+										<div class="space-y-4">
+											<div class="flex flex-row justify-between items-center">
+												<div class="flex gap-2 items-center">
+													<EditorButton
+														onClick={() =>
+															setEditorState("timeline", "selection", null)
+														}
+														leftIcon={<IconLucideCheck />}
+													>
+														Done
+													</EditorButton>
+													<span class="text-sm text-gray-10">
+														{value().segments.length} text{" "}
+														{value().segments.length === 1
+															? "segment"
+															: "segments"}{" "}
+														selected
+													</span>
+												</div>
+												<EditorButton
+													variant="danger"
+													onClick={() =>
+														projectActions.deleteTextSegments(
+															value().segments.map((s) => s.index),
+														)
+													}
+													leftIcon={<IconCapTrash />}
+												>
+													Delete
+												</EditorButton>
+											</div>
+											<For each={value().segments}>
+												{(item) => (
+													<div class="p-4 rounded-lg border border-gray-200">
+														<TextSegmentConfig
+															segment={item.segment}
+															segmentIndex={item.index}
+															brandColorSwatches={brandColorSwatches()}
+														/>
+													</div>
+												)}
+											</For>
+										</div>
+									)}
+								</Show>
+								<Show
+									when={(() => {
+										const audioSelection = selection();
+										if (audioSelection.type !== "audio") return;
+
+										const segments = audioSelection.indices
+											.map((index) => ({
+												index,
+												segment: project.timeline?.audioSegments?.[index],
+											}))
+											.filter(
+												(
+													item,
+												): item is {
+													index: number;
+													segment: AudioTrackSegment;
+												} => item.segment !== undefined,
+											);
+
+										if (segments.length === 0) {
+											setEditorState("timeline", "selection", null);
+											return;
+										}
+										return { selection: audioSelection, segments };
+									})()}
+								>
+									{(value) => (
+										<div class="space-y-4">
+											<div class="flex flex-row justify-between items-center">
+												<div class="flex gap-2 items-center">
+													<EditorButton
+														onClick={() =>
+															setEditorState("timeline", "selection", null)
+														}
+														leftIcon={<IconLucideCheck />}
+													>
+														Done
+													</EditorButton>
+													<span class="text-sm text-gray-10">
+														{value().segments.length} audio{" "}
+														{value().segments.length === 1
+															? "segment"
+															: "segments"}{" "}
+														selected
+													</span>
+												</div>
+												<EditorButton
+													variant="danger"
+													onClick={() =>
+														projectActions.deleteAudioSegments(
+															value().segments.map((s) => s.index),
+														)
+													}
+													leftIcon={<IconCapTrash />}
+												>
+													Delete
+												</EditorButton>
+											</div>
+											<For each={value().segments}>
+												{(item) => (
+													<div class="p-4 rounded-lg border border-gray-200">
+														<AudioSegmentConfig
+															segment={item.segment}
+															segmentIndex={item.index}
+														/>
+													</div>
+												)}
+											</For>
+										</div>
+									)}
+								</Show>
+								<Show
+									when={(() => {
+										const maskSelection = selection();
+										if (maskSelection.type !== "mask") return;
+
+										const segments = maskSelection.indices
+											.map((index) => ({
+												index,
+												segment: project.timeline?.maskSegments?.[index],
+											}))
+											.filter(
+												(
+													item,
+												): item is { index: number; segment: MaskSegment } =>
+													item.segment !== undefined,
+											);
+
+										if (segments.length === 0) {
+											setEditorState("timeline", "selection", null);
+											return;
+										}
+										return { selection: maskSelection, segments };
+									})()}
+								>
+									{(value) => (
+										<div class="space-y-4">
+											<div class="flex flex-row justify-between items-center">
+												<div class="flex gap-2 items-center">
+													<EditorButton
+														onClick={() =>
+															setEditorState("timeline", "selection", null)
+														}
+														leftIcon={<IconLucideCheck />}
+													>
+														Done
+													</EditorButton>
+													<span class="text-sm text-gray-10">
+														{value().segments.length} mask{" "}
+														{value().segments.length === 1
+															? "segment"
+															: "segments"}{" "}
+														selected
+													</span>
+												</div>
+												<EditorButton
+													variant="danger"
+													onClick={() =>
+														projectActions.deleteMaskSegments(
+															value().segments.map((s) => s.index),
+														)
+													}
+													leftIcon={<IconCapTrash />}
+												>
+													Delete
+												</EditorButton>
+											</div>
+											<For each={value().segments}>
+												{(item) => (
+													<div class="p-4 rounded-lg border border-gray-200">
+														<MaskSegmentConfig
+															segment={item.segment}
+															segmentIndex={item.index}
+														/>
+													</div>
+												)}
+											</For>
+										</div>
+									)}
+								</Show>
+								<Show
+									when={(() => {
+										const zoomSelection = selection();
+										if (zoomSelection.type !== "zoom") return;
+
+										const segments = zoomSelection.indices
+											.map((index) => ({
+												index,
+												segment: project.timeline?.zoomSegments?.[index],
+											}))
+											.filter(
+												(
+													item,
+												): item is { index: number; segment: ZoomSegment } =>
+													item.segment !== undefined,
+											);
+
+										if (segments.length === 0) {
+											setEditorState("timeline", "selection", null);
+											return;
+										}
+										return { selection: zoomSelection, segments };
+									})()}
+								>
+									{(value) => (
+										<div class="space-y-4">
+											<div class="flex flex-row justify-between items-center">
+												<div class="flex gap-2 items-center">
+													<EditorButton
+														onClick={() =>
+															setEditorState("timeline", "selection", null)
+														}
+														leftIcon={<IconLucideCheck />}
+													>
+														Done
+													</EditorButton>
+													<span class="text-sm text-gray-10">
+														{value().segments.length} zoom{" "}
+														{value().segments.length === 1
+															? "segment"
+															: "segments"}{" "}
+														selected
+													</span>
+												</div>
+												<EditorButton
+													variant="danger"
+													onClick={() => {
+														projectActions.deleteZoomSegments(
+															value().segments.map((s) => s.index),
+														);
+													}}
+													leftIcon={<IconCapTrash />}
+												>
+													Delete
+												</EditorButton>
+											</div>
+											<Show
+												when={value().segments.length === 1}
+												fallback={
+													<div class="space-y-4">
+														<MultiZoomSegmentConfig
+															segments={value().segments}
+														/>
+														<div class="grid grid-cols-3 gap-4">
+															<Index each={value().segments}>
+																{(item, index) => (
+																	<div class="p-2.5 rounded-lg border border-gray-4 bg-gray-3">
+																		<ZoomSegmentPreview
+																			segment={item().segment}
+																			segmentIndex={index}
+																		/>
+																	</div>
+																)}
+															</Index>
+														</div>
+													</div>
+												}
+											>
+												<For each={value().segments}>
+													{(item) => (
+														<div class="p-4 rounded-lg border border-gray-200">
+															<ZoomSegmentConfig
+																segment={item.segment}
+																segmentIndex={item.index}
+															/>
+														</div>
+													)}
+												</For>
+											</Show>
+										</div>
+									)}
+								</Show>
+								<Show
+									when={(() => {
+										const sceneSelection = selection();
+										if (sceneSelection.type !== "scene") return;
+
+										const segments = sceneSelection.indices
+											.map((idx) => ({
+												segment: project.timeline?.sceneSegments?.[idx],
+												index: idx,
+											}))
+											.filter(
+												(s): s is { segment: SceneSegment; index: number } =>
+													s.segment !== undefined,
+											);
+
+										if (segments.length === 0) return;
+										return { selection: sceneSelection, segments };
+									})()}
+								>
+									{(value) => (
+										<Show when={value().segments[0]}>
+											{(firstSegment) => (
+												<Show
+													when={value().segments.length > 1}
+													fallback={
+														<SceneSegmentConfig
+															segment={firstSegment().segment}
+															segmentIndex={firstSegment().index}
+														/>
+													}
+												>
+													<div class="space-y-4">
+														<div class="flex flex-row justify-between items-center">
+															<div class="flex gap-2 items-center">
+																<EditorButton
+																	onClick={() =>
+																		setEditorState(
+																			"timeline",
+																			"selection",
+																			null,
+																		)
+																	}
+																	leftIcon={<IconLucideCheck />}
+																>
+																	Done
+																</EditorButton>
+																<span class="text-sm text-gray-10">
+																	{value().segments.length} scene{" "}
+																	{value().segments.length === 1
+																		? "segment"
+																		: "segments"}{" "}
+																	selected
+																</span>
+															</div>
+															<EditorButton
+																variant="danger"
+																onClick={() => {
+																	const indices = value().selection.indices;
+
+																	// Delete segments in reverse order to maintain indices
+																	[...indices]
+																		.sort((a, b) => b - a)
+																		.forEach((idx) => {
+																			projectActions.deleteSceneSegment(idx);
+																		});
+																}}
+																leftIcon={<IconCapTrash />}
+															>
+																Delete
+															</EditorButton>
+														</div>
+													</div>
+												</Show>
+											)}
 										</Show>
-									</div>
-								)}
-							</Show>
-							<Show
-								when={(() => {
-									const sceneSelection = selection();
-									if (sceneSelection.type !== "scene") return;
+									)}
+								</Show>
+								<Show
+									when={(() => {
+										const clipSelection = selection();
+										if (clipSelection.type !== "clip") return;
 
-									const segments = sceneSelection.indices
-										.map((idx) => ({
-											segment: project.timeline?.sceneSegments?.[idx],
-											index: idx,
-										}))
-										.filter(
-											(s): s is { segment: SceneSegment; index: number } =>
-												s.segment !== undefined,
-										);
+										const segments = clipSelection.indices
+											.map((idx) => ({
+												segment: project.timeline?.segments?.[idx],
+												index: idx,
+											}))
+											.filter(
+												(s): s is { segment: TimelineSegment; index: number } =>
+													s.segment !== undefined,
+											);
 
-									if (segments.length === 0) return;
-									return { selection: sceneSelection, segments };
-								})()}
-							>
-								{(value) => (
-									<Show when={value().segments[0]}>
-										{(firstSegment) => (
-											<Show
-												when={value().segments.length > 1}
-												fallback={
-													<SceneSegmentConfig
-														segment={firstSegment().segment}
-														segmentIndex={firstSegment().index}
-													/>
-												}
-											>
-												<div class="space-y-4">
-													<div class="flex flex-row justify-between items-center">
-														<div class="flex gap-2 items-center">
+										if (segments.length === 0) return;
+										return { selection: clipSelection, segments };
+									})()}
+								>
+									{(value) => (
+										<Show when={value().segments[0]}>
+											{(firstSegment) => (
+												<Show
+													when={value().segments.length > 1}
+													fallback={
+														<ClipSegmentConfig
+															segment={firstSegment().segment}
+															segmentIndex={firstSegment().index}
+														/>
+													}
+												>
+													<div class="space-y-4">
+														<div class="flex flex-row justify-between items-center">
+															<div class="flex gap-2 items-center">
+																<EditorButton
+																	onClick={() =>
+																		setEditorState(
+																			"timeline",
+																			"selection",
+																			null,
+																		)
+																	}
+																	leftIcon={<IconLucideCheck />}
+																>
+																	Done
+																</EditorButton>
+																<span class="text-sm text-gray-10">
+																	{value().segments.length} clip{" "}
+																	{value().segments.length === 1
+																		? "segment"
+																		: "segments"}{" "}
+																	selected
+																</span>
+															</div>
 															<EditorButton
-																onClick={() =>
-																	setEditorState("timeline", "selection", null)
-																}
-																leftIcon={<IconLucideCheck />}
+																variant="danger"
+																onClick={() => {
+																	const indices = value().selection.indices;
+
+																	// Delete segments in reverse order to maintain indices
+																	[...indices]
+																		.sort((a, b) => b - a)
+																		.forEach((idx) => {
+																			projectActions.deleteClipSegment(idx);
+																		});
+																}}
+																leftIcon={<IconCapTrash />}
 															>
-																Done
+																Delete
 															</EditorButton>
-															<span class="text-sm text-gray-10">
-																{value().segments.length} scene{" "}
-																{value().segments.length === 1
-																	? "segment"
-																	: "segments"}{" "}
-																selected
-															</span>
 														</div>
-														<EditorButton
-															variant="danger"
-															onClick={() => {
-																const indices = value().selection.indices;
-
-																// Delete segments in reverse order to maintain indices
-																[...indices]
-																	.sort((a, b) => b - a)
-																	.forEach((idx) => {
-																		projectActions.deleteSceneSegment(idx);
-																	});
-															}}
-															leftIcon={<IconCapTrash />}
-														>
-															Delete
-														</EditorButton>
 													</div>
-												</div>
-											</Show>
-										)}
-									</Show>
-								)}
-							</Show>
-							<Show
-								when={(() => {
-									const clipSelection = selection();
-									if (clipSelection.type !== "clip") return;
-
-									const segments = clipSelection.indices
-										.map((idx) => ({
-											segment: project.timeline?.segments?.[idx],
-											index: idx,
-										}))
-										.filter(
-											(s): s is { segment: TimelineSegment; index: number } =>
-												s.segment !== undefined,
-										);
-
-									if (segments.length === 0) return;
-									return { selection: clipSelection, segments };
-								})()}
-							>
-								{(value) => (
-									<Show when={value().segments[0]}>
-										{(firstSegment) => (
-											<Show
-												when={value().segments.length > 1}
-												fallback={
-													<ClipSegmentConfig
-														segment={firstSegment().segment}
-														segmentIndex={firstSegment().index}
-													/>
-												}
-											>
-												<div class="space-y-4">
-													<div class="flex flex-row justify-between items-center">
-														<div class="flex gap-2 items-center">
-															<EditorButton
-																onClick={() =>
-																	setEditorState("timeline", "selection", null)
-																}
-																leftIcon={<IconLucideCheck />}
-															>
-																Done
-															</EditorButton>
-															<span class="text-sm text-gray-10">
-																{value().segments.length} clip{" "}
-																{value().segments.length === 1
-																	? "segment"
-																	: "segments"}{" "}
-																selected
-															</span>
-														</div>
-														<EditorButton
-															variant="danger"
-															onClick={() => {
-																const indices = value().selection.indices;
-
-																// Delete segments in reverse order to maintain indices
-																[...indices]
-																	.sort((a, b) => b - a)
-																	.forEach((idx) => {
-																		projectActions.deleteClipSegment(idx);
-																	});
-															}}
-															leftIcon={<IconCapTrash />}
-														>
-															Delete
-														</EditorButton>
-													</div>
-												</div>
-											</Show>
-										)}
-									</Show>
-								)}
-							</Show>
-						</Suspense>
-					)}
-				</Show>
+												</Show>
+											)}
+										</Show>
+									)}
+								</Show>
+							</Suspense>
+						)}
+					</Show>
+				</div>
 			</div>
 		</KTabs>
 	);

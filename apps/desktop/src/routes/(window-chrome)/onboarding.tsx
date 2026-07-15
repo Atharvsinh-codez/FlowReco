@@ -24,74 +24,18 @@ import {
 	type OSPermission,
 	type OSPermissionStatus,
 } from "~/utils/tauri";
-import IconCapCaretDown from "~icons/cap/caret-down";
-import IconCapCursorMacos from "~icons/cap/cursor-macos";
-import IconCapCursorWindows from "~icons/cap/cursor-windows";
 import IconCapFilmCut from "~icons/cap/film-cut";
-import IconCapInstant from "~icons/cap/instant";
-import IconCapMicrophone from "~icons/cap/microphone";
-import IconCapMoreVertical from "~icons/cap/more-vertical";
-import IconCapPauseCircle from "~icons/cap/pause-circle";
-import IconCapRestart from "~icons/cap/restart";
 import IconCapScreenshot from "~icons/cap/screenshot";
-import IconCapSettings from "~icons/cap/settings";
-import IconCapStopCircle from "~icons/cap/stop-circle";
-import IconCapTrash from "~icons/cap/trash";
 import IconLucideArrowLeft from "~icons/lucide/arrow-left";
 import IconLucideArrowRight from "~icons/lucide/arrow-right";
 import IconLucideCheck from "~icons/lucide/check";
-import IconLucideChevronDown from "~icons/lucide/chevron-down";
-import IconLucideCopy from "~icons/lucide/copy";
-import IconLucideExternalLink from "~icons/lucide/external-link";
-import IconLucideSave from "~icons/lucide/save";
+import IconLucideClapperboard from "~icons/lucide/clapperboard";
+import IconLucideDownload from "~icons/lucide/download";
+import IconLucideMonitor from "~icons/lucide/monitor";
 import IconLucideShield from "~icons/lucide/shield";
+import IconLucideSparkles from "~icons/lucide/sparkles";
 import flowRecoMark from "../../assets/flowreco-mark.svg";
-import cloud1 from "../../assets/illustrations/cloud-1.png";
-import cloud2 from "../../assets/illustrations/cloud-2.png";
-import cloud3 from "../../assets/illustrations/cloud-3.png";
 import { WindowChromeHeader } from "./Context";
-
-type ModeId = "studio" | "screenshot";
-
-interface ModeDetail {
-	id: ModeId;
-	title: string;
-	tagline: string;
-	description: string;
-	icon: typeof IconCapFilmCut;
-	features: string[];
-}
-
-const modes: ModeDetail[] = [
-	{
-		id: "studio",
-		title: "Studio",
-		tagline: "Local-first cinematic edits",
-		description:
-			"Keep full-quality media on your machine, then shape zooms, cursor, captions, and layout in the editor.",
-		icon: IconCapFilmCut,
-		features: [
-			"Full-quality local files",
-			"Non-destructive editor",
-			"Zooms, cursor, captions",
-			"Export when you decide",
-		],
-	},
-	{
-		id: "screenshot",
-		title: "Screenshot",
-		tagline: "Stills for bugs and docs",
-		description:
-			"Capture a frame with a hotkey, annotate it, then copy or save — no video pipeline required.",
-		icon: IconCapScreenshot,
-		features: [
-			"One-key capture",
-			"Annotate and call out",
-			"Clean backgrounds",
-			"Copy or save quickly",
-		],
-	},
-];
 
 type SetupPermission = {
 	name: string;
@@ -105,212 +49,105 @@ const setupPermissions: readonly SetupPermission[] = [
 	{
 		name: "Screen Recording",
 		key: "screenRecording",
-		description:
-			"Click Grant to allow when macOS asks, or pick FlowReco in System Settings if needed. Restart the app after allowing screen recording.",
+		description: "Needed to capture your display, windows, or a selected area.",
 		requiresManualGrant: false,
 	},
 	{
 		name: "Accessibility",
 		key: "accessibility",
 		description:
-			"During recording, FlowReco collects mouse activity locally to generate automatic zoom in segments.",
+			"Used locally for pointer activity so Studio can suggest automatic zooms.",
 		requiresManualGrant: false,
 	},
 	{
 		name: "Microphone",
 		key: "microphone",
-		description: "Needed when you want microphone audio in recordings.",
+		description: "Optional — enable when you want voiceover on recordings.",
 		requiresManualGrant: false,
 		optional: true,
 	},
 	{
 		name: "Camera",
 		key: "camera",
-		description: "Needed when you want a webcam track alongside the screen.",
+		description: "Optional — enable when you want a webcam track.",
 		requiresManualGrant: false,
 		optional: true,
 	},
 ];
 
-function createLoopingPhase(
-	active: () => boolean,
-	timings: number[],
-	cycleDuration: number,
-): () => number {
-	const [phase, setPhase] = createSignal(0);
+const modes = [
+	{
+		id: "studio" as const,
+		title: "Studio",
+		tagline: "Full-quality local video",
+		description:
+			"Record display, window, or area into the FlowReco editor. Add zooms, captions, and export when you are ready.",
+		icon: IconCapFilmCut,
+		bullets: [
+			"Local project files",
+			"Non-destructive edits",
+			"MP4 / GIF export",
+		],
+	},
+	{
+		id: "screenshot" as const,
+		title: "Screenshot",
+		tagline: "Stills for bugs and docs",
+		description:
+			"Grab a frame, annotate it, then copy or save — no video pipeline required.",
+		icon: IconCapScreenshot,
+		bullets: ["One-shot capture", "Quick annotate", "Copy or save"],
+	},
+];
 
-	createEffect(() => {
-		if (!active()) {
-			setPhase(0);
-			return;
-		}
-
-		let timers: ReturnType<typeof setTimeout>[] = [];
-		let cycleTimer: ReturnType<typeof setTimeout>;
-
-		const clearAll = () => {
-			for (const t of timers) clearTimeout(t);
-			timers = [];
-			clearTimeout(cycleTimer);
-		};
-
-		const run = () => {
-			clearAll();
-			setPhase(0);
-			timers = timings.map((delay, i) =>
-				setTimeout(() => setPhase(i + 1), delay),
-			);
-			cycleTimer = setTimeout(run, cycleDuration);
-		};
-
-		run();
-		onCleanup(clearAll);
-	});
-
-	return phase;
-}
-
-function OnboardingAmbientBackdrop() {
-	let cloud1Animation: Animation | undefined;
-	let cloud2Animation: Animation | undefined;
-	let cloud3Animation: Animation | undefined;
-
-	const bindCloud1 = (el: HTMLDivElement | null) => {
-		cloud1Animation?.cancel();
-		cloud1Animation = undefined;
-		if (!el) return;
-		requestAnimationFrame(() => {
-			requestAnimationFrame(() => {
-				cloud1Animation = el.animate(
-					[
-						{ transform: "translate(0, 0)" },
-						{ transform: "translate(-20px, 10px)" },
-						{ transform: "translate(0, 0)" },
-					],
-					{ duration: 30000, iterations: Infinity, easing: "linear" },
-				);
-			});
-		});
-	};
-
-	const bindCloud2 = (el: HTMLDivElement | null) => {
-		cloud2Animation?.cancel();
-		cloud2Animation = undefined;
-		if (!el) return;
-		requestAnimationFrame(() => {
-			requestAnimationFrame(() => {
-				cloud2Animation = el.animate(
-					[
-						{ transform: "translate(0, 0)" },
-						{ transform: "translate(20px, 10px)" },
-						{ transform: "translate(0, 0)" },
-					],
-					{ duration: 35000, iterations: Infinity, easing: "linear" },
-				);
-			});
-		});
-	};
-
-	const bindCloud3Inner = (el: HTMLDivElement | null) => {
-		cloud3Animation?.cancel();
-		cloud3Animation = undefined;
-		if (!el) return;
-		requestAnimationFrame(() => {
-			requestAnimationFrame(() => {
-				cloud3Animation = el.animate(
-					[
-						{ transform: "translate(0, 20px)" },
-						{ transform: "translate(2%, 0)" },
-						{ transform: "translate(0, 0)" },
-					],
-					{
-						duration: 60000,
-						iterations: Infinity,
-						easing: "linear",
-						direction: "alternate",
-					},
-				);
-			});
-		});
-	};
-
-	onMount(() => {
-		onCleanup(() => {
-			cloud1Animation?.cancel();
-			cloud2Animation?.cancel();
-			cloud3Animation?.cancel();
-		});
-	});
-
-	return (
-		<div
-			class="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-[0.1]"
-			aria-hidden="true"
-		>
-			<div class="absolute inset-0 custom-bg" />
-			<div class="startup-grain" />
-			<div
-				ref={bindCloud1}
-				class="absolute top-0 right-0 opacity-70 pointer-events-none z-1"
-			>
-				<img
-					class="startup-cloud-image w-screen md:w-[80vw] -mr-40"
-					src={cloud1}
-					alt=""
-				/>
-			</div>
-			<div
-				ref={bindCloud2}
-				class="absolute top-0 left-0 opacity-70 pointer-events-none z-1"
-			>
-				<img
-					class="startup-cloud-image w-screen md:w-[80vw] -ml-40"
-					src={cloud2}
-					alt=""
-				/>
-			</div>
-			<div class="absolute -bottom-[15%] left-1/2 -translate-x-1/2 opacity-70 pointer-events-none z-1">
-				<div ref={bindCloud3Inner}>
-					<img
-						class="startup-cloud-image w-[180vw] md:w-[180vw]"
-						src={cloud3}
-						alt=""
-					/>
-				</div>
-			</div>
-		</div>
-	);
-}
+const workflow = [
+	{
+		title: "Capture",
+		body: "Pick display, window, area, or camera. FlowReco records full quality on this machine.",
+		icon: IconLucideMonitor,
+	},
+	{
+		title: "Polish",
+		body: "Open Studio to trim, zoom, style the cursor, add captions, and frame the scene.",
+		icon: IconLucideClapperboard,
+	},
+	{
+		title: "Export",
+		body: "Export a local file anytime. Sharing to a server is optional — never required.",
+		icon: IconLucideDownload,
+	},
+];
 
 export default function OnboardingPage() {
 	const isMacOS = createMemo(() => ostype() === "macos");
-	const minStep = createMemo(() => (isMacOS() ? 0 : 1));
-
-	const [step, setStep] = createSignal(minStep());
-	const [showStartupOverlay, setShowStartupOverlay] = createSignal(true);
-	const [isExiting, setIsExiting] = createSignal(false);
-	const [permissionsNeeded, setPermissionsNeeded] = createSignal(false);
+	const [step, setStep] = createSignal(0);
+	const [ready, setReady] = createSignal(false);
 	const [permsGranted, setPermsGranted] = createSignal(false);
 	const [corePermsGranted, setCorePermsGranted] = createSignal(false);
-	const [ready, setReady] = createSignal(false);
+	const [permissionsNeeded, setPermissionsNeeded] = createSignal(false);
 
 	const settings = generalSettingsStore.createQuery();
 	const isRevisit = createMemo(
 		() => settings.data?.hasCompletedOnboarding === true,
 	);
 
-	createEffect(() => {
-		if (settings.data?.hasCompletedStartup && showStartupOverlay()) {
-			setShowStartupOverlay(false);
+	const stepIds = createMemo(() => {
+		const ids: Array<
+			"welcome" | "permissions" | "modes" | "workflow" | "ready"
+		> = ["welcome"];
+		if (isMacOS() && (!isRevisit() || permissionsNeeded())) {
+			ids.push("permissions");
 		}
+		if (!(isMacOS() && isRevisit() && permissionsNeeded())) {
+			ids.push("modes", "workflow", "ready");
+		}
+		return ids;
 	});
 
-	const permissionsOnly = createMemo(
-		() => isMacOS() && isRevisit() && permissionsNeeded(),
-	);
+	const totalSteps = createMemo(() => stepIds().length);
+	const currentId = createMemo(() => stepIds()[step()] ?? "welcome");
 
 	createEffect(() => {
-		ready();
 		if (!isMacOS()) {
 			setPermsGranted(true);
 			setCorePermsGranted(true);
@@ -318,92 +155,76 @@ export default function OnboardingPage() {
 	});
 
 	createEffect(() => {
-		if (step() < minStep()) {
-			setStep(minStep());
-		}
-	});
-
-	const totalSteps = createMemo(() => {
-		if (permissionsOnly()) return 1;
-		return 7;
-	});
-
-	createEffect(() => {
 		const s = settings.data;
 		if (s === undefined || ready()) return;
 
-		commands.doPermissionsCheck(true).then((check) => {
+		void commands.doPermissionsCheck(true).then((check) => {
 			const coreOk =
-				isPermitted(check.screenRecording) && isPermitted(check.accessibility);
-			const needs = !coreOk;
-			setPermissionsNeeded(needs);
+				!isMacOS() ||
+				(isPermitted(check.screenRecording) &&
+					isPermitted(check.accessibility));
+			setPermissionsNeeded(isMacOS() && !coreOk);
 			setPermsGranted(coreOk);
 			setCorePermsGranted(coreOk);
 			setReady(true);
 		});
 	});
 
+	createEffect(() => {
+		if (step() >= totalSteps()) setStep(Math.max(0, totalSteps() - 1));
+	});
+
 	const goToStep = (target: number) => {
-		if (target < minStep() || target >= totalSteps()) return;
+		if (target < 0 || target >= totalSteps()) return;
 		setStep(target);
 	};
 
 	const handleFinish = async () => {
 		if (!isRevisit()) {
-			await generalSettingsStore.set({ hasCompletedOnboarding: true });
+			await generalSettingsStore.set({
+				hasCompletedOnboarding: true,
+				hasCompletedStartup: true,
+			});
+		} else {
+			await generalSettingsStore.set({ hasCompletedStartup: true });
 		}
 		await commands.showWindow({ Main: { init_target_mode: null } });
 		await getCurrentWindow().close();
 	};
 
-	const handleStartupDone = async () => {
-		setIsExiting(true);
-		await generalSettingsStore.set({ hasCompletedStartup: true });
-		setTimeout(() => {
-			setShowStartupOverlay(false);
-			setIsExiting(false);
-		}, 600);
-	};
+	const nextDisabled = () =>
+		currentId() === "permissions" && isMacOS() && !permsGranted();
 
 	const handleNext = () => {
-		if (permissionsOnly()) {
-			handleFinish();
-			return;
-		}
+		if (nextDisabled()) return;
 		if (step() < totalSteps() - 1) goToStep(step() + 1);
-		else handleFinish();
+		else void handleFinish();
+	};
+
+	const handleSkip = () => {
+		if (isMacOS() && !corePermsGranted()) return;
+		void handleFinish();
+	};
+
+	const nextLabel = () => {
+		if (step() === totalSteps() - 1) return "Open FlowReco";
+		if (currentId() === "welcome") return "Get started";
+		return "Continue";
 	};
 
 	onMount(() => {
 		const onKeyDown = (e: KeyboardEvent) => {
-			if (showStartupOverlay()) return;
-			if (e.key === "ArrowRight") {
-				e.preventDefault();
-				if (!nextDisabled() && step() < totalSteps() - 1) goToStep(step() + 1);
-			} else if (e.key === "ArrowLeft") {
-				e.preventDefault();
-				if (step() > minStep()) goToStep(step() - 1);
-			} else if (e.key === "Enter") {
+			if (e.key === "ArrowRight" || e.key === "Enter") {
 				e.preventDefault();
 				if (!nextDisabled()) handleNext();
+			} else if (e.key === "ArrowLeft") {
+				e.preventDefault();
+				if (step() > 0) goToStep(step() - 1);
 			}
 		};
 		window.addEventListener("keydown", onKeyDown);
 		onCleanup(() => window.removeEventListener("keydown", onKeyDown));
 	});
-
-	const nextLabel = () => {
-		if (permissionsOnly()) return "Continue to FlowReco";
-		if (step() === totalSteps() - 1) return "Start Using FlowReco";
-		return "Continue";
-	};
-
-	const nextDisabled = () => isMacOS() && step() === 0 && !permsGranted();
-
-	const handleSkipOnboarding = () => {
-		if (!corePermsGranted() || permissionsOnly()) return;
-		handleFinish();
-	};
 
 	return (
 		<>
@@ -421,117 +242,59 @@ export default function OnboardingPage() {
 				</div>
 			</WindowChromeHeader>
 			<Show when={ready()}>
-				<style>
-					{`
-					.custom-bg {
-						transition: all 600ms cubic-bezier(0.4, 0, 0.2, 1);
-					}
-					.startup-grain {
-						position: absolute;
-						top: -150%;
-						left: -50%;
-						right: -50%;
-						bottom: -150%;
-						width: 200%;
-						height: 400%;
-						background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-						pointer-events: none;
-						opacity: 0.5;
-						z-index: 200;
-						mix-blend-mode: overlay;
-					}
-					.startup-cloud-transition {
-						transition: transform 600ms cubic-bezier(0.4, 0, 0.2, 1),
-							opacity 600ms cubic-bezier(0.4, 0, 0.2, 1) !important;
-					}
-					.startup-cloud-1.exiting {
-						transform: translate(-200px, -150px) !important;
-						opacity: 0 !important;
-					}
-					.startup-cloud-2.exiting {
-						transform: translate(200px, -150px) !important;
-						opacity: 0 !important;
-					}
-					.startup-cloud-3.exiting {
-						transform: translate(-50%, 200px) !important;
-						opacity: 0 !important;
-					}
-					.startup-cloud-image {
-						max-width: 100vw;
-						height: auto;
-					}
-					@keyframes bounce {
-						0%, 100% { transform: translateY(0); }
-						50% { transform: translateY(-20px); }
-					}
-					.startup-logo-bounce {
-						animation: bounce 1s cubic-bezier(0.36, 0, 0.66, -0.56) forwards;
-					}
-				`}
-				</style>
 				<div
 					data-tauri-drag-region="false"
-					class="flex flex-col flex-1 min-h-0 overflow-hidden relative"
+					class="flex flex-col flex-1 min-h-0 overflow-hidden relative bg-[var(--recorder-bg,#ffffff)] text-[var(--recorder-text,#252b31)]"
 				>
-					<OnboardingAmbientBackdrop />
+					<div
+						class="pointer-events-none absolute inset-0"
+						style={{
+							background:
+								"radial-gradient(70% 50% at 50% 0%, rgba(0,132,209,0.08) 0%, transparent 60%)",
+						}}
+					/>
 					<div class="relative flex-1 min-h-0 z-10">
-						<Show when={isMacOS()}>
-							<StepPanel active={step() === 0} index={0} currentStep={step()}>
-								<PermissionsStep
-									active={step() === 0 && !showStartupOverlay()}
-									onPermissionsChanged={setPermsGranted}
-									onCorePermissionsChanged={setCorePermsGranted}
-								/>
-							</StepPanel>
-						</Show>
-						<Show when={!permissionsOnly()}>
-							<StepPanel active={step() === 1} index={1} currentStep={step()}>
-								<ModesOverviewStep active={step() === 1} />
-							</StepPanel>
-							<StepPanel active={step() === 2} index={2} currentStep={step()}>
-								<ModeDetailStep mode={modes[0]} active={step() === 2}>
-									<StudioMockup active={step() === 2} />
-								</ModeDetailStep>
-							</StepPanel>
-							<StepPanel active={step() === 3} index={3} currentStep={step()}>
-								<ModeDetailStep mode={modes[1]} active={step() === 3}>
-									<ScreenshotMockup active={step() === 3} />
-								</ModeDetailStep>
-							</StepPanel>
-							<StepPanel active={step() === 4} index={4} currentStep={step()}>
-								<ToggleStep active={step() === 4} />
-							</StepPanel>
-							<StepPanel active={step() === 5} index={5} currentStep={step()}>
-								<ShortcutsStep active={step() === 5} />
-							</StepPanel>
-							<StepPanel active={step() === 6} index={6} currentStep={step()}>
-								<FaqStep active={step() === 6} />
-							</StepPanel>
-						</Show>
+						<For each={stepIds()}>
+							{(id, index) => (
+								<StepPanel
+									active={step() === index()}
+									index={index()}
+									currentStep={step()}
+								>
+									<Show when={id === "welcome"}>
+										<WelcomeStep />
+									</Show>
+									<Show when={id === "permissions"}>
+										<PermissionsStep
+											active={step() === index()}
+											onPermissionsChanged={setPermsGranted}
+											onCorePermissionsChanged={setCorePermsGranted}
+										/>
+									</Show>
+									<Show when={id === "modes"}>
+										<ModesStep />
+									</Show>
+									<Show when={id === "workflow"}>
+										<WorkflowStep />
+									</Show>
+									<Show when={id === "ready"}>
+										<ReadyStep />
+									</Show>
+								</StepPanel>
+							)}
+						</For>
 					</div>
-					<Show when={!showStartupOverlay() || isExiting()}>
-						<StepNavigation
-							current={step() - minStep()}
-							total={totalSteps() - minStep()}
-							onBack={() => goToStep(step() - 1)}
-							onNext={handleNext}
-							nextLabel={nextLabel()}
-							showBack={step() > minStep()}
-							nextDisabled={nextDisabled()}
-							showSkipOnboarding={
-								corePermsGranted() &&
-								!permissionsOnly() &&
-								!showStartupOverlay()
-							}
-							onSkip={handleSkipOnboarding}
-						/>
-					</Show>
-					<Show when={showStartupOverlay()}>
-						<StartupOverlay
-							isExiting={isExiting()}
-							onGetStarted={handleStartupDone}
-						/>
-					</Show>
+					<StepNavigation
+						current={step()}
+						total={totalSteps()}
+						onBack={() => goToStep(step() - 1)}
+						onNext={handleNext}
+						nextLabel={nextLabel()}
+						showBack={step() > 0}
+						nextDisabled={nextDisabled()}
+						showSkip={corePermsGranted() && step() < totalSteps() - 1}
+						onSkip={handleSkip}
+					/>
 				</div>
 			</Show>
 		</>
@@ -546,22 +309,22 @@ function StepNavigation(props: {
 	nextLabel: string;
 	showBack: boolean;
 	nextDisabled?: boolean;
-	showSkipOnboarding?: boolean;
+	showSkip?: boolean;
 	onSkip?: () => void;
 }) {
 	return (
 		<div
 			data-tauri-drag-region="false"
-			class="flex flex-col items-center gap-2 px-8 pb-5 pt-2 shrink-0 relative z-40"
+			class="relative z-40 flex flex-col items-center gap-2 border-t border-[var(--recorder-border,#e6e6e6)] bg-[var(--recorder-bg,#ffffff)] px-6 pb-5 pt-3 shrink-0"
 		>
-			<div class="flex items-center justify-between w-full">
+			<div class="flex items-center justify-between w-full max-w-[640px]">
 				<div class="flex-1">
 					<Show when={props.showBack}>
 						<button
 							data-tauri-drag-region="false"
 							type="button"
 							onClick={props.onBack}
-							class="flex items-center gap-1.5 text-[13px] text-gray-10 hover:text-gray-12 transition-colors duration-200"
+							class="flex items-center gap-1.5 text-[13px] text-[var(--recorder-muted,#879192)] hover:text-[var(--recorder-text,#252b31)] transition-colors"
 						>
 							<IconLucideArrowLeft class="size-3.5" />
 							Back
@@ -573,25 +336,25 @@ function StepNavigation(props: {
 						{(_, index) => (
 							<div
 								class={cx(
-									"rounded-[var(--radius-xs,4px)] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+									"rounded-full transition-all duration-300",
 									props.current === index()
-										? "w-5 h-1.5 bg-[var(--sleek-accent,#0284c7)]"
+										? "w-5 h-1.5 bg-[var(--sleek-accent,#0084d1)]"
 										: props.current > index()
-											? "w-1.5 h-1.5 bg-gray-8"
-											: "w-1.5 h-1.5 bg-gray-5",
+											? "w-1.5 h-1.5 bg-[var(--sleek-accent,#0084d1)]/50"
+											: "w-1.5 h-1.5 bg-[var(--flow-subtle,#eceef1)]",
 								)}
 							/>
 						)}
 					</For>
 				</div>
 				<div class="flex-1 flex justify-end">
-					<div class="flex flex-col items-center gap-1.5">
+					<div class="flex flex-col items-end gap-1">
 						<Button
 							data-tauri-drag-region="false"
 							onClick={props.onNext}
-							variant="primary"
+							variant="blue"
 							size="md"
-							class="gap-2 px-10 py-3 min-h-12 min-w-38 text-[15px] font-medium rounded-[var(--radius-md,10px)]"
+							class="gap-2 min-w-36 rounded-[var(--radius-md,10px)]"
 							disabled={props.nextDisabled}
 						>
 							{props.nextLabel}
@@ -602,21 +365,21 @@ function StepNavigation(props: {
 								<IconLucideArrowRight class="size-4" />
 							</Show>
 						</Button>
-						<Show when={props.showSkipOnboarding}>
+						<Show when={props.showSkip}>
 							<button
 								data-tauri-drag-region="false"
 								type="button"
 								onClick={() => props.onSkip?.()}
-								class="text-[11px] text-gray-9 hover:text-gray-11 transition-colors duration-200 py-0.5"
+								class="text-[11px] text-[var(--recorder-muted,#879192)] hover:text-[var(--recorder-text,#252b31)] transition-colors py-0.5"
 							>
-								Skip onboarding
+								Skip for now
 							</button>
 						</Show>
 					</div>
 				</div>
 			</div>
-			<span class="text-[10px] text-gray-8 tabular-nums">
-				Press Enter ↵ or use ← → arrow keys
+			<span class="text-[10px] text-[var(--recorder-muted,#879192)] tabular-nums">
+				Enter ↵ · ← → arrows
 			</span>
 		</div>
 	);
@@ -635,14 +398,14 @@ function StepPanel(props: {
 				transform: props.active
 					? "translateX(0)"
 					: props.index < props.currentStep
-						? "translateX(-40px)"
-						: "translateX(40px)",
+						? "translateX(-24px)"
+						: "translateX(24px)",
 				opacity: props.active ? 1 : 0,
 				visibility: props.active ? "visible" : "hidden",
 				"pointer-events": props.active ? "auto" : "none",
 				"z-index": props.active ? 1 : 0,
 				transition:
-					"transform 400ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms ease",
+					"transform 320ms cubic-bezier(0.22, 1, 0.36, 1), opacity 240ms ease",
 			}}
 		>
 			{props.children}
@@ -650,1229 +413,154 @@ function StepPanel(props: {
 	);
 }
 
-function ModesOverviewStep(props: { active: boolean }) {
-	const [visible, setVisible] = createSignal(false);
-
-	createEffect(() => {
-		if (props.active) {
-			setVisible(false);
-			const t = setTimeout(() => setVisible(true), 100);
-			onCleanup(() => clearTimeout(t));
-		} else {
-			setVisible(false);
-		}
-	});
-
+function WelcomeStep() {
 	return (
-		<div class="flex flex-col items-center justify-center min-h-full px-10 gap-8">
-			<div
-				class={cx(
-					"flex flex-col items-center gap-3 text-center max-w-[480px] transition-all duration-500 ease-out",
-					visible() ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4",
-				)}
-			>
-				<p class="text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--sleek-accent,#0284c7)]">
-					Two ways to capture
-				</p>
-				<h2 class="text-2xl font-bold text-gray-12 tracking-tight text-balance">
-					Studio recording, local by default
-				</h2>
-				<p class="text-[14px] text-gray-10 leading-relaxed text-pretty">
-					Record full-quality video into the editor, or grab a still for bugs
-					and docs. Your files stay on this machine until you export.
-				</p>
+		<div class="flex flex-col items-center justify-center min-h-full px-10 py-8 text-center">
+			<div class="flex size-16 items-center justify-center rounded-[20px] border border-[var(--recorder-border,#e6e6e6)] bg-white shadow-[0_8px_30px_rgba(37,43,49,0.06)]">
+				<img src={flowRecoMark} alt="" class="size-9" />
 			</div>
-
-			<div class="flex gap-3 w-full max-w-[540px]">
-				<For each={modes}>
-					{(mode, index) => (
-						<div
-							class="flex-1 flex flex-col items-start gap-3 p-4 rounded-[var(--radius-lg,14px)] border border-gray-4 bg-gray-1 dark:bg-gray-2 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] shadow-xs"
-							style={{
-								"transition-delay": `${200 + index() * 100}ms`,
-								opacity: visible() ? 1 : 0,
-								transform: visible()
-									? "translateY(0) scale(1)"
-									: "translateY(16px) scale(0.95)",
-							}}
-						>
-							<div class="flex items-center justify-center size-11 rounded-[var(--radius-md,10px)] border border-gray-5 bg-gray-2 dark:bg-gray-3">
-								<mode.icon class="size-5 invert dark:invert-0" />
-							</div>
-							<div class="text-left">
-								<div class="text-sm font-semibold text-gray-12 tracking-tight">
-									{mode.title}
-								</div>
-								<div class="text-[11px] text-gray-10 mt-1 leading-snug text-pretty">
-									{mode.tagline}
-								</div>
-							</div>
-						</div>
-					)}
-				</For>
-			</div>
-		</div>
-	);
-}
-
-function ModeDetailStep(props: {
-	mode: ModeDetail;
-	active: boolean;
-	children: JSX.Element;
-}) {
-	const [visible, setVisible] = createSignal(false);
-
-	createEffect(() => {
-		if (props.active) {
-			setVisible(false);
-			const t = setTimeout(() => setVisible(true), 80);
-			onCleanup(() => clearTimeout(t));
-		} else {
-			setVisible(false);
-		}
-	});
-
-	return (
-		<div class="flex items-center min-h-full px-10 py-6 gap-8">
-			<div class="w-[240px] shrink-0 flex flex-col justify-center">
-				<div
-					class={cx(
-						"flex flex-col gap-4 transition-all duration-500 ease-out",
-						visible() ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4",
-					)}
-				>
-					<div class="flex items-center gap-3">
-						<div class="flex items-center justify-center size-11 rounded-[var(--radius-md,10px)] border border-gray-5 bg-gray-2 dark:bg-gray-3">
-							<props.mode.icon class="size-5 invert dark:invert-0" />
-						</div>
-						<div>
-							<h3 class="text-lg font-bold text-gray-12 tracking-tight">
-								{props.mode.title}
-							</h3>
-							<p class="text-[11px] font-medium text-[var(--sleek-accent,#0284c7)]">
-								{props.mode.tagline}
-							</p>
-						</div>
-					</div>
-
-					<p class="text-[13px] text-gray-10 leading-relaxed">
-						{props.mode.description}
-					</p>
-
-					<div class="flex flex-col gap-2.5">
-						<For each={props.mode.features}>
-							{(feature, index) => (
-								<div
-									class="flex items-center gap-2.5 transition-all duration-500"
-									style={{
-										"transition-delay": `${200 + index() * 60}ms`,
-										opacity: visible() ? 1 : 0,
-										transform: visible() ? "translateX(0)" : "translateX(-8px)",
-									}}
-								>
-									<div class="flex items-center justify-center size-5 rounded-full shrink-0 bg-blue-9">
-										<IconLucideCheck class="size-2.5 text-white" />
-									</div>
-									<span class="text-xs text-gray-11">{feature}</span>
-								</div>
-							)}
-						</For>
-					</div>
-				</div>
-			</div>
-
-			<div class="flex-1 min-w-0 flex items-center justify-center">
-				<div class="w-full h-full relative rounded-2xl bg-white dark:bg-gray-2 border border-gray-4 overflow-visible shadow-xs">
-					{props.children}
-				</div>
-			</div>
-		</div>
-	);
-}
-
-function ToggleStep(props: { active: boolean }) {
-	const [visible, setVisible] = createSignal(false);
-	const [activeMode, setActiveMode] = createSignal(0);
-	const [userClicked, setUserClicked] = createSignal(false);
-
-	const CIRCLE = 80;
-	const GAP = 24;
-	const PAD = 16;
-
-	createEffect(() => {
-		if (props.active) {
-			setVisible(false);
-			setActiveMode(0);
-			setUserClicked(false);
-			const t = setTimeout(() => setVisible(true), 100);
-			const interval = setInterval(() => {
-				if (!userClicked()) setActiveMode((prev) => (prev + 1) % modes.length);
-			}, 2500);
-			onCleanup(() => {
-				clearTimeout(t);
-				clearInterval(interval);
-			});
-		} else {
-			setVisible(false);
-		}
-	});
-
-	const ringLeft = () => PAD + activeMode() * (CIRCLE + GAP);
-
-	const handleModeClick = (index: number) => {
-		setUserClicked(true);
-		setActiveMode(index);
-		commands.setRecordingMode(modes[index].id);
-	};
-
-	return (
-		<div class="flex flex-col items-center justify-center min-h-full px-12 gap-8">
-			<div
-				class={cx(
-					"flex flex-col items-center gap-3 text-center max-w-[420px] transition-all duration-500",
-					visible() ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4",
-				)}
-			>
-				<h2 class="text-2xl font-bold text-gray-12 tracking-tight">
-					Switch modes anytime
-				</h2>
-				<p class="text-[14px] text-gray-10 leading-relaxed">
-					Toggle between modes with a single click from the main FlowReco
-					window.
-				</p>
-			</div>
-
-			<div
-				class={cx(
-					"flex flex-col items-center gap-5 transition-all duration-700 delay-200",
-					visible()
-						? "opacity-100 translate-y-0 scale-100"
-						: "opacity-0 translate-y-6 scale-95",
-				)}
-			>
-				<div class="relative">
-					<div class="absolute inset-0 rounded-full border border-gray-5 bg-white dark:bg-gray-3" />
-					<div
-						class="absolute rounded-full pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
-						style={{
-							width: `${CIRCLE}px`,
-							height: `${CIRCLE}px`,
-							left: `${ringLeft()}px`,
-							top: `${PAD}px`,
-							"box-shadow": "0 0 0 3px var(--gray-1), 0 0 0 5px var(--blue-9)",
-						}}
-					/>
-					<div
-						class="relative flex"
-						style={{ gap: `${GAP}px`, padding: `${PAD}px` }}
-					>
-						<For each={modes}>
-							{(mode, index) => (
-								<div
-									class={cx(
-										"rounded-full flex items-center justify-center transition-colors duration-300 hover:brightness-95 border",
-										activeMode() === index()
-											? "bg-gray-7 border-transparent dark:border-gray-6"
-											: "bg-white dark:bg-gray-4 border-gray-5 dark:border-gray-6",
-									)}
-									style={{
-										width: `${CIRCLE}px`,
-										height: `${CIRCLE}px`,
-									}}
-									onClick={() => handleModeClick(index())}
-								>
-									<mode.icon
-										class={cx(
-											"size-8 invert dark:invert-0 transition-all duration-300",
-											activeMode() === index()
-												? "scale-110 opacity-100"
-												: "scale-100 opacity-50",
-										)}
-									/>
-								</div>
-							)}
-						</For>
-					</div>
-				</div>
-
-				<div
-					class="flex"
-					style={{
-						gap: `${GAP}px`,
-						"padding-left": `${PAD}px`,
-						"padding-right": `${PAD}px`,
-					}}
-				>
-					<For each={modes}>
-						{(mode, index) => (
-							<span
-								class={cx(
-									"text-sm font-medium text-center transition-all duration-300",
-									activeMode() === index()
-										? "text-gray-12"
-										: "text-gray-9 opacity-50",
-								)}
-								style={{ width: `${CIRCLE}px` }}
-								onClick={() => handleModeClick(index())}
-							>
-								{mode.title}
-							</span>
-						)}
-					</For>
-				</div>
-			</div>
-		</div>
-	);
-}
-
-function ShortcutsStep(props: { active: boolean }) {
-	const [visible, setVisible] = createSignal(false);
-
-	createEffect(() => {
-		if (props.active) {
-			setVisible(false);
-			const t = setTimeout(() => setVisible(true), 100);
-			onCleanup(() => clearTimeout(t));
-		} else {
-			setVisible(false);
-		}
-	});
-
-	const settingsAreas = [
-		{
-			title: "Keyboard Shortcuts",
-			desc: "Global hotkeys for recording, screenshots, and switching modes",
-		},
-		{
-			title: "Custom S3 Storage",
-			desc: "Connect your own S3-compatible bucket for full control over your recordings",
-		},
-		{
-			title: "Custom Domain",
-			desc: "Use your own domain for FlowReco share links",
-		},
-		{
-			title: "Recording Preferences",
-			desc: "FPS, quality, countdown timer, cursor effects, and more",
-		},
-	];
-
-	return (
-		<div class="flex flex-col items-center justify-center min-h-full px-12 gap-6">
-			<div
-				class={cx(
-					"flex flex-col items-center gap-3 text-center max-w-[440px] transition-all duration-500",
-					visible() ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4",
-				)}
-			>
-				<div class="flex items-center justify-center size-12 rounded-2xl bg-white dark:bg-gray-3 border border-gray-4">
-					<IconCapSettings class="size-5 text-gray-11" />
-				</div>
-				<h2 class="text-2xl font-bold text-gray-12 tracking-tight">
-					Make FlowReco yours
-				</h2>
-				<p class="text-[14px] text-gray-10 leading-relaxed">
-					Customize everything from keyboard shortcuts to storage. FlowReco
-					adapts to your workflow.
-				</p>
-			</div>
-
-			<div
-				class={cx(
-					"w-full max-w-[420px] flex flex-col gap-2 transition-all duration-500 delay-100",
-					visible() ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4",
-				)}
-			>
-				<For each={settingsAreas}>
-					{(area, index) => (
-						<div
-							class="flex flex-col gap-1 px-4 py-3 rounded-xl border border-gray-4 bg-white dark:bg-gray-2 transition-all duration-500 shadow-xs"
-							style={{
-								"transition-delay": `${150 + index() * 80}ms`,
-								opacity: visible() ? 1 : 0,
-								transform: visible() ? "translateY(0)" : "translateY(8px)",
-							}}
-						>
-							<span class="text-[13px] font-medium text-gray-12">
-								{area.title}
-							</span>
-							<span class="text-[11px] text-gray-10 leading-snug">
-								{area.desc}
-							</span>
-						</div>
-					)}
-				</For>
-			</div>
-
-			<p
-				class={cx(
-					"text-xs text-gray-9 transition-all duration-500 delay-300",
-					visible() ? "opacity-100" : "opacity-0",
-				)}
-			>
-				Change any of these at any time in Settings
+			<p class="mt-6 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--sleek-accent,#0084d1)]">
+				Local-first capture
 			</p>
+			<h1 class="mt-2 text-[28px] font-semibold tracking-tight text-[var(--recorder-text,#252b31)] text-balance">
+				Welcome to FlowReco
+			</h1>
+			<p class="mt-3 max-w-[420px] text-[14px] leading-relaxed text-[var(--recorder-muted,#879192)] text-pretty">
+				Record your screen, polish in Studio, and export files you own. No
+				account required for local capture and editing.
+			</p>
+			<div class="mt-8 grid w-full max-w-[480px] grid-cols-3 gap-2">
+				<For
+					each={[
+						{ label: "Offline ready", icon: IconLucideMonitor },
+						{ label: "Studio editor", icon: IconLucideClapperboard },
+						{ label: "Clean exports", icon: IconLucideSparkles },
+					]}
+				>
+					{(item) => (
+						<div class="flex flex-col items-center gap-2 rounded-[14px] border border-[var(--recorder-border,#e6e6e6)] bg-[var(--recorder-raised,#f5f5f5)] px-3 py-4">
+							<item.icon class="size-4 text-[var(--sleek-accent,#0084d1)]" />
+							<span class="text-[11px] font-medium text-[var(--recorder-text,#252b31)]">
+								{item.label}
+							</span>
+						</div>
+					)}
+				</For>
+			</div>
 		</div>
 	);
 }
 
-function FaqStep(props: { active: boolean }) {
-	const [visible, setVisible] = createSignal(false);
-
-	createEffect(() => {
-		if (props.active) {
-			setVisible(false);
-			const t = setTimeout(() => setVisible(true), 100);
-			onCleanup(() => clearTimeout(t));
-		} else {
-			setVisible(false);
-		}
-	});
-
+function ModesStep() {
 	return (
-		<div class="flex flex-col items-center justify-center min-h-full px-12 py-6 gap-6">
-			<div
-				class={cx(
-					"flex flex-col items-center gap-2 text-center transition-all duration-500",
-					visible() ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4",
-				)}
-			>
-				<h2 class="text-2xl font-bold text-gray-12 tracking-tight">
-					Frequently Asked Questions
+		<div class="flex flex-col items-center justify-center min-h-full px-8 py-6 gap-6">
+			<div class="text-center max-w-[460px]">
+				<p class="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--sleek-accent,#0084d1)]">
+					Capture modes
+				</p>
+				<h2 class="mt-2 text-[24px] font-semibold tracking-tight text-[var(--recorder-text,#252b31)]">
+					Studio and Screenshot
 				</h2>
-				<p class="text-[14px] text-gray-10">
-					Everything you need to know to get started.
+				<p class="mt-2 text-[14px] leading-relaxed text-[var(--recorder-muted,#879192)]">
+					Switch anytime from the main window. Everything stays on this device
+					until you export.
 				</p>
 			</div>
-
-			<div
-				class={cx(
-					"w-full max-w-[480px] rounded-xl border border-gray-4 bg-white dark:bg-gray-2 overflow-hidden transition-all duration-500 delay-100 shadow-xs",
-					visible() ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4",
-				)}
-			>
-				<FaqItem question="Is FlowReco free to use?">
-					<p class="text-[13px] text-gray-10 leading-relaxed">
-						FlowReco is free and open source under the AGPL. Record and edit
-						locally without a subscription, or connect a server you control when
-						you want sharing and collaboration.
-					</p>
-				</FaqItem>
-				<FaqItem question="What is Studio Mode?">
-					<p class="text-[13px] text-gray-10 leading-relaxed">
-						Studio keeps full-quality media local for the FlowReco editor —
-						zooms, cursor, captions, and export when you decide. Instant Mode is
-						not offered in FlowReco.
-					</p>
-				</FaqItem>
-				<FaqItem question="Where are my recordings stored?">
-					<p class="text-[13px] text-gray-10 leading-relaxed">
-						Recordings are stored locally on your computer. You can open project
-						folders from the editor or Settings.
-					</p>
-				</FaqItem>
-				<FaqItem question="Can I change my shortcuts later?">
-					<p class="text-[13px] text-gray-10 leading-relaxed">
-						Head to Settings → Shortcuts at any time to customize all your
-						keyboard shortcuts.
-					</p>
-				</FaqItem>
-				<FaqItem question="How does sharing work?">
-					<p class="text-[13px] text-gray-10 leading-relaxed">
-						Open the recording in Studio, export when you are happy with the
-						edit, then share the file or upload to a server you configure.
-					</p>
-				</FaqItem>
-			</div>
-
-			<a
-				href="https://github.com/Atharvsinh-codez/FlowReco"
-				target="_blank"
-				rel="noreferrer"
-				class={cx(
-					"flex items-center gap-1.5 text-[13px] text-blue-10 hover:text-blue-11 transition-all duration-500 delay-200",
-					visible() ? "opacity-100" : "opacity-0",
-				)}
-			>
-				View source and releases
-				<IconLucideExternalLink class="size-3" />
-			</a>
-		</div>
-	);
-}
-
-function FaqItem(props: { question: string; children: JSX.Element }) {
-	const [open, setOpen] = createSignal(false);
-
-	return (
-		<div class="border-b border-gray-4 last:border-b-0">
-			<button
-				type="button"
-				onClick={() => setOpen((p) => !p)}
-				class="flex items-center justify-between w-full px-4 py-3 text-left hover:bg-gray-2 dark:hover:bg-gray-3 transition-colors duration-200"
-			>
-				<span class="text-[13px] font-medium text-gray-12">
-					{props.question}
-				</span>
-				<IconLucideChevronDown
-					class={cx(
-						"size-3.5 text-gray-9 shrink-0 transition-transform duration-300",
-						open() && "rotate-180",
-					)}
-				/>
-			</button>
-			<div
-				class="overflow-hidden transition-all duration-300 ease-out"
-				style={{
-					"max-height": open() ? "200px" : "0px",
-					opacity: open() ? 1 : 0,
-				}}
-			>
-				<div class="px-4 pb-3">{props.children}</div>
-			</div>
-		</div>
-	);
-}
-
-function MockupStepBar(props: { steps: string[]; activeStep: number }) {
-	return (
-		<div class="flex items-center justify-center gap-2 pb-3">
-			<For each={props.steps}>
-				{(label, index) => (
-					<>
-						<Show when={index() > 0}>
-							<div class="w-3 h-px bg-gray-5" />
-						</Show>
-						<div
-							class={cx(
-								"flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-medium transition-all duration-300",
-								props.activeStep === index()
-									? "bg-blue-3 text-blue-11 border border-blue-5"
-									: props.activeStep > index()
-										? "text-gray-10 bg-white dark:bg-gray-3 border border-gray-4"
-										: "text-gray-8 border border-transparent",
-							)}
-						>
-							<span class="font-bold">{index() + 1}</span>
-							{label}
-						</div>
-					</>
-				)}
-			</For>
-		</div>
-	);
-}
-
-function StartRecordingClickMock(props: {
-	active: boolean;
-	mode: "instant" | "studio";
-}) {
-	const [cursorStage, setCursorStage] = createSignal(0);
-
-	const cursorMoveMs = 1450;
-
-	createEffect(() => {
-		if (!props.active) {
-			setCursorStage(0);
-			return;
-		}
-		setCursorStage(0);
-		const settleFrameMs = 40;
-		const pauseAfterArriveMs = 280;
-		const t1 = setTimeout(() => setCursorStage(1), settleFrameMs);
-		const t2 = setTimeout(
-			() => setCursorStage(2),
-			settleFrameMs + cursorMoveMs + pauseAfterArriveMs,
-		);
-		onCleanup(() => {
-			clearTimeout(t1);
-			clearTimeout(t2);
-		});
-	});
-
-	const modeLabel = () =>
-		props.mode === "studio" ? "Studio Mode" : "Instant Mode";
-
-	const cursorW = () => (ostype() === "windows" ? 24 : 22);
-	const cursorH = () => (ostype() === "windows" ? 34 : 32);
-
-	return (
-		<div class="relative mx-auto w-full max-w-[18rem] overflow-visible pb-8">
-			<div class="relative w-full">
-				<div
-					class={cx(
-						"flex h-11 w-full overflow-hidden rounded-full bg-linear-to-r from-blue-10 via-blue-10 to-blue-11 text-white transition-transform duration-500 ease-out dark:from-blue-9 dark:via-blue-9 dark:to-blue-10",
-						cursorStage() === 2 && "scale-[0.98]",
-					)}
-				>
-					<div class="flex min-w-0 flex-1 items-center py-1 pl-4 pointer-events-none">
-						<Show
-							when={props.mode === "studio"}
-							fallback={<IconCapInstant class="size-4 shrink-0" />}
-						>
-							<IconCapFilmCut class="size-4 shrink-0" />
-						</Show>
-						<div class="mr-2 ml-3 flex min-w-0 flex-col">
-							<span class="text-[0.95rem] font-medium text-nowrap text-white">
-								Start Recording
-							</span>
-							<span class="-mt-0.5 flex items-center gap-1 text-[11px] font-light text-nowrap text-white/90">
-								{modeLabel()}
-							</span>
-						</div>
-					</div>
-					<div class="flex shrink-0 items-center border-l border-white/20 bg-white/5 py-1.5 pl-2.5 pr-3">
-						<IconCapCaretDown class="pointer-events-none" />
-					</div>
-				</div>
-				<div
-					class="pointer-events-none absolute z-10 transition-[top,left] ease-[cubic-bezier(0.22,0.82,0.28,1)]"
-					style={{
-						"transition-duration": `${cursorMoveMs}ms`,
-						top:
-							cursorStage() === 0 ? "calc(100% + 10px)" : "calc(100% - 18px)",
-						left: cursorStage() === 0 ? "-2.75rem" : "28%",
-						width: `${cursorW()}px`,
-						height: `${cursorH()}px`,
-					}}
-				>
-					<div
-						class={cx(
-							"size-full transition-transform duration-200 ease-out",
-							cursorStage() === 2 && "translate-y-[3px] scale-[0.94]",
-						)}
-					>
-						<Show
-							when={ostype() === "windows"}
-							fallback={<IconCapCursorMacos class="h-full w-full" />}
-						>
-							<IconCapCursorWindows class="h-full w-full" />
-						</Show>
-					</div>
-				</div>
-			</div>
-		</div>
-	);
-}
-
-function RecordingBar(props: {
-	time: string;
-	stopped?: boolean;
-	class?: string;
-}) {
-	const actionIconWrap =
-		"h-8 w-8 flex shrink-0 items-center justify-center rounded-lg p-1 text-gray-11";
-
-	return (
-		<div class={cx("h-10 w-full min-w-[280px] rounded-2xl", props.class)}>
-			<div class="flex h-full w-full flex-row items-stretch overflow-hidden rounded-2xl border border-gray-5 bg-white dark:bg-gray-1 shadow-[0_1px_3px_rgba(0,0,0,0.1)]">
-				<div class="flex min-w-0 flex-1 flex-col gap-2 p-1">
-					<div class="flex min-h-0 flex-1 flex-row items-center justify-between">
-						<Show
-							when={!props.stopped}
-							fallback={
-								<div class="flex flex-row items-center gap-1.5 rounded-lg px-2 py-1 text-gray-10">
-									<div class="size-2 shrink-0 rounded-full bg-gray-8" />
-									<span class="text-[0.875rem] font-medium">Stopped</span>
+			<div class="grid w-full max-w-[560px] gap-3 md:grid-cols-2">
+				<For each={modes}>
+					{(mode) => (
+						<div class="flex flex-col gap-3 rounded-[16px] border border-[var(--recorder-border,#e6e6e6)] bg-white p-4 shadow-[0_1px_0_rgba(255,255,255,0.8)_inset]">
+							<div class="flex items-center gap-3">
+								<div class="flex size-10 items-center justify-center rounded-[12px] bg-[var(--sleek-accent-soft,rgba(0,132,209,0.12))] text-[var(--sleek-accent,#0084d1)]">
+									<mode.icon class="size-5 invert dark:invert-0 opacity-90" />
 								</div>
-							}
-						>
-							<button
-								type="button"
-								class="flex shrink-0 flex-row items-center gap-1 rounded-lg px-2 py-1 text-red-300 transition-colors duration-100 hover:bg-red-500/8 active:bg-red-500/12"
-							>
-								<IconCapStopCircle class="size-5 shrink-0" />
-								<span class="text-[0.875rem] font-medium tabular-nums">
-									{props.time}
-								</span>
-							</button>
-						</Show>
-						<div
-							class={cx(
-								"flex shrink-0 items-center gap-1",
-								props.stopped && "opacity-45",
-							)}
-						>
-							<div class="relative flex h-8 w-8 shrink-0 items-center justify-center">
-								<IconCapMicrophone class="size-5 text-gray-12" />
-								<div class="absolute bottom-1 left-1 right-1 h-0.5 overflow-hidden rounded-full bg-gray-10">
-									<div
-										class="absolute inset-0 bg-blue-9"
-										style={{ transform: "translateX(-40%)" }}
-									/>
+								<div>
+									<div class="text-[15px] font-semibold text-[var(--recorder-text,#252b31)]">
+										{mode.title}
+									</div>
+									<div class="text-[12px] text-[var(--recorder-muted,#879192)]">
+										{mode.tagline}
+									</div>
 								</div>
 							</div>
-							<div class={actionIconWrap} aria-hidden="true">
-								<IconCapPauseCircle class="size-5" />
-							</div>
-							<div class={actionIconWrap} aria-hidden="true">
-								<IconCapRestart class="size-5" />
-							</div>
-							<div class={actionIconWrap} aria-hidden="true">
-								<IconCapTrash class="size-5" />
-							</div>
-							<div class={actionIconWrap} aria-hidden="true">
-								<IconCapSettings class="size-5" />
-							</div>
-						</div>
-					</div>
-				</div>
-				<div
-					class={cx(
-						"flex w-9 shrink-0 cursor-default items-center justify-center border-l border-gray-5 p-1 text-gray-10",
-						props.stopped && "opacity-45",
-					)}
-					aria-hidden="true"
-				>
-					<IconCapMoreVertical class="pointer-events-none size-5" />
-				</div>
-			</div>
-		</div>
-	);
-}
-
-function InstantMockup(props: { active: boolean }) {
-	const phase = createLoopingPhase(
-		() => props.active,
-		[300, 2350, 3350, 4350, 5350, 6350, 7350, 8350],
-		9550,
-	);
-
-	const activeStep = () => {
-		const p = phase();
-		if (p <= 5) return 0;
-		if (p <= 6) return 1;
-		return 2;
-	};
-
-	const recordingTime = () => {
-		const p = phase();
-		if (p >= 5) return "0:03";
-		if (p >= 4) return "0:02";
-		if (p >= 3) return "0:01";
-		if (p >= 2) return "0:00";
-		return "0:00";
-	};
-
-	return (
-		<div class="w-full h-full flex flex-col min-h-0 p-4">
-			<MockupStepBar
-				steps={["Record", "Stop", "Share link"]}
-				activeStep={activeStep()}
-			/>
-			<div class="relative flex-1 min-h-[200px] w-full max-w-[420px] mx-auto">
-				<div
-					class={cx(
-						"absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-500 ease-[cubic-bezier(0.34,1.3,0.64,1)]",
-						phase() >= 1 && phase() < 7
-							? "opacity-100"
-							: "pointer-events-none opacity-0",
-					)}
-				>
-					<div class="relative min-h-[52px] w-full max-w-[400px]">
-						<div
-							class={cx(
-								"flex w-full justify-center transition-all duration-720 ease-[cubic-bezier(0.34,1.3,0.64,1)]",
-								phase() === 1
-									? "relative z-2 translate-y-0 scale-100 opacity-100"
-									: "pointer-events-none absolute inset-0 z-1 flex items-center justify-center opacity-0 scale-[0.94] -translate-y-2",
-							)}
-						>
-							<StartRecordingClickMock active={phase() === 1} mode="instant" />
-						</div>
-						<div
-							class={cx(
-								"w-full transition-all duration-720 ease-[cubic-bezier(0.34,1.3,0.64,1)]",
-								phase() >= 2 && phase() < 7
-									? "relative z-2 translate-y-0 scale-100 opacity-100"
-									: "pointer-events-none absolute inset-0 z-1 flex items-center justify-center opacity-0 scale-[0.94] translate-y-3",
-							)}
-						>
-							<div class="w-full shadow-[0_8px_30px_rgba(0,0,0,0.08)]">
-								<RecordingBar time={recordingTime()} stopped={phase() >= 6} />
-							</div>
-						</div>
-					</div>
-				</div>
-				<div
-					class={cx(
-						"absolute inset-0 flex items-center justify-center transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]",
-						phase() >= 7
-							? "opacity-100 translate-y-0 scale-100"
-							: "opacity-0 translate-y-4 scale-[0.97] pointer-events-none",
-					)}
-				>
-					<div class="w-full max-w-[340px] rounded-xl overflow-hidden border border-gray-4 bg-white dark:bg-gray-1 shadow-lg">
-						<div class="flex flex-col items-center gap-3 px-4 py-4">
-							<div class="flex items-center gap-2">
-								<div class="size-5 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-									<IconLucideCheck class="size-3 text-green-600" />
-								</div>
-								<span class="text-[12px] font-medium text-gray-12">
-									Link ready to share!
-								</span>
-							</div>
-							<div class="flex items-center gap-2 w-full">
-								<div class="flex-1 flex items-center px-3 py-2 rounded-lg bg-white dark:bg-gray-3 border border-gray-4">
-									<span class="text-[11px] text-gray-11 font-mono">
-										your-reco.example/s/m4k92x
-									</span>
-								</div>
-								<div
-									class={cx(
-										"flex items-center gap-1.5 px-3 py-2 rounded-lg border text-[11px] font-medium transition-all duration-300 shrink-0",
-										phase() >= 8
-											? "bg-green-50 border-green-200 text-green-700 scale-95"
-											: "bg-white dark:bg-gray-3 border-gray-5 text-gray-11",
+							<p class="text-[13px] leading-relaxed text-[var(--recorder-muted,#879192)]">
+								{mode.description}
+							</p>
+							<ul class="flex flex-col gap-1.5">
+								<For each={mode.bullets}>
+									{(bullet) => (
+										<li class="flex items-center gap-2 text-[12px] text-[var(--recorder-text,#252b31)]">
+											<span class="flex size-4 items-center justify-center rounded-full bg-[var(--sleek-accent,#0084d1)]">
+												<IconLucideCheck class="size-2.5 text-white" />
+											</span>
+											{bullet}
+										</li>
 									)}
-								>
-									<Show
-										when={phase() >= 8}
-										fallback={
-											<>
-												<IconLucideCopy class="size-3" stroke-width={2} />
-												Copy
-											</>
-										}
-									>
-										<IconLucideCheck class="size-3" />
-										Copied!
-									</Show>
-								</div>
-							</div>
+								</For>
+							</ul>
 						</div>
-					</div>
-				</div>
+					)}
+				</For>
 			</div>
 		</div>
 	);
 }
 
-function StudioMockup(props: { active: boolean }) {
-	const phase = createLoopingPhase(
-		() => props.active,
-		[300, 2350, 3350, 4350, 5350, 6350, 7350, 8150, 9150, 10150, 11150],
-		12250,
-	);
-
-	const activeStep = () => {
-		const p = phase();
-		if (p < 7) return 0;
-		if (p < 9) return 1;
-		return 2;
-	};
-
-	const showRecording = () => phase() < 7;
-	const showEditor = () => phase() >= 7;
-	const showExporting = () => phase() >= 9;
-
-	const studioRecordingTime = () => {
-		const p = phase();
-		if (p >= 5) return "0:03";
-		if (p >= 4) return "0:02";
-		if (p >= 3) return "0:01";
-		if (p >= 2) return "0:00";
-		return "0:00";
-	};
-
-	const exportPercent = () => {
-		const p = phase();
-		if (p >= 11) return 100;
-		if (p >= 10) return 75;
-		if (p >= 9) return 25;
-		return 0;
-	};
-
+function WorkflowStep() {
 	return (
-		<div class="w-full h-full flex flex-col min-h-0 p-4">
-			<MockupStepBar
-				steps={["Record", "Edit", "Export"]}
-				activeStep={activeStep()}
-			/>
-			<div class="relative flex-1 w-full max-w-[420px] min-h-[248px] mx-auto flex items-center justify-center">
-				<div
-					class={cx(
-						"absolute inset-0 z-1 flex flex-col items-center justify-center transition-opacity duration-600 ease-out",
-						showRecording()
-							? "opacity-100 blur-0"
-							: "pointer-events-none opacity-0 blur-[2px]",
-					)}
-				>
-					<div class="relative min-h-[52px] w-full max-w-[400px]">
-						<div
-							class={cx(
-								"flex w-full justify-center transition-all duration-720 ease-[cubic-bezier(0.34,1.3,0.64,1)]",
-								phase() === 1
-									? "relative z-2 translate-y-0 scale-100 opacity-100"
-									: "pointer-events-none absolute inset-0 z-1 flex items-center justify-center opacity-0 scale-[0.94] -translate-y-2",
-							)}
-						>
-							<StartRecordingClickMock active={phase() === 1} mode="studio" />
-						</div>
-						<div
-							class={cx(
-								"w-full transition-all duration-720 ease-[cubic-bezier(0.34,1.3,0.64,1)]",
-								phase() >= 2 && phase() < 7
-									? "relative z-2 translate-y-0 scale-100 opacity-100"
-									: "pointer-events-none absolute inset-0 z-1 flex items-center justify-center opacity-0 scale-[0.94] translate-y-3",
-							)}
-						>
-							<div class="w-full shadow-[0_8px_30px_rgba(0,0,0,0.08)]">
-								<RecordingBar
-									time={studioRecordingTime()}
-									stopped={phase() >= 6}
-								/>
+		<div class="flex flex-col items-center justify-center min-h-full px-8 py-6 gap-6">
+			<div class="text-center max-w-[440px]">
+				<p class="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--sleek-accent,#0084d1)]">
+					How it works
+				</p>
+				<h2 class="mt-2 text-[24px] font-semibold tracking-tight text-[var(--recorder-text,#252b31)]">
+					Capture, polish, export
+				</h2>
+			</div>
+			<div class="flex w-full max-w-[520px] flex-col gap-3">
+				<For each={workflow}>
+					{(item, index) => (
+						<div class="flex gap-3 rounded-[14px] border border-[var(--recorder-border,#e6e6e6)] bg-white p-4">
+							<div class="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-[var(--recorder-raised,#f5f5f5)] text-[var(--sleek-accent,#0084d1)]">
+								<item.icon class="size-4" />
 							</div>
-						</div>
-					</div>
-				</div>
-
-				<div
-					class={cx(
-						"absolute inset-0 flex flex-col rounded-xl overflow-hidden border border-gray-3 bg-white dark:bg-gray-1 shadow-lg transition-all duration-600 ease-out z-2",
-						showEditor()
-							? "opacity-100 scale-100 translate-y-0 blur-0"
-							: "opacity-0 scale-[0.96] translate-y-3 blur-[2px] pointer-events-none",
-					)}
-				>
-					<div class="flex items-center justify-between h-9 px-3 border-b border-gray-3 bg-white dark:bg-gray-1">
-						<div class="flex items-center gap-2">
-							<div class="flex gap-1">
-								<div class="size-2 rounded-full bg-gray-6" />
-								<div class="size-2 rounded-full bg-gray-6" />
-								<div class="size-2 rounded-full bg-gray-6" />
-							</div>
-							<span class="text-[10px] text-gray-11 font-medium">
-								FlowReco Editor
-							</span>
-						</div>
-						<div
-							class={cx(
-								"px-2.5 py-1 rounded-md text-[9px] text-white font-medium transition-all duration-500 ease-out bg-blue-9",
-								phase() >= 8
-									? "scale-105 ring-2 ring-blue-9/50 ring-offset-2 ring-offset-white dark:ring-offset-gray-1"
-									: "scale-100 ring-0 ring-offset-0",
-							)}
-						>
-							Export
-						</div>
-					</div>
-
-					<div class="flex bg-white dark:bg-gray-1 flex-1 relative">
-						<div
-							class={cx(
-								"flex-1 p-3 transition-all duration-500",
-								showEditor() ? "opacity-100" : "opacity-0",
-							)}
-						>
-							<div class="relative rounded-lg overflow-hidden border border-gray-3 h-full">
-								<div
-									class="absolute inset-0"
-									style={{
-										background:
-											"linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-									}}
-								/>
-								<div class="relative m-2.5 h-[80px] rounded-md bg-white/95 dark:bg-gray-1/95 border border-gray-3 shadow-md flex items-center justify-center">
-									<div class="flex flex-col gap-1.5 p-3 w-full">
-										<div class="w-3/4 h-1.5 rounded-full bg-gray-5/50" />
-										<div class="w-1/2 h-1.5 rounded-full bg-gray-5/30" />
-										<div class="w-full h-5 rounded-sm bg-gray-5/20 mt-1" />
-									</div>
-								</div>
-							</div>
-						</div>
-
-						<div
-							class={cx(
-								"w-[90px] shrink-0 border-l border-gray-3 bg-white dark:bg-gray-1 p-2 flex flex-col gap-1.5 transition-all duration-500",
-								showEditor()
-									? "opacity-100 translate-x-0"
-									: "opacity-0 translate-x-2",
-							)}
-						>
-							<div class="text-[8px] text-gray-9 font-medium uppercase tracking-wider">
-								Style
-							</div>
-							<div class="h-5 rounded-sm border border-gray-3 bg-white dark:bg-gray-2" />
-							<div class="text-[8px] text-gray-9 font-medium uppercase tracking-wider mt-1">
-								Background
-							</div>
-							<div class="flex gap-1">
-								<div class="size-4 rounded-full bg-linear-to-br from-blue-400 to-purple-500 border border-gray-3" />
-								<div class="size-4 rounded-full bg-linear-to-br from-pink-400 to-orange-400 border border-gray-3" />
-								<div class="size-4 rounded-full bg-gray-4 border border-gray-3" />
-							</div>
-						</div>
-
-						<Show when={showExporting()}>
-							<div class="absolute inset-0 bg-black/25 backdrop-blur-[2px] flex items-center justify-center z-10">
-								<div class="bg-white dark:bg-gray-1 rounded-xl border border-gray-4 shadow-xl px-6 py-5 flex flex-col items-center gap-3 min-w-[200px]">
-									<Show
-										when={phase() < 11}
-										fallback={
-											<div class="flex items-center gap-2">
-												<div class="size-6 rounded-full bg-green-100 flex items-center justify-center">
-													<IconLucideCheck class="size-3.5 text-green-600" />
-												</div>
-												<span class="text-sm font-medium text-gray-12">
-													Export complete!
-												</span>
-											</div>
-										}
-									>
-										<span class="text-sm font-medium text-gray-12">
-											Exporting...
-										</span>
-									</Show>
-									<div class="w-full h-2 bg-gray-4 rounded-full overflow-hidden">
-										<div
-											class="h-full bg-blue-9 rounded-full transition-all ease-out"
-											style={{
-												width: `${exportPercent()}%`,
-												"transition-duration":
-													phase() >= 11 ? "800ms" : "600ms",
-											}}
-										/>
-									</div>
-									<span class="text-xs text-gray-10 tabular-nums font-medium">
-										{exportPercent()}%
+							<div class="min-w-0">
+								<div class="flex items-center gap-2">
+									<span class="text-[11px] font-semibold tabular-nums text-[var(--sleek-accent,#0084d1)]">
+										{index() + 1}
+									</span>
+									<span class="text-[14px] font-semibold text-[var(--recorder-text,#252b31)]">
+										{item.title}
 									</span>
 								</div>
+								<p class="mt-1 text-[13px] leading-relaxed text-[var(--recorder-muted,#879192)]">
+									{item.body}
+								</p>
 							</div>
-						</Show>
-					</div>
-
-					<div
-						class={cx(
-							"px-3 pb-2 border-t border-gray-3 bg-white dark:bg-gray-1 transition-all duration-500",
-							showEditor()
-								? "opacity-100 translate-y-0"
-								: "opacity-0 translate-y-2",
-						)}
-					>
-						<div class="flex items-center gap-1.5 h-6 bg-white dark:bg-gray-2 rounded-lg px-2 border border-gray-3">
-							<div class="flex-1 h-[3px] bg-gray-4 rounded-full relative">
-								<div
-									class="h-full bg-gray-8 rounded-full"
-									style={{ width: "42%" }}
-								/>
-							</div>
-							<span class="text-[8px] text-gray-10 tabular-nums font-medium">
-								0:12
-							</span>
 						</div>
-					</div>
-				</div>
+					)}
+				</For>
 			</div>
 		</div>
 	);
 }
 
-function StartupOverlay(props: {
-	isExiting: boolean;
-	onGetStarted: () => void;
-}) {
-	let cloud1Animation: Animation | undefined;
-	let cloud2Animation: Animation | undefined;
-	let cloud3Animation: Animation | undefined;
-
-	const [isLogoAnimating, setIsLogoAnimating] = createSignal(false);
-
-	const handleLogoClick = () => {
-		if (!isLogoAnimating()) {
-			setIsLogoAnimating(true);
-			setTimeout(() => setIsLogoAnimating(false), 1000);
-		}
-	};
-
-	const bindCloud1 = (el: HTMLDivElement | null) => {
-		cloud1Animation?.cancel();
-		cloud1Animation = undefined;
-		if (!el) return;
-		requestAnimationFrame(() => {
-			requestAnimationFrame(() => {
-				cloud1Animation = el.animate(
-					[
-						{ transform: "translate(0, 0)" },
-						{ transform: "translate(-20px, 10px)" },
-						{ transform: "translate(0, 0)" },
-					],
-					{ duration: 30000, iterations: Infinity, easing: "linear" },
-				);
-			});
-		});
-	};
-
-	const bindCloud2 = (el: HTMLDivElement | null) => {
-		cloud2Animation?.cancel();
-		cloud2Animation = undefined;
-		if (!el) return;
-		requestAnimationFrame(() => {
-			requestAnimationFrame(() => {
-				cloud2Animation = el.animate(
-					[
-						{ transform: "translate(0, 0)" },
-						{ transform: "translate(20px, 10px)" },
-						{ transform: "translate(0, 0)" },
-					],
-					{ duration: 35000, iterations: Infinity, easing: "linear" },
-				);
-			});
-		});
-	};
-
-	const bindCloud3Inner = (el: HTMLDivElement | null) => {
-		cloud3Animation?.cancel();
-		cloud3Animation = undefined;
-		if (!el) return;
-		requestAnimationFrame(() => {
-			requestAnimationFrame(() => {
-				cloud3Animation = el.animate(
-					[
-						{ transform: "translate(0, 20px)" },
-						{ transform: "translate(2%, 0)" },
-						{ transform: "translate(0, 0)" },
-					],
-					{
-						duration: 60000,
-						iterations: 1,
-						easing: "cubic-bezier(0.4, 0, 0.2, 1)",
-						fill: "forwards",
-					},
-				);
-			});
-		});
-	};
-
-	onMount(() => {
-		onCleanup(() => {
-			cloud1Animation?.cancel();
-			cloud2Animation?.cancel();
-			cloud3Animation?.cancel();
-		});
-	});
-
-	const handleGetStarted = () => {
-		cloud1Animation?.cancel();
-		cloud2Animation?.cancel();
-		cloud3Animation?.cancel();
-		props.onGetStarted();
-	};
-
-	createEffect(() => {
-		const exiting = props.isExiting;
-		const onKeyDown = (e: KeyboardEvent) => {
-			if (exiting) return;
-			if (e.key !== " " && e.code !== "Space") return;
-			e.preventDefault();
-			handleGetStarted();
-		};
-		window.addEventListener("keydown", onKeyDown);
-		onCleanup(() => window.removeEventListener("keydown", onKeyDown));
-	});
-
+function ReadyStep() {
 	return (
-		<div
-			class={cx(
-				"absolute inset-0 z-50 flex flex-col min-h-full h-full overflow-hidden transition-all duration-600 text-white bg-[var(--recorder-bg,#121212)]",
-				props.isExiting && "opacity-0 scale-105 pointer-events-none",
-			)}
-		>
-			<div class="startup-grain opacity-40" />
-			<div
-				class="pointer-events-none absolute inset-0 z-0"
-				style={{
-					background:
-						"radial-gradient(80% 60% at 50% 0%, rgba(255,98,67,0.18) 0%, transparent 55%), radial-gradient(50% 40% at 80% 100%, rgba(255,98,67,0.08) 0%, transparent 50%)",
-				}}
-			/>
-
-			<div
-				ref={bindCloud1}
-				class={cx(
-					"absolute top-0 right-0 opacity-25 pointer-events-none startup-cloud-1 z-1",
-					props.isExiting && "startup-cloud-transition exiting",
-				)}
-			>
-				<img
-					class="startup-cloud-image w-screen md:w-[80vw] -mr-40"
-					src={cloud1}
-					alt=""
-				/>
+		<div class="flex flex-col items-center justify-center min-h-full px-10 py-8 text-center">
+			<div class="flex size-14 items-center justify-center rounded-full bg-[var(--sleek-accent-soft,rgba(0,132,209,0.12))] text-[var(--sleek-accent,#0084d1)]">
+				<IconLucideCheck class="size-6" />
 			</div>
-			<div
-				ref={bindCloud2}
-				class={cx(
-					"absolute top-0 left-0 opacity-20 pointer-events-none startup-cloud-2 z-1",
-					props.isExiting && "startup-cloud-transition exiting",
-				)}
-			>
-				<img
-					class="startup-cloud-image w-screen md:w-[80vw] -ml-40"
-					src={cloud2}
-					alt=""
-				/>
-			</div>
-			<div
-				class={cx(
-					"absolute -bottom-[15%] left-1/2 -translate-x-1/2 opacity-20 pointer-events-none z-1",
-					props.isExiting && "startup-cloud-transition startup-cloud-3 exiting",
-				)}
-			>
-				<div ref={bindCloud3Inner}>
-					<img
-						class="startup-cloud-image w-[180vw] md:w-[180vw]"
-						src={cloud3}
-						alt=""
-					/>
-				</div>
-			</div>
-
-			<div
-				class={cx(
-					"flex flex-col items-center justify-center flex-1 relative px-6 z-5",
-					props.isExiting && "opacity-0 scale-[1.1]",
-				)}
-				style={{ transition: "all 600ms cubic-bezier(0.22, 1, 0.36, 1)" }}
-			>
-				<div class="text-center max-w-lg">
-					<div onClick={handleLogoClick} class="inline-block">
-						<img
-							src={flowRecoMark}
-							alt=""
-							class={cx(
-								"w-16 h-16 mx-auto drop-shadow-[0_0_48px_rgba(255,98,67,0.35)]",
-								isLogoAnimating() && "startup-logo-bounce",
-							)}
-						/>
-					</div>
-					<p class="mt-8 text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--sleek-accent,#0284c7)]">
-						Local-first capture
-					</p>
-					<h1 class="text-4xl md:text-[2.75rem] font-bold mb-3 mt-3 tracking-tight text-balance">
-						Welcome to FlowReco
-					</h1>
-					<p class="text-base md:text-lg text-white/70 mx-auto text-pretty leading-relaxed">
-						Cinematic screen recording you own — edit locally, share only when
-						you choose.
-					</p>
-				</div>
-
-				<Button
-					class="mt-12 px-12 py-3.5 min-h-14 min-w-52 text-base font-medium rounded-[var(--radius-md,10px)] shadow-[0_12px_32px_rgba(2,132,199,0.28)] bg-[var(--sleek-accent,#0284c7)] border border-[#0270a8] text-white hover:brightness-110 flex-col gap-0.5"
-					variant="blue"
-					size="lg"
-					onClick={handleGetStarted}
-				>
-					<span>Continue</span>
-					<span class="text-[11px] font-normal text-white/75 leading-tight inline-flex items-center justify-center gap-1">
-						<span>or press</span>
-						<kbd class="rounded-[var(--radius-xs,4px)] border border-white/25 bg-white/10 px-1.5 py-px text-[10px] font-medium text-white">
-							Space
-						</kbd>
-					</span>
-				</Button>
+			<h2 class="mt-5 text-[24px] font-semibold tracking-tight text-[var(--recorder-text,#252b31)]">
+				You are ready
+			</h2>
+			<p class="mt-2 max-w-[400px] text-[14px] leading-relaxed text-[var(--recorder-muted,#879192)]">
+				Open the main window, choose a source, and start a Studio recording.
+				Shortcuts and preferences live in Settings anytime.
+			</p>
+			<div class="mt-6 rounded-[14px] border border-[var(--recorder-border,#e6e6e6)] bg-[var(--recorder-raised,#f5f5f5)] px-4 py-3 text-[12px] text-[var(--recorder-muted,#879192)]">
+				Tip: use Studio for editable video projects. Screenshots are perfect for
+				quick stills.
 			</div>
 		</div>
 	);
@@ -1883,11 +571,11 @@ function PermissionsStep(props: {
 	onPermissionsChanged: (allRequired: boolean) => void;
 	onCorePermissionsChanged: (granted: boolean) => void;
 }) {
-	const [visible, setVisible] = createSignal(false);
 	const [initialCheck, setInitialCheck] = createSignal(true);
 	const [check, setCheck] = createSignal<
 		Record<string, OSPermissionStatus> | undefined
 	>(undefined);
+	const [requestingPermission, setRequestingPermission] = createSignal(false);
 
 	const fetchPermissions = async () => {
 		const result = await commands.doPermissionsCheck(initialCheck());
@@ -1895,22 +583,14 @@ function PermissionsStep(props: {
 	};
 
 	onMount(() => {
-		fetchPermissions();
-	});
-
-	createEffect(() => {
-		if (props.active) {
-			setVisible(false);
-			const t = setTimeout(() => setVisible(true), 100);
-			onCleanup(() => clearTimeout(t));
-		} else {
-			setVisible(false);
-		}
+		void fetchPermissions();
 	});
 
 	createEffect(() => {
 		if (props.active && !initialCheck()) {
-			const interval = setInterval(fetchPermissions, 250);
+			const interval = setInterval(() => {
+				void fetchPermissions();
+			}, 250);
 			onCleanup(() => clearInterval(interval));
 		}
 	});
@@ -1943,8 +623,6 @@ function PermissionsStep(props: {
 		}
 	};
 
-	const [requestingPermission, setRequestingPermission] = createSignal(false);
-
 	const requestPermission = async (permission: OSPermission) => {
 		if (requestingPermission()) return;
 		setRequestingPermission(true);
@@ -1965,7 +643,7 @@ function PermissionsStep(props: {
 			}
 		} catch (err) {
 			console.error(`Error requesting permission: ${err}`);
-			fetchPermissions().catch(() => {});
+			void fetchPermissions().catch(() => {});
 		} finally {
 			setRequestingPermission(false);
 		}
@@ -1980,7 +658,7 @@ function PermissionsStep(props: {
 				await maybePromptRestartForPermission(permission);
 			}
 			setInitialCheck(false);
-			fetchPermissions();
+			void fetchPermissions();
 		} catch (err) {
 			console.error(`Error opening permission settings: ${err}`);
 		} finally {
@@ -1991,66 +669,47 @@ function PermissionsStep(props: {
 	return (
 		<div
 			data-tauri-drag-region="false"
-			class="flex flex-col items-center justify-center min-h-full px-12 gap-6"
+			class="flex flex-col items-center justify-center min-h-full px-8 py-6 gap-5"
 		>
-			<div
-				class={cx(
-					"flex flex-col items-center gap-3 text-center max-w-[440px] transition-all duration-500",
-					visible() ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4",
-				)}
-			>
-				<div class="flex items-center justify-center size-12 rounded-2xl bg-white dark:bg-gray-3 border border-gray-4">
-					<IconLucideShield class="size-5 text-gray-11" />
+			<div class="flex flex-col items-center gap-2 text-center max-w-[440px]">
+				<div class="flex size-12 items-center justify-center rounded-[14px] border border-[var(--recorder-border,#e6e6e6)] bg-white">
+					<IconLucideShield class="size-5 text-[var(--sleek-accent,#0084d1)]" />
 				</div>
-				<h2 class="text-2xl font-bold text-gray-12 tracking-tight">
-					Permissions Required
+				<h2 class="text-[22px] font-semibold tracking-tight text-[var(--recorder-text,#252b31)]">
+					Permissions
 				</h2>
-				<p class="text-[14px] text-gray-10 leading-relaxed">
-					FlowReco needs a few permissions to record your screen and capture
-					audio.
+				<p class="text-[13px] leading-relaxed text-[var(--recorder-muted,#879192)]">
+					Grant access so FlowReco can record your screen. Optional devices can
+					wait until you need them.
 				</p>
 			</div>
-
-			<div
-				class={cx(
-					"w-full max-w-[440px] flex flex-col gap-2 transition-all duration-500 delay-100",
-					visible() ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4",
-				)}
-			>
+			<div class="w-full max-w-[460px] flex flex-col gap-2">
 				<For each={setupPermissions}>
-					{(permission, index) => {
+					{(permission) => {
 						const permStatus = () =>
 							check()?.[permission.key] as OSPermissionStatus | undefined;
-
 						return (
 							<Show when={permStatus() !== "notNeeded"}>
-								<div
-									class="flex items-center gap-4 px-4 py-3 rounded-xl border border-gray-4 bg-white dark:bg-gray-2 transition-all duration-500 shadow-xs"
-									style={{
-										"transition-delay": `${150 + index() * 80}ms`,
-										opacity: visible() ? 1 : 0,
-										transform: visible() ? "translateY(0)" : "translateY(8px)",
-									}}
-								>
-									<div class="flex flex-col flex-1 min-w-0">
+								<div class="flex items-center gap-3 rounded-[14px] border border-[var(--recorder-border,#e6e6e6)] bg-white px-4 py-3">
+									<div class="flex flex-col flex-1 min-w-0 gap-0.5">
 										<div class="flex items-center gap-2">
-											<span class="text-[13px] font-medium text-gray-12">
+											<span class="text-[13px] font-medium text-[var(--recorder-text,#252b31)]">
 												{permission.name}
 											</span>
 											<Show when={permission.optional}>
-												<span class="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-2 dark:bg-gray-4 text-gray-9">
+												<span class="text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--recorder-raised,#f5f5f5)] text-[var(--recorder-muted,#879192)]">
 													Optional
 												</span>
 											</Show>
 										</div>
-										<span class="text-[11px] text-gray-10 leading-snug mt-0.5">
+										<span class="text-[11px] text-[var(--recorder-muted,#879192)] leading-snug">
 											{permission.description}
 										</span>
 									</div>
 									<Show
 										when={!isPermitted(permStatus())}
 										fallback={
-											<div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-3 border border-green-5 text-green-11 text-[12px] font-medium shrink-0">
+											<div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-[8px] bg-green-3 border border-green-5 text-green-11 text-[12px] font-medium shrink-0">
 												<IconLucideCheck class="size-3" />
 												Granted
 											</div>
@@ -2080,237 +739,6 @@ function PermissionsStep(props: {
 						);
 					}}
 				</For>
-			</div>
-		</div>
-	);
-}
-
-function ScreenshotMockup(props: { active: boolean }) {
-	const phase = createLoopingPhase(
-		() => props.active,
-		[200, 700, 1400, 2600, 3400, 3900, 4900, 5900, 6700],
-		8000,
-	);
-
-	const activeStep = () => {
-		const p = phase();
-		if (p <= 5) return 0;
-		if (p <= 8) return 1;
-		return 2;
-	};
-
-	const showEditor = () => phase() >= 6;
-
-	return (
-		<div class="w-full h-full flex flex-col items-center justify-center p-4">
-			<MockupStepBar
-				steps={["Select area", "Beautify", "Copy"]}
-				activeStep={activeStep()}
-			/>
-			<div class="relative w-full max-w-[420px] h-[240px]">
-				<div
-					class="absolute inset-0 flex items-center justify-center transition-all duration-700"
-					style={{
-						opacity: !showEditor() ? 1 : 0,
-						transform: !showEditor() ? "scale(1)" : "scale(0.96)",
-						"pointer-events": !showEditor() ? "auto" : "none",
-					}}
-				>
-					<div
-						class={cx(
-							"relative w-full max-w-[380px] h-[200px] rounded-xl overflow-hidden border border-gray-5 bg-white dark:bg-gray-3 transition-all duration-500",
-							phase() >= 1
-								? "opacity-100 translate-y-0 scale-100"
-								: "opacity-0 translate-y-4 scale-95",
-						)}
-					>
-						<div class="absolute inset-0 p-5 flex flex-col gap-2.5">
-							<div class="w-20 h-2.5 rounded-full bg-gray-5/60" />
-							<div class="w-36 h-2.5 rounded-full bg-gray-5/40" />
-							<div class="w-28 h-2.5 rounded-full bg-gray-5/50" />
-							<div class="mt-3 flex gap-3">
-								<div class="flex-1 h-12 rounded-lg bg-gray-5/30" />
-								<div class="flex-1 h-12 rounded-lg bg-gray-5/20" />
-							</div>
-						</div>
-
-						<div
-							class={cx(
-								"absolute inset-0 transition-all duration-500",
-								phase() >= 2 ? "bg-black/45" : "bg-transparent",
-							)}
-						/>
-
-						<Show when={phase() >= 2 && phase() < 6}>
-							<div
-								class="absolute pointer-events-none z-10 transition-[top,left] ease-[cubic-bezier(0.22,0.82,0.28,1)]"
-								style={{
-									top: phase() >= 3 ? "calc(88% - 4px)" : "12%",
-									left: phase() >= 3 ? "calc(90% - 4px)" : "8%",
-									width: `${ostype() === "windows" ? 24 : 22}px`,
-									height: `${ostype() === "windows" ? 34 : 32}px`,
-									"transition-duration": "1200ms",
-								}}
-							>
-								<Show
-									when={ostype() === "windows"}
-									fallback={<IconCapCursorMacos class="h-full w-full" />}
-								>
-									<IconCapCursorWindows class="h-full w-full" />
-								</Show>
-							</div>
-						</Show>
-
-						<div
-							class="absolute border rounded-lg pointer-events-none"
-							style={{
-								top: "10%",
-								left: "6%",
-								right: phase() >= 3 ? "10%" : "94%",
-								bottom: phase() >= 3 ? "12%" : "90%",
-								"border-color":
-									phase() >= 3 ? "rgba(255,255,255,0.6)" : "transparent",
-								opacity: phase() >= 3 ? 1 : 0,
-								transition:
-									"right 1200ms cubic-bezier(0.22, 0.82, 0.28, 1), bottom 1200ms cubic-bezier(0.22, 0.82, 0.28, 1), border-color 200ms ease, opacity 200ms ease",
-							}}
-						>
-							<Show when={phase() >= 4}>
-								<For
-									each={[
-										"left-[-11px] top-[-11px]",
-										"right-[-11px] top-[-11px]",
-										"left-[-11px] bottom-[-11px]",
-										"right-[-11px] bottom-[-11px]",
-									]}
-								>
-									{(pos) => (
-										<svg
-											class={`absolute size-[22px] pointer-events-none ${pos} drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)]`}
-											viewBox="0 0 16 16"
-											fill="none"
-										>
-											<path
-												d={
-													pos.includes("left") && pos.includes("top")
-														? "M0 0 H12 M0 0 V12"
-														: pos.includes("right") && pos.includes("top")
-															? "M16 0 H4 M16 0 V12"
-															: pos.includes("left") && pos.includes("bottom")
-																? "M0 16 H12 M0 16 V4"
-																: "M16 16 H4 M16 16 V4"
-												}
-												stroke="white"
-												stroke-width="3"
-												stroke-linecap="square"
-											/>
-										</svg>
-									)}
-								</For>
-								<div class="absolute -bottom-7 left-1/2 -translate-x-1/2 bg-gray-12 text-[9px] font-mono px-2 py-0.5 rounded-full border border-gray-12 text-gray-1 shadow-md whitespace-nowrap tabular-nums">
-									640 × 480
-								</div>
-							</Show>
-						</div>
-
-						<Show when={phase() === 5}>
-							<div class="absolute inset-0 bg-white/30 animate-[pulse_300ms_ease-out_1]" />
-						</Show>
-					</div>
-				</div>
-
-				<div
-					class="absolute inset-0 flex items-center justify-center transition-all duration-700"
-					style={{
-						opacity: showEditor() ? 1 : 0,
-						transform: showEditor()
-							? "translateY(0) scale(1)"
-							: "translateY(8px) scale(0.98)",
-						"pointer-events": showEditor() ? "auto" : "none",
-					}}
-				>
-					<div class="w-full max-w-[420px] rounded-xl overflow-hidden border border-gray-3 bg-white dark:bg-gray-2 shadow-lg">
-						<div class="flex relative flex-row items-center w-full h-10 px-3 border-b border-gray-3 shrink-0">
-							<div class="flex flex-1 items-center gap-1">
-								<div class="size-2 rounded-full bg-gray-6" />
-								<div class="size-2 rounded-full bg-gray-6" />
-								<div class="size-2 rounded-full bg-gray-6" />
-							</div>
-							<div class="flex items-center gap-1.5 absolute left-1/2 -translate-x-1/2">
-								<div class="size-4 rounded-sm bg-white dark:bg-gray-3 border border-gray-4" />
-								<div class="size-4 rounded-sm bg-white dark:bg-gray-3 border border-gray-4" />
-								<div class="w-px h-5 bg-gray-4 mx-0.5" />
-								<div class="size-4 rounded-sm bg-blue-3 border border-blue-5" />
-								<div class="size-4 rounded-sm bg-white dark:bg-gray-3 border border-gray-4" />
-								<div class="w-px h-5 bg-gray-4 mx-0.5" />
-								<div class="size-4 rounded-sm bg-white dark:bg-gray-3 border border-gray-4" />
-							</div>
-							<div class="flex flex-1 flex-row items-center justify-end gap-1.5">
-								<div class="flex items-center gap-1 px-2 py-1 rounded-md bg-white dark:bg-gray-3 border border-gray-4 text-[9px] text-gray-11 font-medium">
-									<IconLucideCopy class="size-3 shrink-0" stroke-width={2} />
-									Copy
-								</div>
-								<div class="flex items-center gap-1 px-2 py-1 rounded-md bg-white dark:bg-gray-3 border border-gray-4 text-[9px] text-gray-11 font-medium">
-									<IconLucideSave class="size-3 shrink-0" stroke-width={2} />
-									Save
-								</div>
-							</div>
-						</div>
-
-						<div class="p-3 flex items-center justify-center">
-							<div class="relative w-full h-[140px] rounded-sm overflow-hidden">
-								<div
-									class="absolute inset-0 transition-opacity duration-1000 ease-out"
-									style={{
-										background:
-											"linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-										opacity: phase() >= 7 ? 1 : 0,
-									}}
-								/>
-
-								<div
-									class="absolute transition-all duration-1000 ease-out"
-									style={{
-										top: phase() >= 8 ? "8%" : "0",
-										left: phase() >= 8 ? "8%" : "0",
-										right: phase() >= 8 ? "8%" : "0",
-										bottom: phase() >= 8 ? "8%" : "0",
-									}}
-								>
-									<div
-										class="w-full h-full bg-white dark:bg-gray-3 flex flex-col gap-2 p-3 transition-all duration-1000"
-										style={{
-											"border-radius": phase() >= 8 ? "8px" : "0px",
-											"box-shadow":
-												phase() >= 8 ? "0 4px 20px rgba(0,0,0,0.2)" : "none",
-										}}
-									>
-										<div class="w-16 h-2 rounded-full bg-gray-5/60" />
-										<div class="w-28 h-2 rounded-full bg-gray-5/40" />
-										<div class="w-20 h-2 rounded-full bg-gray-5/50" />
-										<div class="mt-1 flex gap-2">
-											<div class="flex-1 h-8 rounded-sm bg-gray-5/30" />
-											<div class="flex-1 h-8 rounded-sm bg-gray-5/20" />
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-
-						<div
-							class="h-8 flex items-center justify-center transition-all duration-300"
-							style={{
-								opacity: phase() >= 9 ? 1 : 0,
-								transform: phase() >= 9 ? "translateY(0)" : "translateY(4px)",
-							}}
-						>
-							<div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-12 text-gray-1 text-[10px] font-medium">
-								<IconLucideCheck class="size-3" />
-								Copied to clipboard
-							</div>
-						</div>
-					</div>
-				</div>
 			</div>
 		</div>
 	);

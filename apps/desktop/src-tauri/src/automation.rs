@@ -227,11 +227,11 @@ impl AutomationHost for DesktopAutomationHost {
                 crate::UploadResult::NotAuthenticated => {
                     return Err("Not authenticated for upload".to_string());
                 }
-                crate::UploadResult::UpgradeRequired => {
-                    return Err("Upgrade required for upload".to_string());
-                }
-                crate::UploadResult::PlanCheckFailed => {
-                    return Err("Plan check failed for upload".to_string());
+                crate::UploadResult::UpgradeRequired | crate::UploadResult::PlanCheckFailed => {
+                    return Err(
+                        "The configured FlowReco server rejected this upload. There is no local plan gate — check server access and storage settings."
+                            .to_string(),
+                    );
                 }
             }
         } else {

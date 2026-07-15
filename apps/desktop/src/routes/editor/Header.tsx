@@ -5,7 +5,6 @@ import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { type as ostype } from "@tauri-apps/plugin-os";
 import { cx } from "cva";
 import {
-	type ComponentProps,
 	createEffect,
 	createMemo,
 	createSignal,
@@ -89,7 +88,7 @@ export function Header() {
 	return (
 		<div
 			data-tauri-drag-region
-			class="flex relative flex-row items-center w-full h-12 border-b border-gray-3 bg-gray-1/90 dark:bg-gray-2/90 backdrop-blur-sm"
+			class="flex relative flex-row items-center w-full h-12 border-b border-[var(--recorder-border,#e6e6e6)] bg-white/95 dark:bg-gray-2/95 backdrop-blur-md"
 		>
 			<div
 				data-tauri-drag-region
@@ -97,7 +96,7 @@ export function Header() {
 			>
 				{ostype() === "macos" && <div class="h-full w-16" />}
 				{ostype() === "linux" && <CaptionControlsMacOS class="mr-1" />}
-				<div class="flex items-center gap-1 rounded-[var(--radius-md,10px)] border border-gray-3 bg-gray-2/80 p-0.5">
+				<div class="flex items-center gap-1 rounded-[10px] border border-[var(--recorder-border,#e6e6e6)] bg-[var(--flow-surface-light,#f5f5f5)] p-0.5">
 					<EditorButton
 						onClick={async () => {
 							clearTimelineSelection();
@@ -126,7 +125,7 @@ export function Header() {
 					<div class="flex flex-row items-center gap-1.5 min-w-0">
 						<NameEditor name={meta().prettyName} />
 					</div>
-					<span class="text-[10px] text-[var(--recorder-muted,#7a7d85)] leading-none mt-0.5">
+					<span class="text-[10px] text-[var(--recorder-muted,#879192)] leading-none mt-0.5">
 						Studio · local project
 					</span>
 				</div>
@@ -135,7 +134,7 @@ export function Header() {
 
 			<div
 				data-tauri-drag-region
-				class="flex flex-row items-center justify-center gap-2 px-3 h-full border-x border-gray-3"
+				class="flex flex-row items-center justify-center gap-2 px-3 h-full"
 			>
 				<PresetsDropdown />
 				<OrganizationDropdown />
@@ -148,7 +147,7 @@ export function Header() {
 					ostype() !== "windows" && "pr-2",
 				)}
 			>
-				<div class="flex items-center gap-0.5 rounded-[var(--radius-md,10px)] border border-gray-3 bg-gray-2/80 p-0.5">
+				<div class="flex items-center gap-0.5 rounded-[10px] border border-[var(--recorder-border,#e6e6e6)] bg-[var(--flow-surface-light,#f5f5f5)] p-0.5">
 					<EditorButton
 						onClick={() => {
 							clearTimelineSelection();
@@ -180,7 +179,7 @@ export function Header() {
 				</Show>
 				<Button
 					variant={isClipsOpen() ? "white" : "gray"}
-					class="flex gap-1.5 justify-center h-9 px-3 rounded-[var(--radius-md,10px)]"
+					class="flex gap-1.5 justify-center h-9 px-3 rounded-[10px] border border-[var(--recorder-border,#e6e6e6)]"
 					onClick={() => {
 						clearTimelineSelection();
 						if (isClipsOpen()) {
@@ -196,7 +195,7 @@ export function Header() {
 				<Show when={hasTranscript()}>
 					<Button
 						variant={isTranscriptOpen() ? "white" : "gray"}
-						class="flex gap-1.5 justify-center h-9 px-3 rounded-[var(--radius-md,10px)]"
+						class="flex gap-1.5 justify-center h-9 px-3 rounded-[10px] border border-[var(--recorder-border,#e6e6e6)]"
 						onClick={() => {
 							clearTimelineSelection();
 							if (isTranscriptOpen()) {
@@ -218,11 +217,11 @@ export function Header() {
 				<button
 					type="button"
 					class={cx(
-						"flex gap-1.5 justify-center items-center px-4 h-9 min-w-[96px] text-[0.8125rem] font-medium text-white rounded-[var(--radius-md,8px)] outline-hidden",
-						"bg-[var(--sleek-accent,#0284c7)] border border-[#0270a8]",
-						"shadow-[0_6px_18px_-8px_rgba(2,132,199,0.45),inset_0_1px_0_0_rgba(255,255,255,0.2)]",
-						"transition-[box-shadow,filter] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
-						"hover:brightness-110 active:brightness-95",
+						"flex gap-1.5 justify-center items-center px-4 h-9 min-w-[96px] text-[0.8125rem] font-semibold text-white rounded-full outline-hidden",
+						"bg-[var(--sleek-accent,#0084d1)]",
+						"shadow-[0_8px_20px_-10px_rgba(0,132,209,0.55)]",
+						"transition-[box-shadow,filter,transform] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
+						"hover:brightness-110 active:scale-[0.98]",
 					)}
 					onClick={() => {
 						clearTimelineSelection();
@@ -233,7 +232,6 @@ export function Header() {
 						setDialog({ type: "export", open: true });
 					}}
 				>
-					<UploadIcon class="size-4" />
 					Export
 				</button>
 				{ostype() === "windows" && <CaptionControlsWindows11 />}
@@ -241,44 +239,6 @@ export function Header() {
 		</div>
 	);
 }
-
-const UploadIcon = (props: ComponentProps<"svg">) => {
-	const { exportState } = useEditorContext();
-	return (
-		<svg
-			width={20}
-			height={20}
-			viewBox="0 0 20 20"
-			fill="none"
-			xmlns="http://www.w3.org/2000/svg"
-			{...props}
-		>
-			{/* Bottom part (the base) */}
-			<path
-				d="M16.6667 10.625V14.1667C16.6667 15.5474 15.5474 16.6667 14.1667 16.6667H5.83333C4.45262 16.6667 3.33333 15.5474 3.33333 14.1667V10.625"
-				stroke="currentColor"
-				stroke-width={1.66667}
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				class="upload-base"
-			/>
-
-			{/* Arrow part */}
-			<path
-				d="M9.99999 3.33333V12.7083M9.99999 3.33333L13.75 7.08333M9.99999 3.33333L6.24999 7.08333"
-				stroke="currentColor"
-				stroke-width={1.66667}
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				class={cx(
-					exportState.type !== "idle" &&
-						exportState.type !== "done" &&
-						"bounce",
-				)}
-			/>
-		</svg>
-	);
-};
 
 function NameEditor(props: { name: string }) {
 	const { refetchMeta } = useEditorContext();

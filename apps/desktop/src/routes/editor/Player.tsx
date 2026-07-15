@@ -291,8 +291,8 @@ export function PlayerContent() {
 	};
 
 	return (
-		<div class="flex flex-col flex-1 min-h-0">
-			<div class="flex items-center justify-between gap-3 px-3 py-2 border-b border-gray-3/80">
+		<div class="flex flex-col flex-1 min-h-0 bg-white dark:bg-gray-2">
+			<div class="flex items-center justify-between gap-3 px-3.5 py-2 border-b border-[var(--recorder-border,#e6e6e6)] bg-white/90 dark:bg-gray-2">
 				<div class="flex items-center gap-2">
 					<AspectRatioSelect />
 					<EditorButton
@@ -300,12 +300,12 @@ export function PlayerContent() {
 						onClick={cropDialogHandler}
 						leftIcon={<IconCapCrop class="w-4 text-gray-12" />}
 					>
-						Crop
+						Crop Video
 					</EditorButton>
 					<FrameButton />
 				</div>
 				<div class="flex items-center gap-2">
-					<span class="text-[11px] font-medium uppercase tracking-[0.06em] text-gray-10">
+					<span class="text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--recorder-muted,#879192)]">
 						Preview
 					</span>
 					<KSelect<{ label: string; value: EditorPreviewQuality }>
@@ -327,13 +327,13 @@ export function PlayerContent() {
 								<KSelect.ItemLabel class="flex-1">
 									{props.item.rawValue.label}
 								</KSelect.ItemLabel>
-								<KSelect.ItemIndicator class="ml-auto text-[var(--sleek-accent,#0284c7)]">
+								<KSelect.ItemIndicator class="ml-auto text-[var(--sleek-accent,#0084d1)]">
 									<IconCapCircleCheck />
 								</KSelect.ItemIndicator>
 							</MenuItem>
 						)}
 					>
-						<KSelect.Trigger class="flex items-center gap-2 h-8 px-2.5 rounded-[var(--radius-md,10px)] border border-gray-3 bg-gray-2 dark:bg-gray-3 text-sm text-gray-12 transition-colors hover:border-gray-5">
+						<KSelect.Trigger class="flex items-center gap-2 h-8 px-2.5 rounded-[10px] border border-[var(--recorder-border,#e6e6e6)] bg-[var(--flow-surface-light,#f5f5f5)] text-sm text-gray-12 transition-colors hover:border-gray-5">
 							<KSelect.Value<{
 								label: string;
 								value: EditorPreviewQuality;
@@ -360,112 +360,94 @@ export function PlayerContent() {
 					</KSelect>
 				</div>
 			</div>
-			<div class="relative flex flex-1 min-h-0 flex-col">
+			<div class="relative flex flex-1 min-h-0 flex-col bg-[var(--flow-subtle,#eceef1)] dark:bg-gray-3">
 				<PreviewCanvas />
-				<div class="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center px-3 pb-3">
-					<div class="pointer-events-auto flex max-w-full items-center gap-2 rounded-[var(--radius-lg,14px)] border border-white/10 bg-black/70 px-2 py-1.5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-md transition-colors duration-200 hover:border-white/20 hover:bg-black/80">
-						<button
-							type="button"
-							class="flex size-8 shrink-0 items-center justify-center rounded-[var(--radius-md,10px)] border border-white/10 bg-white/10 text-white transition-colors hover:bg-white/20"
-							onClick={handlePlayPauseClick}
-							aria-label={
-								!editorState.playing || isAtEnd() ? "Play" : "Pause"
-							}
-						>
-							{!editorState.playing || isAtEnd() ? (
-								<IconCapPlay class="size-3.5" />
-							) : (
-								<IconCapPause class="size-3.5" />
+			</div>
+			<div class="relative flex z-10 flex-row gap-3 justify-between items-center px-3.5 py-2.5 border-t border-[var(--recorder-border,#e6e6e6)] bg-white dark:bg-gray-2">
+				<div class="flex items-center gap-2">
+					<button
+						type="button"
+						class="flex size-8 shrink-0 items-center justify-center rounded-full border border-[var(--recorder-border,#e6e6e6)] bg-[var(--flow-surface-light,#f5f5f5)] text-gray-12 transition-colors hover:bg-[var(--sleek-accent-soft,rgba(0,132,209,0.12))] hover:text-[var(--sleek-accent,#0084d1)]"
+						onClick={handlePlayPauseClick}
+						aria-label={!editorState.playing || isAtEnd() ? "Play" : "Pause"}
+					>
+						{!editorState.playing || isAtEnd() ? (
+							<IconCapPlay class="size-3.5" />
+						) : (
+							<IconCapPause class="size-3.5" />
+						)}
+					</button>
+					<div class="flex items-center gap-1.5 text-[0.8125rem] tabular-nums">
+						<Time
+							class="text-gray-12 font-medium"
+							seconds={Math.max(
+								editorState.previewTime ?? editorState.playbackTime,
+								0,
 							)}
-						</button>
-						<span class="w-10 shrink-0 text-right text-[10px] font-medium tabular-nums text-white/70">
-							{formatTime(
-								Math.max(
-									editorState.previewTime ?? editorState.playbackTime,
-									0,
-								),
-							)}
-						</span>
-						<div class="group relative mx-0.5 flex h-6 w-36 min-w-[6rem] flex-1 items-center sm:w-52">
-							<div class="absolute inset-x-0 h-0.5 overflow-hidden rounded-[var(--radius-xs,4px)] bg-white/15">
-								<div
-									class="h-full rounded-[var(--radius-xs,4px)] bg-[var(--sleek-accent,#0284c7)]"
-									style={{ width: `${playbackProgress()}%` }}
-								/>
-							</div>
-							<input
-								type="range"
-								min={0}
-								max={Math.max(totalDuration(), 0.001)}
-								step={0.01}
-								value={Math.max(
-									editorState.previewTime ?? editorState.playbackTime,
-									0,
-								)}
-								class="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
-								onInput={async (e) => {
-									const next = Number(e.currentTarget.value);
-									if (editorState.playing) {
-										await commands.stopPlayback();
-										setEditorState("playing", false);
-									}
-									setEditorState("playbackTime", next);
-									setEditorState("previewTime", null);
-									await commands.seekTo(Math.floor(next * FPS));
-								}}
-							/>
+						/>
+						<span class="text-[var(--recorder-muted,#879192)]">/</span>
+						<Time
+							class="text-[var(--recorder-muted,#879192)]"
+							seconds={totalDuration()}
+						/>
+					</div>
+					<div class="group relative mx-1 hidden h-6 w-40 min-w-[6rem] flex-1 items-center sm:flex sm:w-52">
+						<div class="absolute inset-x-0 h-1 overflow-hidden rounded-full bg-[var(--flow-subtle,#eceef1)]">
 							<div
-								class="pointer-events-none absolute size-2.5 rounded-[var(--radius-xs,4px)] bg-white shadow-sm transition-transform duration-100 group-hover:scale-125"
-								style={{
-									left: `${playbackProgress()}%`,
-									transform: "translateX(-50%)",
-								}}
+								class="h-full rounded-full bg-[var(--sleek-accent,#0084d1)]"
+								style={{ width: `${playbackProgress()}%` }}
 							/>
 						</div>
-						<span class="w-10 shrink-0 text-[10px] font-medium tabular-nums text-white/70">
-							{formatTime(totalDuration())}
-						</span>
-						<button
-							type="button"
-							class="flex size-7 shrink-0 items-center justify-center rounded-[var(--radius-sm,6px)] text-white/80 transition-opacity hover:opacity-100"
-							onClick={async () => {
-								await commands.stopPlayback();
-								setEditorState("playing", false);
-								setEditorState("playbackTime", 0);
-								editorState.timeline.transform.setPosition(0);
+						<input
+							type="range"
+							min={0}
+							max={Math.max(totalDuration(), 0.001)}
+							step={0.01}
+							value={Math.max(
+								editorState.previewTime ?? editorState.playbackTime,
+								0,
+							)}
+							class="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+							onInput={async (e) => {
+								const next = Number(e.currentTarget.value);
+								if (editorState.playing) {
+									await commands.stopPlayback();
+									setEditorState("playing", false);
+								}
+								setEditorState("playbackTime", next);
+								setEditorState("previewTime", null);
+								await commands.seekTo(Math.floor(next * FPS));
 							}}
-							aria-label="Go to start"
-						>
-							<IconCapPrev class="size-3" />
-						</button>
-						<button
-							type="button"
-							class="flex size-7 shrink-0 items-center justify-center rounded-[var(--radius-sm,6px)] text-white/80 transition-opacity hover:opacity-100"
-							onClick={async () => {
-								await commands.stopPlayback();
-								setEditorState("playing", false);
-								setEditorState("playbackTime", totalDuration());
-							}}
-							aria-label="Go to end"
-						>
-							<IconCapNext class="size-3" />
-						</button>
+						/>
 					</div>
 				</div>
-			</div>
-			<div class="relative flex z-10 flex-row gap-3 justify-between items-center px-3 py-2.5 border-t border-gray-3">
-				<div class="flex items-center gap-2 text-[0.8125rem]">
-					<Time
-						class="text-gray-12"
-						seconds={Math.max(
-							editorState.previewTime ?? editorState.playbackTime,
-							0,
-						)}
-					/>
-					<span class="text-gray-10 tabular-nums">/</span>
-					<Time class="text-gray-11" seconds={totalDuration()} />
-				</div>
-				<div class="flex flex-row flex-1 gap-3 justify-end items-center">
+				<div class="flex flex-row flex-1 gap-2 justify-end items-center">
+					<button
+						type="button"
+						class="flex size-7 shrink-0 items-center justify-center rounded-[8px] text-gray-11 transition-colors hover:bg-[var(--flow-surface-light,#f5f5f5)] hover:text-gray-12"
+						onClick={async () => {
+							await commands.stopPlayback();
+							setEditorState("playing", false);
+							setEditorState("playbackTime", 0);
+							editorState.timeline.transform.setPosition(0);
+						}}
+						aria-label="Go to start"
+					>
+						<IconCapPrev class="size-3.5" />
+					</button>
+					<button
+						type="button"
+						class="flex size-7 shrink-0 items-center justify-center rounded-[8px] text-gray-11 transition-colors hover:bg-[var(--flow-surface-light,#f5f5f5)] hover:text-gray-12"
+						onClick={async () => {
+							await commands.stopPlayback();
+							setEditorState("playing", false);
+							setEditorState("playbackTime", totalDuration());
+						}}
+						aria-label="Go to end"
+					>
+						<IconCapNext class="size-3.5" />
+					</button>
+					<div class="w-px h-5 bg-[var(--recorder-border,#e6e6e6)]" />
 					<EditorButton<typeof KToggleButton>
 						tooltipText="Split tool"
 						kbd={["S"]}
@@ -485,11 +467,11 @@ export function PlayerContent() {
 							/>
 						}
 					/>
-					<div class="w-px h-6 rounded-[var(--radius-xs,4px)] bg-gray-4" />
+					<div class="w-px h-5 bg-[var(--recorder-border,#e6e6e6)]" />
 					<Tooltip kbd={["meta", "-"]} content="Zoom out timeline">
 						<button
 							type="button"
-							class="p-1 rounded-[var(--radius-sm,6px)] text-gray-12 transition-opacity hover:opacity-70"
+							class="p-1.5 rounded-[8px] text-gray-12 transition-colors hover:bg-[var(--flow-surface-light,#f5f5f5)]"
 							onClick={() => {
 								editorState.timeline.transform.updateZoom(
 									editorState.timeline.transform.zoom * 1.1,
@@ -503,7 +485,7 @@ export function PlayerContent() {
 					<Tooltip kbd={["meta", "+"]} content="Zoom in timeline">
 						<button
 							type="button"
-							class="p-1 rounded-[var(--radius-sm,6px)] text-gray-12 transition-opacity hover:opacity-70"
+							class="p-1.5 rounded-[8px] text-gray-12 transition-colors hover:bg-[var(--flow-surface-light,#f5f5f5)]"
 							onClick={() => {
 								editorState.timeline.transform.updateZoom(
 									editorState.timeline.transform.zoom / 1.1,

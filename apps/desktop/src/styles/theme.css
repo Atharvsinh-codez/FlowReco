@@ -23,7 +23,7 @@
  * segments and the "Add track" picker read these, so they always match. */
 :root {
 	--track-clip: #3f8ae0; /* blue */
-	--track-zoom: #4a4f5c; /* slate */
+	--track-zoom: #a78bfa; /* soft purple zoom pills (Recordly-inspired) */
 	--track-caption: #6f747d;
 	--track-keyboard: #d4742c; /* orange */
 	--track-text: #2898ac; /* teal */
@@ -33,14 +33,14 @@
 }
 
 :root {
-	/* Light theme variables */
-	--gray-50: #ffffff; /* Pure white background */
-	--gray-100: #f8f9fb; /* Soft background */
-	--gray-200: #e4e6ed; /* Light borders/dividers */
-	--gray-300: #c7ccda; /* Subtle highlights */
-	--gray-400: #868e9f; /* Secondary text - slightly softened */
-	--gray-450: #4a4a4a; /* Adjusted to maintain balance */
-	--gray-500: #161b26; /* Primary text - deep, rich contrast */
+	/* Light theme variables — FlowReco white product surface */
+	--gray-50: #ffffff;
+	--gray-100: #f5f5f5;
+	--gray-200: #e6e6e6;
+	--gray-300: #eceef1;
+	--gray-400: #879192;
+	--gray-450: #6b7280;
+	--gray-500: #252b31;
 
 	--gray-50-transparent-50: rgba(255, 255, 255, 0.5);
 	--gray-100-transparent-50: rgba(248, 249, 251, 0.5);
@@ -52,16 +52,16 @@
 
 	--transparent-window: rgba(255, 255, 255, 0.7);
 
-	--text-primary: rgba(18, 22, 31, 0.95); /* Section titles, headings */
-	--text-secondary: rgba(18, 22, 31, 0.85); /* Important labels */
-	--text-tertiary: rgba(18, 22, 31, 0.65); /* Descriptions */
+	--text-primary: rgba(37, 43, 49, 0.95);
+	--text-secondary: rgba(37, 43, 49, 0.85);
+	--text-tertiary: rgba(37, 43, 49, 0.65);
 
-	--black-transparent-5: rgba(18, 22, 31, 0.05);
-	--black-transparent-10: rgba(18, 22, 31, 0.1);
-	--black-transparent-20: rgba(18, 22, 31, 0.2);
-	--black-transparent-40: rgba(18, 22, 31, 0.4);
-	--black-transparent-60: rgba(18, 22, 31, 0.6);
-	--black-transparent-80: rgba(18, 22, 31, 0.8);
+	--black-transparent-5: rgba(37, 43, 49, 0.05);
+	--black-transparent-10: rgba(37, 43, 49, 0.1);
+	--black-transparent-20: rgba(37, 43, 49, 0.2);
+	--black-transparent-40: rgba(37, 43, 49, 0.4);
+	--black-transparent-60: rgba(37, 43, 49, 0.6);
+	--black-transparent-80: rgba(37, 43, 49, 0.8);
 
 	--white-transparent-5: rgba(255, 255, 255, 0.05);
 	--white-transparent-10: rgba(255, 255, 255, 0.1);
@@ -72,16 +72,16 @@
 
 	--solid-white: #ffffff;
 
-	--blue-50: #ebf1ff;
-	--blue-100: #adc9ff;
-	--blue-200: #85adff;
-	--blue-300: #4785ff;
-	--blue-400: #3f75e0;
-	--blue-500: rgb(54, 102, 197);
+	--blue-50: #e8f4fb;
+	--blue-100: #b3dbf2;
+	--blue-200: #7ec2e8;
+	--blue-300: #3aa0d9;
+	--blue-400: #0084d1;
+	--blue-500: #0084d1;
 
-	--blue-transparent-0: rgba(34, 64, 122, 0);
-	--blue-transparent-10: rgba(34, 64, 122, 0.1);
-	--blue-transparent-20: rgba(34, 64, 122, 0.2);
+	--blue-transparent-0: rgba(0, 132, 209, 0);
+	--blue-transparent-10: rgba(0, 132, 209, 0.1);
+	--blue-transparent-20: rgba(0, 132, 209, 0.2);
 
 	--red-50: #ffebee;
 	--red-100: #ffadbb;
@@ -93,21 +93,31 @@
 
 	--shadow-s: 0px 8px 16px 0px rgba(18, 22, 31, 0.04);
 
-	/* make.design sleek tokens — only these accents (no purple) */
-	--sleek-surface-tint: #eef3f8;
+	/* FlowReco product tokens (light-first, Recordly-inspired density) */
+	--flow-border: #e6e6e6;
+	--flow-surface-light: #f5f5f5;
+	--flow-surface-white: #ffffff;
+	--flow-accent: #0084d1;
+	--flow-text-alt: #6b7280;
+	--flow-foreground: #252b31;
+	--flow-muted: #879192;
+	--flow-subtle: #eceef1;
+
+	--sleek-surface-tint: #f5f5f5;
 	--sleek-white: #ffffff;
-	--sleek-text: #121212;
-	--sleek-text-alt: #111111;
-	--sleek-foreground: #171717;
-	--sleek-muted: #7a7d85;
-	--sleek-accent: #0284c7;
-	--sleek-accent-soft: rgba(2, 132, 199, 0.12);
-	--sleek-accent-ring: rgba(2, 132, 199, 0.35);
-	--sleek-slate: #1b1d22;
-	--sleek-border: #e9eef5;
+	--sleek-text: #252b31;
+	--sleek-text-alt: #6b7280;
+	--sleek-foreground: #252b31;
+	--sleek-muted: #879192;
+	--sleek-accent: #0084d1;
+	--sleek-accent-soft: rgba(0, 132, 209, 0.12);
+	--sleek-accent-ring: rgba(0, 132, 209, 0.35);
+	--sleek-slate: #ffffff;
+	--sleek-border: #e6e6e6;
 	--radius-xs: 4px;
 	--radius-sm: 6px;
 	--radius-md: 8px;
+	--radius-base: 10px;
 	--radius-lg: 12px;
 	--radius-xl: 16px;
 	--radius-2xl: 20px;
@@ -116,13 +126,17 @@
 	--duration-fast: 150ms;
 	--duration-med: 220ms;
 
-	/* Recorder shell (dark, elevated) — derived only from sleek palette */
-	--recorder-bg: #121212;
-	--recorder-raised: #1b1d22;
-	--recorder-hover: #22252b;
-	--recorder-border: rgba(233, 238, 245, 0.1);
-	--recorder-text: #eef3f8;
-	--recorder-muted: #7a7d85;
+	/* Recorder shell — white / airy default (matches product light theme) */
+	--recorder-bg: #ffffff;
+	--recorder-raised: #f5f5f5;
+	--recorder-hover: #eceef1;
+	--recorder-border: #e6e6e6;
+	--recorder-text: #252b31;
+	--recorder-muted: #879192;
+	--recorder-overlay: rgba(37, 43, 49, 0.05);
+	--recorder-overlay-strong: rgba(37, 43, 49, 0.08);
+	--recorder-inset-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+	--recorder-selected-shadow: 0 0 0 1px rgba(0, 132, 209, 0.35);
 }
 
 /* Dark theme variables */
@@ -197,6 +211,29 @@
 	--gray-5: #3a3a3a;
 	--gray-6: #444444;
 	--gray-11: #a1a1a1;
+
+	--sleek-surface-tint: #1b1d22;
+	--sleek-white: #ffffff;
+	--sleek-text: #eef3f8;
+	--sleek-text-alt: #c8cdd4;
+	--sleek-foreground: #f5f5f5;
+	--sleek-muted: #9aa3ad;
+	--sleek-accent: #0084d1;
+	--sleek-accent-soft: rgba(0, 132, 209, 0.18);
+	--sleek-accent-ring: rgba(0, 132, 209, 0.4);
+	--sleek-slate: #1b1d22;
+	--sleek-border: rgba(233, 238, 245, 0.12);
+
+	--recorder-bg: #121212;
+	--recorder-raised: #1b1d22;
+	--recorder-hover: #22252b;
+	--recorder-border: rgba(233, 238, 245, 0.1);
+	--recorder-text: #eef3f8;
+	--recorder-muted: #9aa3ad;
+	--recorder-overlay: rgba(255, 255, 255, 0.06);
+	--recorder-overlay-strong: rgba(255, 255, 255, 0.1);
+	--recorder-inset-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+	--recorder-selected-shadow: 0 0 0 1px rgba(0, 132, 209, 0.4);
 }
 
 .dark .dark-button-shadow {

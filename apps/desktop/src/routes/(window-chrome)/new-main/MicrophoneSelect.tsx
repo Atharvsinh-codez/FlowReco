@@ -90,7 +90,7 @@ export default function MicrophoneSelect(props: {
 						style={{ right: `${audioLevel() * 100}%` }}
 					/>
 					<div
-						class="absolute bottom-0 left-0 h-[2px] -z-10 transition-[right] duration-100 pointer-events-none bg-[var(--sleek-accent,#0284c7)]"
+						class="absolute bottom-0 left-0 h-[2px] -z-10 transition-[right] duration-100 pointer-events-none bg-[var(--sleek-accent,#0084d1)]"
 						style={{ right: `${audioLevel() * 100}%` }}
 					/>
 				</Show>

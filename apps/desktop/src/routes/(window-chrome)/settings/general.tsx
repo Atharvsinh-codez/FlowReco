@@ -690,7 +690,7 @@ function Inner(props: { initialStore: GeneralSettingsStore | null }) {
 
 						if (
 							!(await confirm(
-								`Are you sure you want to change the server URL to '${origin}'? You will need to sign in again.`,
+								`Are you sure you want to change the server URL to '${origin}'? Existing server sessions will be cleared.`,
 							))
 						)
 							return;
@@ -1091,7 +1091,7 @@ function DefaultProjectNameCard(props: {
 			val,
 			macos ? "Safari" : "Chrome",
 			"Window",
-			"instant",
+			"studio",
 			datetime,
 		);
 		setPreview(formatted);
@@ -1103,7 +1103,7 @@ function DefaultProjectNameCard(props: {
 				MOMENT_EXAMPLE_TEMPLATE,
 				macos ? "Safari" : "Chrome",
 				"Window",
-				"instant",
+				"studio",
 				datetime,
 			)
 			.then(setMomentExample);
@@ -1207,8 +1207,8 @@ function DefaultProjectNameCard(props: {
 							<div class="space-y-1">
 								<p class="font-medium text-gray-12">Recording mode</p>
 								<p>
-									<CodeView>{"{recording_mode}"}</CodeView> → "Studio",
-									"Instant", or "Screenshot"
+									<CodeView>{"{recording_mode}"}</CodeView> → "Studio" or
+									"Screenshot"
 								</p>
 								<p>
 									<CodeView>{"{mode}"}</CodeView> → "studio" or

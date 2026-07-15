@@ -410,13 +410,14 @@ export const screenshotProjectFingerprint = async (
 
 const shareLinkFromUploadResult = (result: UploadResult) => {
 	if (result === "NotAuthenticated") {
-		throw new Error("You need to sign in to create shareable links");
+		throw new Error(
+			"Shareable links require a connected FlowReco server. Save the image locally instead.",
+		);
 	}
-	if (result === "PlanCheckFailed") {
-		throw new Error("The configured server could not verify upload access");
-	}
-	if (result === "UpgradeRequired") {
-		throw new Error("The configured server rejected this upload");
+	if (result === "PlanCheckFailed" || result === "UpgradeRequired") {
+		throw new Error(
+			"The configured FlowReco server rejected this upload. There is no local plan gate — check server access and storage settings.",
+		);
 	}
 
 	return result.Success;

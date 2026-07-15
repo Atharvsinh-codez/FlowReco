@@ -67,7 +67,7 @@ export default function (props: RouteSectionProps) {
 		<WindowChromeContext>
 			<div
 				class={cx(
-					"cap-window-shell flex overflow-hidden flex-col w-screen h-screen max-h-screen divide-y divide-[var(--recorder-border,rgba(233,238,245,0.08))] bg-[var(--recorder-bg,#121212)]",
+					"cap-window-shell flex overflow-hidden flex-col w-screen h-screen max-h-screen divide-y divide-[var(--recorder-border,#e6e6e6)] bg-[var(--recorder-bg,#ffffff)]",
 					isMacOS && "rounded-[var(--radius-xl,16px)]",
 				)}
 			>
@@ -110,7 +110,7 @@ function Header() {
 	return (
 		<header
 			class={cx(
-				"cap-window-header flex items-center min-w-0 w-full h-9 select-none shrink-0 bg-gray-2",
+				"cap-window-header flex items-center min-w-0 w-full h-9 select-none shrink-0 bg-[var(--recorder-bg,#ffffff)] border-b border-[var(--recorder-border,#e6e6e6)]",
 				isWindows ? "flex-row" : "flex-row-reverse",
 			)}
 			data-tauri-drag-region

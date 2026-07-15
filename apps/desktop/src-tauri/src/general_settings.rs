@@ -324,7 +324,7 @@ impl Default for GeneralSettingsStore {
             enable_notifications: true,
             disable_auto_open_links: false,
             has_completed_startup: false,
-            theme: AppTheme::System,
+            theme: AppTheme::Light,
             commercial_license: None,
             last_version: None,
             window_transparency: false,

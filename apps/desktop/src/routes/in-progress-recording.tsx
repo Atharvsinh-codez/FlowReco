@@ -472,7 +472,7 @@ function InProgressRecordingInner() {
 
 	// Muting zeroes the mic samples backend-side while the stream keeps its
 	// normal cadence, so the recording timeline is unaffected. Only exposed for
-	// instant mode: studio records the mic as an editable track, where muted
+	// studio records the mic as an editable track, where muted
 	// spans would silently bake zeros into it.
 	const canToggleMicMute = createMemo(
 		() =>

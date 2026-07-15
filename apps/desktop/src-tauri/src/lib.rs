@@ -3419,10 +3419,6 @@ async fn upload_exported_video(
     let metadata = build_video_meta(&file_path)
         .map_err(|err| format!("Error getting output video meta: {err}"))?;
 
-    if !auth.is_upgraded() && metadata.duration_in_secs > 300.0 {
-        return Ok(UploadResult::UpgradeRequired);
-    }
-
     channel.send(UploadProgress { progress: 0.0 }).ok();
 
     let s3_config = match async {
@@ -3456,7 +3452,12 @@ async fn upload_exported_video(
     {
         Ok(data) => data,
         Err(AuthedApiError::InvalidAuthentication) => return Ok(UploadResult::NotAuthenticated),
-        Err(AuthedApiError::UpgradeRequired) => return Ok(UploadResult::UpgradeRequired),
+        Err(AuthedApiError::UpgradeRequired) => {
+            return Err(
+                "The configured FlowReco server rejected this upload. There is no local plan gate — check server access and storage settings."
+                    .to_string(),
+            );
+        }
         Err(err) => return Err(err.to_string()),
     };
 
@@ -3503,7 +3504,10 @@ async fn upload_exported_video(
             NotificationType::ShareableLinkCopied.send(&app);
             Ok(UploadResult::Success(uploaded_video.link))
         }
-        Err(AuthedApiError::UpgradeRequired) => Ok(UploadResult::UpgradeRequired),
+        Err(AuthedApiError::UpgradeRequired) => Err(
+            "The configured FlowReco server rejected this upload. There is no local plan gate — check server access and storage settings."
+                .to_string(),
+        ),
         Err(e) => {
             error!("Failed to upload video: {e}");
 
@@ -3587,9 +3591,8 @@ fn screenshot_share_link_for_hash(
     None
 }
 
-async fn upgrade_required_result(app: &AppHandle) -> UploadResult {
-    let _ = ShowCapWindow::Upgrade.show(app).await;
-    UploadResult::UpgradeRequired
+async fn upgrade_required_result(_app: &AppHandle) -> UploadResult {
+	UploadResult::UpgradeRequired
 }
 
 #[tauri::command]
@@ -3639,10 +3642,6 @@ async fn upload_screenshot(
         return Ok(UploadResult::NotAuthenticated);
     };
 
-    if !auth.is_upgraded() {
-        return Ok(upgrade_required_result(&app).await);
-    }
-
     println!("Uploading screenshot: {screenshot_path:?}");
 
     let (project_path, meta) = load_screenshot_project_meta(&screenshot_path)?;
@@ -3654,7 +3653,12 @@ async fn upload_screenshot(
     let uploaded = match upload_screenshot_file(&app, screenshot_path.clone(), None, None).await {
         Ok(uploaded) => uploaded,
         Err(AuthedApiError::InvalidAuthentication) => return Ok(UploadResult::NotAuthenticated),
-        Err(AuthedApiError::UpgradeRequired) => return Ok(upgrade_required_result(&app).await),
+        Err(AuthedApiError::UpgradeRequired) => {
+            return Err(
+                "The configured FlowReco server rejected this upload. Check server access and storage settings."
+                    .to_string(),
+            );
+        }
         Err(e) => return Err(e.to_string()),
     };
     save_screenshot_sharing(&project_path, meta, &uploaded, None)?;
@@ -3682,10 +3686,6 @@ async fn upload_rendered_screenshot(
         return Ok(UploadResult::NotAuthenticated);
     };
 
-    if !auth.is_upgraded() {
-        return Ok(upgrade_required_result(&app).await);
-    }
-
     let (project_path, meta) = load_screenshot_project_meta(&project_path)?;
     let existing_video_id = meta.sharing.as_ref().map(|sharing| sharing.id.clone());
     let uploaded =
@@ -3696,7 +3696,12 @@ async fn upload_rendered_screenshot(
             Err(AuthedApiError::InvalidAuthentication) => {
                 return Ok(UploadResult::NotAuthenticated);
             }
-            Err(AuthedApiError::UpgradeRequired) => return Ok(upgrade_required_result(&app).await),
+            Err(AuthedApiError::UpgradeRequired) => {
+                return Err(
+                    "The configured FlowReco server rejected this upload. Check server access and storage settings."
+                        .to_string(),
+                );
+            }
             Err(e) => return Err(e.to_string()),
         };
     save_screenshot_sharing(&project_path, meta, &uploaded, content_hash)?;
@@ -3992,62 +3997,22 @@ fn list_screenshots(app: AppHandle) -> Result<Vec<(PathBuf, RecordingMeta)>, Str
 #[specta::specta]
 #[instrument(skip(app))]
 async fn check_upgraded_and_update(app: AppHandle) -> Result<bool, String> {
-    println!("Checking upgraded status and updating...");
-
-    if let Ok(Some(settings)) = GeneralSettingsStore::get(&app)
-        && settings.commercial_license.is_some()
-    {
-        return Ok(true);
+    if let Ok(Some(auth)) = AuthStore::get(&app) {
+        let updated_auth = AuthStore {
+            secret: auth.secret,
+            user_id: auth.user_id,
+            plan: Some(Plan {
+                upgraded: true,
+                manual: true,
+                last_checked: chrono::Utc::now().timestamp() as i32,
+            }),
+            organizations: auth.organizations,
+            organizations_updated_at: auth.organizations_updated_at,
+        };
+        AuthStore::set(&app, Some(updated_auth)).map_err(|e| e.to_string())?;
     }
 
-    let Ok(Some(auth)) = AuthStore::get(&app) else {
-        return Ok(false);
-    };
-
-    if let Some(ref plan) = auth.plan
-        && plan.manual
-    {
-        return Ok(true);
-    }
-
-    println!(
-        "Fetching plan for user {}",
-        auth.user_id.as_deref().unwrap_or("unknown")
-    );
-    let response = app
-        .authed_api_request("/api/desktop/plan", |client, url| client.get(url))
-        .await
-        .map_err(|e| {
-            println!("Failed to fetch plan: {e}");
-            e.to_string()
-        })?;
-
-    println!("Plan fetch response status: {}", response.status());
-    let plan_data = response.json::<serde_json::Value>().await.map_err(|e| {
-        println!("Failed to parse plan response: {e}");
-        format!("Failed to parse plan response: {e}")
-    })?;
-
-    let is_pro = plan_data
-        .get("upgraded")
-        .and_then(|v| v.as_bool())
-        .unwrap_or(false);
-    println!("Pro status: {is_pro}");
-    let updated_auth = AuthStore {
-        secret: auth.secret,
-        user_id: auth.user_id,
-        plan: Some(Plan {
-            upgraded: is_pro,
-            manual: auth.plan.map(|p| p.manual).unwrap_or(false),
-            last_checked: chrono::Utc::now().timestamp() as i32,
-        }),
-        organizations: auth.organizations,
-        organizations_updated_at: auth.organizations_updated_at,
-    };
-    println!("Updating auth store with new pro status");
-    AuthStore::set(&app, Some(updated_auth)).map_err(|e| e.to_string())?;
-
-    Ok(is_pro)
+    Ok(true)
 }
 
 #[tauri::command]

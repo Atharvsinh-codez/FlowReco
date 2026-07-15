@@ -1307,7 +1307,7 @@ export type { EditorPreviewQuality } from "~/utils/tauri";
 
 function transformMeta({ pretty_name, ...rawMeta }: RecordingMeta) {
 	if ("fps" in rawMeta) {
-		throw new Error("Instant mode recordings cannot be edited");
+		throw new Error("This recording cannot be opened in the Studio editor");
 	}
 
 	let meta:

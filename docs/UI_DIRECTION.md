@@ -12,20 +12,27 @@ FlowReco should feel like a precise creative tool: calm while idle, fast while r
 
 ## Visual system
 
+Light-first product chrome (see D021). Marketing may use Instrument Serif for editorial display; in-app UI stays Geist / system sans for density and control labels.
+
 | Token | Direction |
 | --- | --- |
-| Primary surface | Graphite `#111315` |
-| Raised surface | Near-black/graphite steps with visible borders, not floating card piles |
-| Primary action/accent | Coral `#FF6243` |
-| Primary text | Soft white with sufficient contrast |
-| Secondary text | Cool neutral gray, never below accessible contrast for essential content |
+| Page / shell surface | White `#ffffff` |
+| Raised / secondary surface | Light gray `#f5f5f5` |
+| Subtle fill | `#eceef1` |
+| Border | `#e6e6e6` |
+| Primary text | Near-black `#252b31` |
+| Secondary text | `#6b7280` |
+| Muted / caption text | `#879192` |
+| Primary action/accent | Blue `#0084d1` (single strongest action per view) |
 | Success/warning/error | Semantic colors used sparingly and never as the only signal |
-| Grid | 4 px base; common spacing 8/12/16/24/32 px |
-| Type | Geist or the checked-in system fallback stack |
-| Corners | Small and functional; larger rounding reserved for media/camera composition |
+| Grid | 8 px base; common spacing 4/8/12/16/20/24/32/40/48 px |
+| Type (app) | Geist or the checked-in system fallback stack |
+| Type (marketing display) | Instrument Serif for large headlines only |
+| Corners | Soft rounded system: 6–12 px controls, 16–20 px cards, pills 20–28 px |
+| Elevation | Flat by default; thin borders over heavy shadow stacks |
 | Motion | Short, interruptible, transform/opacity first; honor reduced motion |
 
-Avoid decorative gradients, glassmorphism, oversized marketing typography inside the product, unrelated illustrations, dense shadow stacks, and generic dashboard card grids.
+Avoid decorative gradients, oversized marketing typography inside dense editor chrome, unrelated illustrations, dense shadow stacks, and generic dashboard card grids. Dark theme remaps the same roles; it is optional, not the default product look.
 
 ## Application layout
 
@@ -35,11 +42,11 @@ The source preview is dominant. Device/source controls form one clear preparatio
 
 ### Editor
 
-Use a stable three-zone layout:
+Use a stable three-zone layout (Recordly-inspired control density, FlowReco chrome):
 
 1. Header: project identity, save state, undo/redo, preview quality, share/export.
-2. Canvas: maximum usable area, playback controls adjacent, direct manipulation with safe-area guides.
-3. Timeline and inspector: multi-track timeline across the lower area; contextual inspector at the side.
+2. Body row: **inspector on the left** (config / clips), **preview canvas on the right** with maximum usable area, playback adjacent, direct manipulation with safe-area guides.
+3. Timeline: multi-track strip full-width under the body row.
 
 The selected region owns the inspector. Do not scatter the same property across several panels. Zoom presets (`1.25×`, `1.5×`, `1.8×`, `2×`, `2.5×`, `3×`) are one-tap options backed by a bounded numeric field.
 

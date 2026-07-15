@@ -1626,14 +1626,10 @@ pub async fn start_recording(
                 notify_recording_start_failed(&app, &error);
                 return Err(error);
             };
-            let instant_mode_max_resolution = if auth.is_upgraded() {
-                general_settings
-                    .map_or(cap_recording::PRO_INSTANT_MODE_MAX_RESOLUTION, |settings| {
-                        settings.instant_mode_max_resolution
-                    })
-            } else {
-                cap_recording::FREE_INSTANT_MODE_MAX_RESOLUTION
-            };
+            let instant_mode_max_resolution = general_settings
+                .map_or(cap_recording::PRO_INSTANT_MODE_MAX_RESOLUTION, |settings| {
+                    settings.instant_mode_max_resolution
+                });
             let upload_mode = if matches!(inputs.capture_target, ScreenCaptureTarget::CameraOnly) {
                 "desktopMP4"
             } else {
@@ -1664,11 +1660,9 @@ pub async fn start_recording(
                 }
                 Err(AuthedApiError::UpgradeRequired) => {
                     state_mtx.write().await.clear_pending_recording();
-                    notify_recording_start_failed(
-                        &app,
-                        "Instant recording requires an upgraded plan.",
-                    );
-                    return Ok(RecordingAction::UpgradeRequired);
+                    let error = "The configured FlowReco server rejected Instant recording. Studio Mode records fully offline with no plan gate.".to_string();
+                    notify_recording_start_failed(&app, &error);
+                    return Err(error);
                 }
                 Err(err) => {
                     let error = format!("Could not create the shareable link: {err}");

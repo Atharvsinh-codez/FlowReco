@@ -142,3 +142,31 @@ This is an append-only decision log. Superseded decisions remain visible with a 
 **Why:** Permissions, codecs, clocks, hardware, and device behavior differ substantially by platform.  
 **Consequence:** Environmental blockers are reported, never converted into a completion claim.
 
+## D021 — Light product chrome with FlowReco brand tokens
+
+**Status:** Accepted, 2026-07-15  
+**Decision:** Desktop product chrome defaults to a light, airy surface system: white surfaces (`#ffffff` / `#f5f5f5`), border gray `#e6e6e6`, foreground `#252b31`, muted `#879192` / `#6b7280`, and accent blue `#0084d1`. Dark theme remains available and remaps recorder/editor shell tokens.  
+**Why:** Match the desired Recordly-like light density while keeping original FlowReco identity and brandable accent control.  
+**Consequence:** Recorder shell tokens (`--recorder-*`) and sleek accents are light-first; dark is an override under `.dark`, not the default product look.
+
+## D022 — Studio inspector on the left, preview on the right
+
+**Status:** Accepted, 2026-07-15  
+**Decision:** FlowReco Studio places the config/clips inspector on the left and the preview player on the right, with the timeline full-width below.  
+**Why:** Align editor information architecture with the Recordly-inspired control density and free maximum horizontal space for the canvas on the right.  
+**Consequence:** Loading skeleton mirrors the same order; transcript mode keeps preview + transcript side-by-side without restoring a right-hand inspector.
+
+## D023 — Recordly is behavior and feature reference only
+
+**Status:** Accepted, 2026-07-15  
+**Decision:** Use the pinned Recordly tree (sibling clone under the research workspace) for feature inventory, layout, and polish behavior. Reimplement suitable UX in FlowReco’s Cap-based Tauri + Solid + Rust stack. Do not adopt Electron, PixiJS, or Recordly branding/assets.  
+**Why:** D002 already forbids a second desktop runtime; AGPL/brand constraints require attribution without product-name reuse.  
+**Consequence:** Feature ports are tracked in `docs/RECORDLY_PORT.md` and land as FlowReco UI/Rust work, not as a runtime transplant.
+
+## D024 — No client-side paid plan gates
+
+**Status:** Accepted, 2026-07-15  
+**Decision:** FlowReco desktop treats all local capture, edit, export, and high-quality settings as free. `AuthStore::is_upgraded` always returns true; duration/resolution/upload plan checks no longer block local workflows. A remote FlowReco server may still reject uploads under its own policy — that is surfaced as a server error, not an upgrade paywall.  
+**Why:** Local-first open-source product must not hide editor quality behind a commercial plan.  
+**Consequence:** Upgrade windows are not opened for plan gates; license query reports pro/unlocked by default.
+

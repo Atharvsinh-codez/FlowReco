@@ -16,9 +16,9 @@ export function handleRecordingResult(
 					commands.setRecordingMode("studio");
 				}
 				await dialog.message(
-					"Instant Mode is disabled in FlowReco. Studio Mode records locally without signing in.",
+					"Studio Mode records locally on this device. No account is required.",
 					{
-						title: "Studio Mode only",
+						title: "Studio Mode",
 						kind: "info",
 					},
 				);

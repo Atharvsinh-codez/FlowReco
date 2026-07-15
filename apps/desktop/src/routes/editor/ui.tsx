@@ -33,15 +33,15 @@ export function Field(
 	}>,
 ) {
 	return (
-		<div class={cx("flex flex-col gap-4", props.class)}>
+		<div class={cx("flex flex-col gap-3", props.class)}>
 			<span
 				data-disabled={props.disabled}
-				class="flex flex-row items-center gap-1.5 text-gray-12 data-[disabled='true']:text-gray-10 font-medium text-sm"
+				class="flex flex-row items-center gap-1.5 text-[var(--recorder-text,#252b31)] data-[disabled='true']:text-[var(--recorder-muted,#879192)] font-semibold text-[13px] tracking-[-0.01em]"
 			>
 				{props.icon}
 				{props.name}
 				{props.badge && (
-					<span class="text-[10px] px-1.5 py-0.5 bg-gray-3 rounded-[var(--radius-sm,6px)] text-gray-11 font-medium">
+					<span class="text-[10px] px-1.5 py-0.5 bg-[var(--flow-surface-light,#f5f5f5)] rounded-[6px] text-[var(--recorder-muted,#879192)] font-medium border border-[var(--recorder-border,#e6e6e6)]">
 						{props.badge}
 					</span>
 				)}
@@ -115,7 +115,7 @@ export function Slider(
 					});
 				}}
 			>
-				<KSlider.Fill class="absolute -ml-2 h-full rounded-[var(--radius-xs,4px)] bg-[var(--sleek-accent,#0284c7)] data-disabled:bg-gray-8" />
+				<KSlider.Fill class="absolute -ml-2 h-full rounded-[var(--radius-xs,4px)] bg-[var(--sleek-accent,#0084d1)] data-disabled:bg-gray-8" />
 				<Tooltip
 					open={dragging() ? true : undefined}
 					getAnchorRect={() => {
@@ -324,7 +324,7 @@ const editorButtonStyles = cva(
 		variants: {
 			variant: {
 				primary:
-					"text-gray-12 enabled:hover:not-data-pressed:bg-gray-3 data-expanded:bg-gray-3 outline-[var(--sleek-accent,#0284c7)] focus:bg-transparent",
+					"text-gray-12 enabled:hover:not-data-pressed:bg-gray-3 data-expanded:bg-gray-3 outline-[var(--sleek-accent,#0084d1)] focus:bg-transparent",
 				danger:
 					"text-gray-12 enabled:hover:not-data-pressed:bg-gray-3 data-expanded:bg-red-300 data-pressed:bg-red-300 data-expanded:text-gray-1 data-pressed:text-gray-1 outline-red-300",
 			},

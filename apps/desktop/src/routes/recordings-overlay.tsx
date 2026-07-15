@@ -720,7 +720,9 @@ function createRecordingMutations(media: MediaEntry) {
 			// Check authentication first
 			const existingAuth = await authStore.get();
 			if (!existingAuth) {
-				throw new Error("You need to sign in to share recordings");
+				throw new Error(
+					"Sharing requires a connected FlowReco server. Export to a file to stay fully local.",
+				);
 			}
 
 			const uploadChannel = new Channel<UploadProgress>((progress) => {
@@ -784,7 +786,7 @@ function createRecordingMutations(media: MediaEntry) {
 			if (typeof res === "string") {
 				throw new Error(
 					res === "NotAuthenticated"
-						? "You need to sign in to share recordings"
+						? "Sharing requires a connected FlowReco server. Export to a file to stay fully local."
 						: "The configured FlowReco server did not accept this upload. Check your server access and storage settings, then try again.",
 				);
 			}

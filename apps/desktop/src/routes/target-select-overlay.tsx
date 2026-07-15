@@ -9,7 +9,6 @@ import {
 	type PhysicalPosition,
 	type PhysicalSize,
 } from "@tauri-apps/api/dpi";
-import { emit } from "@tauri-apps/api/event";
 import {
 	CheckMenuItem,
 	Menu,
@@ -56,7 +55,7 @@ import {
 } from "~/components/Cropper";
 import ModeSelect from "~/components/ModeSelect";
 import SelectionHint from "~/components/selection-hint";
-import { authStore, generalSettingsStore } from "~/store";
+import { generalSettingsStore } from "~/store";
 import { getCameraWindow } from "~/utils/camera-window";
 import { createDevicesQuery } from "~/utils/devices";
 import {
@@ -324,8 +323,7 @@ function Inner() {
 	// (from possibly-stale query state) whether it may reveal itself again.
 	const dismissPickerForRecordingStart = () => {
 		if (options.mode === "screenshot") return;
-		const targetModeDismissal =
-			options.mode === "screenshot" ? "recordingStudio" : "recordingStudio";
+		const targetModeDismissal = "recordingStudio" as const;
 		if (options.targetModeSource === "editor") {
 			setOptions({
 				targetMode: null,
@@ -1598,7 +1596,6 @@ function RecordingControls(props: {
 	onRecordingStart?: () => void;
 	onClose?: () => void;
 }) {
-	const auth = authStore.createQuery();
 	const { setOptions, rawOptions } = useRecordingOptions();
 
 	const generalSetings = generalSettingsStore.createQuery();
@@ -1747,7 +1744,7 @@ function RecordingControls(props: {
 						</div>
 						<div
 							data-disabled={startDisabled()}
-							class="flex flex-1 min-w-0 max-w-[18rem] overflow-hidden flex-row h-11 rounded-[var(--radius-pill,9999px)] text-white bg-[var(--sleek-accent,#0284c7)] group shadow-[0_8px_20px_-10px_rgba(2,132,199,0.55)]"
+							class="flex flex-1 min-w-0 max-w-[18rem] overflow-hidden flex-row h-11 rounded-[var(--radius-pill,9999px)] text-white bg-[var(--sleek-accent,#0084d1)] group shadow-[0_8px_20px_-10px_rgba(0,132,209,0.45)]"
 							onClick={async () => {
 								if (startDisabled()) return;
 

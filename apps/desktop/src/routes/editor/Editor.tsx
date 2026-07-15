@@ -207,7 +207,7 @@ export function Editor() {
 		<Switch
 			fallback={
 				<div class="flex items-center justify-center h-full w-full">
-					<div class="animate-spin rounded-[var(--radius-md,10px)] h-8 w-8 border-2 border-gray-5 border-t-[var(--sleek-accent,#0284c7)]" />
+					<div class="animate-spin rounded-[var(--radius-md,10px)] h-8 w-8 border-2 border-gray-5 border-t-[var(--sleek-accent,#0084d1)]" />
 				</div>
 			}
 		>
@@ -662,10 +662,10 @@ function Inner() {
 				</Suspense>
 			}
 		>
-			<div class="flex flex-col flex-1 min-h-0 bg-gray-2 dark:bg-[var(--recorder-bg,#121212)]">
+			<div class="flex flex-col flex-1 min-h-0 bg-[var(--flow-surface-light,#f5f5f5)] dark:bg-[var(--recorder-bg,#121212)]">
 				<Header />
 				<div
-					class="flex overflow-y-hidden flex-col flex-1 gap-1.5 w-full min-h-0 leading-5 pt-1.5"
+					class="flex overflow-y-hidden flex-col flex-1 gap-2 w-full min-h-0 leading-5 pt-2"
 					data-tauri-drag-region
 				>
 					<div
@@ -674,52 +674,13 @@ function Inner() {
 					>
 						<div
 							ref={setSplitContainerRef}
-							class="flex overflow-hidden flex-row flex-1 min-h-0 px-2"
+							class="flex overflow-hidden flex-row flex-1 min-h-0 px-2.5 gap-2"
 							style={{
 								"min-height": `${MIN_PLAYER_HEIGHT}px`,
 							}}
 						>
-							<div
-								class="flex flex-col rounded-[var(--radius-lg,14px)] border bg-gray-1 dark:bg-gray-2 border-gray-3 overflow-hidden shadow-[0_1px_0_rgba(255,255,255,0.03)_inset]"
-								style={{
-									flex: isTranscriptMode()
-										? `0 0 ${splitRatio() * 100}%`
-										: "1 1 0%",
-									"min-width": "0",
-								}}
-							>
-								<PlayerContent />
-								<div
-									role="separator"
-									aria-orientation="horizontal"
-									class="flex-none shrink-0 border-t border-gray-4 dark:border-gray-5 bg-gray-2/95 dark:bg-gray-3/55 transition-colors hover:bg-[var(--sleek-accent-soft,rgba(2,132,199,0.12))]"
-									style={{ height: `${RESIZE_HANDLE_HEIGHT}px` }}
-								>
-									<div
-										class="flex flex-col gap-0.5 justify-center items-center h-full w-full cursor-row-resize select-none group"
-										classList={{
-											"bg-[var(--sleek-accent-soft,rgba(2,132,199,0.12))]":
-												isResizingTimeline(),
-										}}
-										onMouseDown={handleTimelineResizeStart}
-										aria-label="Resize timeline height"
-									>
-										<For each={TIMELINE_RESIZE_GRIP_MARKS}>
-											{() => (
-												<div
-													class="h-0.5 w-16 max-w-[85%] rounded-[var(--radius-xs,4px)] bg-gray-6 dark:bg-gray-7 transition-colors group-hover:bg-[var(--sleek-accent,#0284c7)]"
-													classList={{
-														"bg-[var(--sleek-accent,#0284c7)]":
-															isResizingTimeline(),
-													}}
-												/>
-											)}
-										</For>
-									</div>
-								</div>
-							</div>
 							<Show when={!isTranscriptMode()}>
-								<div class="ml-1.5 flex min-h-0 w-104 min-w-104 flex-none overflow-hidden">
+								<div class="flex min-h-0 w-104 min-w-104 flex-none overflow-hidden">
 									<div
 										class="overflow-hidden min-h-0"
 										classList={{
@@ -740,6 +701,45 @@ function Inner() {
 									</Show>
 								</div>
 							</Show>
+							<div
+								class="flex flex-col rounded-[var(--radius-xl,16px)] border bg-white dark:bg-gray-2 border-[var(--recorder-border,#e6e6e6)] dark:border-gray-3 overflow-hidden shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]"
+								style={{
+									flex: isTranscriptMode()
+										? `0 0 ${splitRatio() * 100}%`
+										: "1 1 0%",
+									"min-width": "0",
+								}}
+							>
+								<PlayerContent />
+								<div
+									role="separator"
+									aria-orientation="horizontal"
+									class="flex-none shrink-0 border-t border-[var(--recorder-border,#e6e6e6)] bg-[var(--flow-surface-light,#f5f5f5)] dark:bg-gray-3/55 transition-colors hover:bg-[var(--sleek-accent-soft,rgba(0,132,209,0.12))]"
+									style={{ height: `${RESIZE_HANDLE_HEIGHT}px` }}
+								>
+									<div
+										class="flex flex-col gap-0.5 justify-center items-center h-full w-full cursor-row-resize select-none group"
+										classList={{
+											"bg-[var(--sleek-accent-soft,rgba(0,132,209,0.12))]":
+												isResizingTimeline(),
+										}}
+										onMouseDown={handleTimelineResizeStart}
+										aria-label="Resize timeline height"
+									>
+										<For each={TIMELINE_RESIZE_GRIP_MARKS}>
+											{() => (
+												<div
+													class="h-0.5 w-16 max-w-[85%] rounded-[var(--radius-xs,4px)] bg-gray-6 dark:bg-gray-7 transition-colors group-hover:bg-[var(--sleek-accent,#0084d1)]"
+													classList={{
+														"bg-[var(--sleek-accent,#0084d1)]":
+															isResizingTimeline(),
+													}}
+												/>
+											)}
+										</For>
+									</div>
+								</div>
+							</div>
 							<Show when={isTranscriptMode()}>
 								<div
 									class="flex-none flex items-center justify-center cursor-col-resize select-none group z-10"
@@ -750,9 +750,9 @@ function Inner() {
 									aria-orientation="vertical"
 								>
 									<div
-										class="w-1 h-10 rounded-[var(--radius-xs,4px)] bg-gray-6 dark:bg-gray-7 transition-colors group-hover:bg-[var(--sleek-accent,#0284c7)]"
+										class="w-1 h-10 rounded-[var(--radius-xs,4px)] bg-gray-6 dark:bg-gray-7 transition-colors group-hover:bg-[var(--sleek-accent,#0084d1)]"
 										classList={{
-											"bg-[var(--sleek-accent,#0284c7)]": isResizingSplit(),
+											"bg-[var(--sleek-accent,#0084d1)]": isResizingSplit(),
 										}}
 									/>
 								</div>
@@ -772,10 +772,10 @@ function Inner() {
 							</Show>
 						</div>
 						<div
-							class="flex-none min-h-0 px-2 pb-2 overflow-hidden relative"
+							class="flex-none min-h-0 px-2.5 pb-2.5 overflow-hidden relative"
 							style={{ height: `${timelineHeight()}px` }}
 						>
-							<div class="h-full rounded-[var(--radius-lg,14px)] border border-gray-3 bg-gray-1 dark:bg-gray-2 overflow-hidden">
+							<div class="h-full rounded-[var(--radius-xl,16px)] border border-[var(--recorder-border,#e6e6e6)] bg-white dark:bg-gray-2 overflow-hidden shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]">
 								<Timeline
 									onViewportOverflowChange={setTimelineViewportOverflow}
 								/>

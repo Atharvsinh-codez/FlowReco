@@ -38,10 +38,11 @@ function ShareButton() {
 
 			console.log("Starting upload process...");
 
-			// Check authentication first
 			const existingAuth = await authStore.get();
 			if (!existingAuth) {
-				throw new Error("You need to sign in to share recordings");
+				throw new Error(
+					"Sharing requires a connected FlowReco server. Export to a file to stay fully local.",
+				);
 			}
 
 			const uploadChannel = new Channel<UploadProgress>((progress) => {
@@ -106,8 +107,10 @@ function ShareButton() {
 			if (typeof result === "string") {
 				throw new Error(
 					result === "NotAuthenticated"
-						? "You need to sign in to share recordings"
-						: "The configured FlowReco server did not accept this upload. Check your server access and storage settings, then try again.",
+						? "Sharing requires a connected FlowReco server. Export to a file to stay fully local."
+						: result === "UpgradeRequired" || result === "PlanCheckFailed"
+							? "The configured FlowReco server rejected this upload. There is no local plan gate — check server access and storage settings."
+							: "The configured FlowReco server did not accept this upload. Check your server access and storage settings, then try again.",
 				);
 			}
 

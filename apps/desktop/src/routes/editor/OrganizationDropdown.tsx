@@ -12,7 +12,7 @@ import {
 	Suspense,
 } from "solid-js";
 import toast from "solid-toast";
-import { SignInButton } from "~/components/SignInButton";
+
 import {
 	createSelectedOrganization,
 	type DesktopOrganization,
@@ -359,13 +359,13 @@ export function OrganizationDropdown() {
 		}
 		if (availability === "loading") return "Loading...";
 		if (availability === "unavailable") return "Organization";
-		return "Sign in";
+		return "Local only";
 	});
 	const fallbackTitle = createMemo(() => {
 		const availability = organizationSelection.availability();
 		if (availability === "loading") return "Loading organizations";
 		if (availability === "unavailable") return "Unable to load organizations";
-		return "Organization branding requires sign in";
+		return "Local workspace";
 	});
 	const fallbackDescription = createMemo(() => {
 		const availability = organizationSelection.availability();
@@ -373,9 +373,9 @@ export function OrganizationDropdown() {
 			return "Fetching organization branding from your FlowReco server.";
 		}
 		if (availability === "unavailable") {
-			return "Organization branding uses your configured FlowReco server. Connect to a server and sign in to select an organization.";
+			return "Organization branding uses a configured FlowReco server. You can keep editing and exporting locally without it.";
 		}
-		return "Sign in to select an organization, edit brand colours, and use those colours in Studio.";
+		return "Organization branding is optional. Record, edit, and export fully offline.";
 	});
 
 	const selectOrganization = (organization: DesktopOrganization) => {
@@ -423,15 +423,6 @@ export function OrganizationDropdown() {
 													{fallbackDescription()}
 												</span>
 											</div>
-											<Show
-												when={
-													organizationSelection.availability() === "signed-out"
-												}
-											>
-												<SignInButton class="w-full justify-center">
-													Sign In
-												</SignInButton>
-											</Show>
 											<Show
 												when={
 													organizationSelection.availability() === "unavailable"

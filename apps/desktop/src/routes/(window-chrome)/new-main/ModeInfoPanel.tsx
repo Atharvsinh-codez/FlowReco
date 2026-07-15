@@ -86,7 +86,7 @@ export default function ModeInfoPanel(props: ModeInfoPanelProps) {
 												)}
 											>
 												{isSelected() && (
-													<div class="absolute top-2 right-2 flex items-center justify-center size-4 rounded-[var(--radius-md,8px)] bg-[var(--sleek-accent,#0284c7)]">
+													<div class="absolute top-2 right-2 flex items-center justify-center size-4 rounded-[var(--radius-md,8px)] bg-[var(--sleek-accent,#0084d1)]">
 														<IconLucideCheck class="size-2.5 text-white" />
 													</div>
 												)}

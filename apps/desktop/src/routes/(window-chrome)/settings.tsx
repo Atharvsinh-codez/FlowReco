@@ -5,6 +5,7 @@ import { getVersion } from "@tauri-apps/api/app";
 import * as dialog from "@tauri-apps/plugin-dialog";
 import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 import * as shell from "@tauri-apps/plugin-shell";
+import { cx } from "cva";
 import {
 	createEffect,
 	createMemo,
@@ -17,11 +18,9 @@ import {
 	Suspense,
 } from "solid-js";
 import { CapErrorBoundary } from "~/components/CapErrorBoundary";
-import { SignInButton } from "~/components/SignInButton";
 
 import { authStore, userProfileStore } from "~/store";
 import { trackEvent } from "~/utils/analytics";
-import { createSignInMutation } from "~/utils/auth";
 import { commands } from "~/utils/tauri";
 import {
 	apiClient,
@@ -133,7 +132,6 @@ function SettingsContentSkeleton() {
 export default function Settings(props: RouteSectionProps) {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
-	const signIn = createSignInMutation();
 	const [auth, setAuth] =
 		createSignal<Awaited<ReturnType<typeof authStore.get>>>();
 	const [authLoaded, setAuthLoaded] = createSignal(false);
@@ -254,8 +252,8 @@ export default function Settings(props: RouteSectionProps) {
 		},
 	];
 	const accountName = createMemo(() => {
-		if (!auth()) return "Click to sign in";
-		if (!userProfile.isSuccess) return "Signed in";
+		if (!auth()) return "Local workspace";
+		if (!userProfile.isSuccess) return "Connected";
 
 		const name = userProfile.data?.name?.trim();
 		if (name) return name;
@@ -263,8 +261,11 @@ export default function Settings(props: RouteSectionProps) {
 		const email = userProfile.data?.email?.trim();
 		if (email) return email;
 
-		return "Signed in";
+		return "Connected";
 	});
+	const accountSubtitle = createMemo(() =>
+		auth() ? "Server account" : "Works offline on this device",
+	);
 	const accountRemoteImageUrl = createMemo(() => {
 		if (!userProfile.isSuccess) return null;
 
@@ -280,18 +281,7 @@ export default function Settings(props: RouteSectionProps) {
 		);
 	};
 	const handleProfileClick = () => {
-		if (auth()) {
-			openDashboard();
-			return;
-		}
-
-		if (signIn.isPending) {
-			signIn.variables.abort();
-			signIn.reset();
-			return;
-		}
-
-		signIn.mutate(new AbortController());
+		if (auth()) openDashboard();
 	};
 	const handleProfileImageError = (imageUrl: string) => {
 		setFailedProfileImageUrl(imageUrl);
@@ -459,9 +449,13 @@ export default function Settings(props: RouteSectionProps) {
 				<div class="cap-settings-window-spacer" data-tauri-drag-region />
 				<button
 					type="button"
-					class="cap-settings-profile flex h-11 gap-2 items-center mx-2 mt-2 mb-3 px-2 py-1.5 rounded-lg text-left transition-colors hover:bg-gray-3"
+					class={cx(
+						"cap-settings-profile flex h-11 gap-2 items-center mx-2 mt-2 mb-3 px-2 py-1.5 rounded-lg text-left transition-colors",
+						auth() ? "hover:bg-gray-3 cursor-pointer" : "cursor-default",
+					)}
 					data-tauri-drag-region="false"
 					onClick={handleProfileClick}
+					disabled={!auth()}
 				>
 					<Show
 						when={accountImageUrl()}
@@ -490,7 +484,7 @@ export default function Settings(props: RouteSectionProps) {
 							{accountName()}
 						</p>
 						<p class="h-[13px] truncate text-[11px] leading-[13px] text-gray-10">
-							Account
+							{accountSubtitle()}
 						</p>
 					</div>
 				</button>
@@ -549,10 +543,13 @@ export default function Settings(props: RouteSectionProps) {
 					>
 						{auth() ? (
 							<Button onClick={handleAuth} variant="gray" class="w-full">
-								Sign Out
+								Disconnect server
 							</Button>
 						) : (
-							<SignInButton>Sign In</SignInButton>
+							<p class="px-1 text-[11px] leading-snug text-gray-10">
+								Recording and editing work fully offline. Server options live
+								under Integrations when you need them.
+							</p>
 						)}
 					</Show>
 				</div>

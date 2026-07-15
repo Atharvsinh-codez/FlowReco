@@ -69,7 +69,7 @@ export async function protectedHeaders() {
 	const { authorization } = await maybeProtectedHeaders();
 	if (!authorization)
 		throw new Error(
-			"Please sign in to continue, or configure your FlowReco server in Settings.",
+			"Connect a FlowReco server in Settings if you need cloud features. Local recording and editing do not require an account.",
 		);
 	return { authorization };
 }

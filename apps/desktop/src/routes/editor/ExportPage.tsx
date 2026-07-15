@@ -22,7 +22,7 @@ import {
 } from "solid-js";
 import { createStore, produce, reconcile } from "solid-js/store";
 import toast from "solid-toast";
-import { SignInButton } from "~/components/SignInButton";
+
 import Tooltip from "~/components/Tooltip";
 import CaptionControlsWindows11 from "~/components/titlebar/controls/CaptionControlsWindows11";
 import { authStore } from "~/store";
@@ -645,7 +645,9 @@ export function ExportPage() {
 
 				const existingAuth = await authStore.get();
 				if (!existingAuth) {
-					throw new Error("You need to sign in to share recordings");
+					throw new Error(
+						"Sharing requires a connected FlowReco server. Export to a file to stay fully local.",
+					);
 				}
 				trackEvent("create_shareable_link_clicked", {
 					resolution: settings.resolution,
@@ -692,8 +694,10 @@ export function ExportPage() {
 				if (typeof result === "string") {
 					throw new Error(
 						result === "NotAuthenticated"
-							? "You need to sign in to share recordings"
-							: "The configured FlowReco server did not accept this upload. Check your server access and storage settings, then try again.",
+							? "Sharing requires a connected FlowReco server. Export to a file to stay fully local."
+							: result === "UpgradeRequired" || result === "PlanCheckFailed"
+								? "The configured FlowReco server rejected this upload. There is no local plan gate — check server access and storage settings."
+								: "The configured FlowReco server did not accept this upload. Check your server access and storage settings, then try again.",
 					);
 				}
 			} finally {
@@ -1362,11 +1366,22 @@ export function ExportPage() {
 
 					<div class="p-4 border-t border-gray-3">
 						{settings.exportTo === "link" && !auth.data ? (
-							<div class="flex flex-col items-center gap-2.5">
-								<SignInButton class="w-full justify-center">
-									<IconCapLink class="size-4" />
-									<span>Sign in to share</span>
-								</SignInButton>
+							<div class="flex flex-col items-center gap-2.5 text-center">
+								<p class="text-[13px] leading-snug text-gray-11">
+									Shareable links need a connected FlowReco server. Export to a
+									file for a fully local workflow.
+								</p>
+								<Button
+									class="w-full gap-2 h-12 text-base"
+									variant="blue"
+									size="lg"
+									onClick={() => {
+										setSettings("exportTo", "file");
+									}}
+								>
+									<IconCapFile class="size-5" />
+									Export to File instead
+								</Button>
 							</div>
 						) : (
 							<div class="flex flex-col items-center gap-2.5">
@@ -1689,9 +1704,9 @@ export function ExportPage() {
 
 							<Show when={exportState.type !== "done"}>
 								<p class="max-w-sm text-xs leading-relaxed text-center text-gray-11">
-									<span class="font-semibold text-gray-12">Tip:</span> Use
-									Instant Mode for your next recording to record and upload on
-									the fly, with no exporting required.
+									<span class="font-semibold text-gray-12">Tip:</span> Export to
+									a file keeps your full-quality project local. Share links are
+									optional when a server is configured.
 								</p>
 							</Show>
 						</div>

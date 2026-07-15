@@ -61,14 +61,14 @@ const Mode = (props: ModeProps) => {
 	};
 
 	return (
-		<div class="flex relative gap-1 items-center p-1 rounded-[var(--radius-pill,9999px)] border border-[var(--recorder-border,rgba(233,238,245,0.1))] bg-[var(--recorder-raised,#1b1d22)] w-fit shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+		<div class="flex relative gap-1 items-center p-1 rounded-[var(--radius-pill,9999px)] border border-[var(--recorder-border,#e6e6e6)] bg-[var(--recorder-raised,#f5f5f5)] w-fit shadow-[var(--recorder-inset-highlight,inset_0_1px_0_rgba(255,255,255,0.8))]">
 			<button
 				type="button"
 				onClick={handleInfoClick}
-				class="absolute -left-1 -top-1.5 flex size-4 items-center justify-center rounded-[var(--radius-pill,9999px)] border border-[var(--recorder-border,rgba(233,238,245,0.12))] bg-[var(--recorder-hover,#22252b)] group focus:outline-none"
+				class="absolute -left-1 -top-1.5 flex size-4 items-center justify-center rounded-[var(--radius-pill,9999px)] border border-[var(--recorder-border,#e6e6e6)] bg-[var(--recorder-hover,#eceef1)] group focus:outline-none"
 				aria-label="Recording mode info"
 			>
-				<IconCapInfo class="size-2.5 text-[var(--recorder-muted,#7a7d85)] group-hover:text-[var(--recorder-text,#eef3f8)]" />
+				<IconCapInfo class="size-2.5 text-[var(--recorder-muted,#879192)] group-hover:text-[var(--recorder-text,#252b31)]" />
 			</button>
 
 			{MODE_BUTTONS.map((button) => {
@@ -90,8 +90,8 @@ const Mode = (props: ModeProps) => {
 							class={cx(
 								"relative flex justify-center items-center rounded-[var(--radius-pill,9999px)] transition-all duration-150 size-7 focus:outline-none",
 								isSelected()
-									? "bg-[var(--sleek-accent,#0284c7)] text-white shadow-[0_4px_12px_rgba(2,132,199,0.35)]"
-									: "bg-transparent text-[var(--recorder-muted,#7a7d85)] hover:bg-white/[0.06] hover:text-[var(--recorder-text,#eef3f8)]",
+									? "bg-[var(--sleek-accent,#0084d1)] text-white shadow-[0_4px_12px_rgba(0,132,209,0.28)]"
+									: "bg-transparent text-[var(--recorder-muted,#879192)] hover:bg-[var(--recorder-overlay,rgba(37,43,49,0.05))] hover:text-[var(--recorder-text,#252b31)]",
 							)}
 						>
 							<button.icon
@@ -103,12 +103,12 @@ const Mode = (props: ModeProps) => {
 						</HoverCard.Trigger>
 						<HoverCard.Portal>
 							<HoverCard.Content class="z-50 outline-none animate-in fade-in slide-in-from-top-1 duration-100">
-								<div class="flex flex-col gap-2 px-3 py-2.5 rounded-[var(--radius-xl,16px)] border border-[var(--recorder-border,rgba(233,238,245,0.12))] shadow-lg bg-[var(--sleek-slate,#1b1d22)] text-[var(--recorder-text,#eef3f8)] min-w-[12rem] max-w-[15rem]">
+								<div class="flex flex-col gap-2 px-3 py-2.5 rounded-[var(--radius-xl,16px)] border border-[var(--recorder-border,#e6e6e6)] shadow-lg bg-[var(--sleek-slate,#ffffff)] text-[var(--recorder-text,#252b31)] min-w-[12rem] max-w-[15rem]">
 									<div class="flex flex-col gap-0.5">
 										<span class="text-[13px] font-medium tracking-[-0.02em]">
 											{button.label}
 										</span>
-										<span class="text-[11px] text-[var(--recorder-muted,#7a7d85)] leading-snug">
+										<span class="text-[11px] text-[var(--recorder-muted,#879192)] leading-snug">
 											{button.description}
 										</span>
 									</div>
@@ -120,7 +120,7 @@ const Mode = (props: ModeProps) => {
 													e.stopPropagation();
 													void openQualitySettings(section());
 												}}
-												class="flex gap-1.5 items-center px-2 py-1 -mx-1 text-[11px] rounded-[var(--radius-md,8px)] transition-colors text-[var(--recorder-muted,#7a7d85)] hover:bg-white/[0.06] hover:text-[var(--recorder-text,#eef3f8)]"
+												class="flex gap-1.5 items-center px-2 py-1 -mx-1 text-[11px] rounded-[var(--radius-md,8px)] transition-colors text-[var(--recorder-muted,#879192)] hover:bg-[var(--recorder-overlay,rgba(37,43,49,0.05))] hover:text-[var(--recorder-text,#252b31)]"
 											>
 												<IconCapSettings class="size-3" />
 												<span>Quality settings</span>
